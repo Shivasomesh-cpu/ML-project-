@@ -1,0 +1,28 @@
+task_id: "t1_aomic_age"
+name: "AOMIC Brain Age Regression (Amsterdam Natural Experiment)"
+type: "regression"
+target_column: "age"
+target_metric: "mae" # lower is better
+metrics:
+  - "mae"
+  - "rmse"
+  - "r2"
+  - "pearson_r"
+  - "age_bias_corrected_mae"
+
+cohorts:
+  seen:
+    dataset: "AOMIC_ID1000"
+    scanner: "Philips Achieva 3T"
+    site: "LAB_UvA"
+    pretraining_status: "seen"
+  unseen:
+    dataset: "AOMIC_PIOP1_PIOP2"
+    scanner: "Philips Achieva 3T"
+    site: "LAB_UvA"
+    pretraining_status: "unseen"
+
+controls:
+  age_window: [19.0, 26.0]
+  stratify_by: ["sex", "age_band"]
+  enforce_subject_isolation: true

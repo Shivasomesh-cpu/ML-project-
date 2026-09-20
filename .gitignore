@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Secrets and local credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Downloaded, derived, or potentially restricted MRI data
+data/raw/
+data/cache/
+data/manifests/
+data/metadata/
+data/splits/*.json
+data/qc/montages/
+src/checkpoints/
+
+# Generated research outputs: regenerate only from verified observed inputs
+results/*
+!results/.gitkeep
+work/
+
+# Operating-system and editor files
+.DS_Store
+Thumbs.db

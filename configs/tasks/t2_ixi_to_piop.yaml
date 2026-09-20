@@ -1,0 +1,24 @@
+task_id: "t2_ixi_to_piop"
+name: "Brain Age Regression Under Cross-Site Domain Shift"
+type: "regression"
+target_column: "age"
+target_metric: "mae"
+metrics:
+  - "mae"
+  - "rmse"
+  - "r2"
+  - "pearson_r"
+
+cohorts:
+  train_cohort:
+    dataset: "IXI"
+    scanners: ["Philips 3T", "Philips 1.5T", "GE 1.5T"]
+    pretraining_status: "seen"
+  test_cohort:
+    dataset: "AOMIC_PIOP1_PIOP2"
+    scanners: ["Philips Achieva 3T"]
+    pretraining_status: "unseen"
+
+controls:
+  stratify_by: ["sex", "age_band"]
+  enforce_subject_isolation: true

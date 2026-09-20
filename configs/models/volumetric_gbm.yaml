@@ -1,0 +1,12 @@
+model_id: "volumetric_gbm"
+name: "Volumetric Tissue / Regional Features + LightGBM / Ridge"
+type: "baseline_tabular"
+feature_extractor: "synthseg_or_fastsurfer_volumes"
+
+optuna_search_space:
+  model_type: ["lightgbm", "ridge"]
+  learning_rate: [0.01, 0.2]
+  num_leaves: [15, 63]
+  n_estimators: [50, 300]
+  alpha: [0.1, 100.0] # for Ridge
+  subsample: [0.6, 1.0]

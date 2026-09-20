@@ -1,0 +1,35 @@
+# Experimental Budgets and Seeds Specification
+# As prescribed in SEEN-IT-BEFORE-README.md Section 7
+
+label_budgets:
+  - 25
+  - 50
+  - 100
+  - 250
+  - 500
+  - -1 # 'all' available labels
+
+random_seeds:
+  - 42
+  - 1337
+  - 2026
+  - 7
+  - 99
+
+optuna_trial_budgets:
+  smoke: 2
+  low: 5
+  medium: 20
+  high: 50
+
+volume_dimensions:
+  resolution_mm: 2.0
+  spatial_shape: [128, 128, 128]
+  dtype: "float16"
+
+age_matching_window:
+  min_age: 19.0
+  max_age: 26.0
+
+bootstrap_iterations: 2000
+significance_alpha: 0.05

@@ -1,0 +1,12 @@
+model_id: "resnet18_scratch"
+name: "3D ResNet-18 From Scratch (MONAI)"
+type: "baseline_scratch"
+architecture: "resnet18_3d"
+
+optuna_search_space:
+  learning_rate: [1e-5, 1e-2]
+  weight_decay: [1e-6, 1e-2]
+  batch_size: [4, 8, 16]
+  dropout: [0.0, 0.5]
+  optimizer: ["adamw", "sgd"]
+  augmentation_strength: [0.0, 1.0] # None to full affine/noise/flip

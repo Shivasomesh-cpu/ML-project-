@@ -1,0 +1,24 @@
+model_id: "fomo_unet_b"
+name: "FOMO25 Baseline UNet-B (FOMO60K Pretrained)"
+type: "foundation"
+pretrained_source: "FOMO25/baseline_pretrained_models"
+checkpoint_filename: "unet_b_lw_dec_fullaug.pth"
+checkpoint_path: "src/checkpoints/unet_b_lw_dec_fullaug.pth"
+
+architecture:
+  model_name: "unet_b"
+  patch_size: 96
+
+adaptation_ladder:
+  - "linear_probe"
+  - "mlp_probe"
+  - "last_block_finetune"
+  - "full_finetune"
+
+optuna_search_space:
+  adaptation_mode: ["linear_probe", "mlp_probe", "last_block_finetune", "full_finetune"]
+  learning_rate: [1e-5, 1e-2]
+  weight_decay: [1e-6, 1e-2]
+  batch_size: [4, 8, 16]
+  dropout: [0.0, 0.5]
+  optimizer: ["adamw", "sgd"]

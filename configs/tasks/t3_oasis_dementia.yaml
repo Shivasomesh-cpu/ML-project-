@@ -1,0 +1,22 @@
+task_id: "t3_oasis_dementia"
+name: "Dementia Classification (CDR > 0 vs CDR = 0)"
+type: "classification"
+target_column: "dementia_binary" # CDR > 0 -> 1, CDR == 0 -> 0
+target_metric: "auroc" # higher is better
+metrics:
+  - "auroc"
+  - "balanced_accuracy"
+  - "auprc"
+  - "f1"
+
+cohorts:
+  train_cohort:
+    dataset: "OASIS_1"
+    pretraining_status: "seen"
+  test_cohort:
+    dataset: "OASIS_2"
+    pretraining_status: "seen" # Worst-case: both cohorts seen in pretraining
+
+controls:
+  stratify_by: ["dementia_binary", "sex"]
+  enforce_subject_isolation: true # Guard against multi-session leakage in OASIS-1 and longitudinal sessions in OASIS-2

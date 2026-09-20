@@ -1,0 +1,19 @@
+model_id: "brainiac"
+name: "BrainIAC (3D ResNet-50 SimCLR Foundation Model)"
+type: "foundation"
+pretrained_source: "AIM-KannLab/BrainIAC"
+checkpoint_path: "src/checkpoints/brainiac_resnet50.pth"
+
+adaptation_ladder:
+  - "linear_probe"
+  - "mlp_probe"
+  - "last_block_finetune"
+  - "full_finetune"
+
+optuna_search_space:
+  adaptation_mode: ["linear_probe", "mlp_probe", "last_block_finetune", "full_finetune"]
+  learning_rate: [1e-5, 1e-2] # log-uniform
+  weight_decay: [1e-6, 1e-2]
+  batch_size: [4, 8, 16]
+  dropout: [0.0, 0.5]
+  optimizer: ["adamw", "sgd"]

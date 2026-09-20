@@ -1,0 +1,6 @@
+{
+  "name": "Seen It Before: Brain-MRI Foundation Model Benchmark Audit",
+  "description": "Empirical research dashboard evaluating pretraining contamination, Difference-in-Differences (DiD) natural experiments, label equivalence (N_eq), and compute Pareto frontiers across Brain-MRI Foundation Models.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
