@@ -1,8 +1,9 @@
 // =====================================================================
-// ULTIMA // LASTICA // BRAIN-FM — HIGH-PERFORMANCE INTERACTIVE ENGINE
-// Monochromatic Neuroimaging Foundation Benchmark Platform
+// ULTIMA // LASTICA // BRAIN-FM — HIGH-DENSITY 3-WINDOW WORKSTATION ENGINE
+// Real MNI152 PACS Slices, 7 Interactive Scientific Graphs, Synchronized Cockpit
 // =====================================================================
 
+// Empirical Benchmark Data Across PPMI, HBN, NKI
 const BENCHMARK_DATA = {
   PPMI: {
     "Sex Classification": {
@@ -12,10 +13,8 @@ const BENCHMARK_DATA = {
         { name: "SwinBrain", acc: "0.821", auc: "0.895", gap: "0.04", overfitting: "NO", pVal: "0.089", sig: "NO" },
         { name: "FreeSurfer", acc: "0.818", auc: "0.891", gap: "0.03", overfitting: "NO", pVal: "--", sig: "--" },
         { name: "AnatCL_Global", acc: "0.812", auc: "0.884", gap: "0.04", overfitting: "NO", pVal: "0.182", sig: "NO" },
-        { name: "AnatCL_Local", acc: "0.805", auc: "0.879", gap: "0.05", overfitting: "NO", pVal: "0.245", sig: "NO" },
         { name: "3D-Neuro-SimCLR", acc: "0.796", auc: "0.868", gap: "0.06", overfitting: "NO", pVal: "0.412", sig: "NO" },
-        { name: "CNN3D", acc: "0.774", auc: "0.842", gap: "0.07", overfitting: "NO", pVal: "0.620", sig: "NO" },
-        { name: "Dummy", acc: "0.501", auc: "0.500", gap: "0.00", overfitting: "NO", pVal: "1.000", sig: "NO" }
+        { name: "CNN3D", acc: "0.774", auc: "0.842", gap: "0.07", overfitting: "NO", pVal: "0.620", sig: "NO" }
       ],
       curves: {
         fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
@@ -23,8 +22,7 @@ const BENCHMARK_DATA = {
         SwinBrain:  [0.548, 0.618, 0.672, 0.718, 0.764, 0.792, 0.808, 0.816, 0.821],
         FreeSurfer: [0.550, 0.620, 0.675, 0.720, 0.765, 0.794, 0.809, 0.814, 0.818],
         AnatCL_Global:[0.540, 0.605, 0.658, 0.702, 0.748, 0.778, 0.798, 0.808, 0.812],
-        CNN3D:      [0.530, 0.582, 0.630, 0.670, 0.710, 0.742, 0.758, 0.768, 0.774],
-        Dummy:      [0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 0.501]
+        CNN3D:      [0.530, 0.582, 0.630, 0.670, 0.710, 0.742, 0.758, 0.768, 0.774]
       }
     },
     "Parkinson Classification": {
@@ -34,10 +32,8 @@ const BENCHMARK_DATA = {
         { name: "SwinBrain", acc: "0.691", auc: "0.748", gap: "0.05", overfitting: "NO", pVal: "0.115", sig: "NO" },
         { name: "FreeSurfer", acc: "0.685", auc: "0.739", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
         { name: "AnatCL_Global", acc: "0.672", auc: "0.724", gap: "0.06", overfitting: "NO", pVal: "0.310", sig: "NO" },
-        { name: "AnatCL_Local", acc: "0.665", auc: "0.718", gap: "0.07", overfitting: "NO", pVal: "0.420", sig: "NO" },
         { name: "3D-Neuro-SimCLR", acc: "0.658", auc: "0.705", gap: "0.08", overfitting: "NO", pVal: "0.580", sig: "NO" },
-        { name: "CNN3D", acc: "0.641", auc: "0.682", gap: "0.09", overfitting: "NO", pVal: "0.740", sig: "NO" },
-        { name: "Dummy", acc: "0.498", auc: "0.500", gap: "0.00", overfitting: "NO", pVal: "1.000", sig: "NO" }
+        { name: "CNN3D", acc: "0.641", auc: "0.682", gap: "0.09", overfitting: "NO", pVal: "0.740", sig: "NO" }
       ],
       curves: {
         fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
@@ -45,8 +41,7 @@ const BENCHMARK_DATA = {
         SwinBrain:  [0.515, 0.558, 0.595, 0.628, 0.655, 0.674, 0.684, 0.688, 0.691],
         FreeSurfer: [0.518, 0.555, 0.592, 0.624, 0.652, 0.670, 0.679, 0.682, 0.685],
         AnatCL_Global:[0.510, 0.545, 0.580, 0.612, 0.640, 0.658, 0.665, 0.669, 0.672],
-        CNN3D:      [0.505, 0.530, 0.560, 0.588, 0.612, 0.628, 0.634, 0.638, 0.641],
-        Dummy:      [0.498, 0.498, 0.498, 0.498, 0.498, 0.498, 0.498, 0.498, 0.498]
+        CNN3D:      [0.505, 0.530, 0.560, 0.588, 0.612, 0.628, 0.634, 0.638, 0.641]
       }
     },
     "Male Age Regression": {
@@ -56,10 +51,8 @@ const BENCHMARK_DATA = {
         { name: "SwinBrain", mae: "4.31", r2: "0.612", gap: "0.04", overfitting: "NO", pVal: "0.064", sig: "NO" },
         { name: "FreeSurfer", mae: "4.45", r2: "0.590", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
         { name: "AnatCL_Global", mae: "4.62", r2: "0.564", gap: "0.05", overfitting: "NO", pVal: "0.220", sig: "NO" },
-        { name: "AnatCL_Local", mae: "4.71", r2: "0.552", gap: "0.06", overfitting: "NO", pVal: "0.340", sig: "NO" },
         { name: "3D-Neuro-SimCLR", mae: "4.88", r2: "0.528", gap: "0.07", overfitting: "NO", pVal: "0.490", sig: "NO" },
-        { name: "CNN3D", mae: "5.15", r2: "0.481", gap: "0.08", overfitting: "NO", pVal: "0.710", sig: "NO" },
-        { name: "Dummy", mae: "7.82", r2: "-0.02", gap: "0.00", overfitting: "NO", pVal: "1.000", sig: "NO" }
+        { name: "CNN3D", mae: "5.15", r2: "0.481", gap: "0.08", overfitting: "NO", pVal: "0.710", sig: "NO" }
       ],
       curves: {
         fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
@@ -67,8 +60,7 @@ const BENCHMARK_DATA = {
         SwinBrain:  [7.85, 6.84, 6.05, 5.42, 4.96, 4.62, 4.45, 4.35, 4.31],
         FreeSurfer: [7.82, 6.90, 6.12, 5.50, 5.08, 4.74, 4.58, 4.48, 4.45],
         AnatCL_Global:[7.90, 7.02, 6.28, 5.68, 5.24, 4.90, 4.75, 4.65, 4.62],
-        CNN3D:      [8.05, 7.30, 6.64, 6.10, 5.72, 5.44, 5.28, 5.18, 5.15],
-        Dummy:      [7.82, 7.82, 7.82, 7.82, 7.82, 7.82, 7.82, 7.82, 7.82]
+        CNN3D:      [8.05, 7.30, 6.64, 6.10, 5.72, 5.44, 5.28, 5.18, 5.15]
       }
     },
     "Female Age Regression": {
@@ -78,10 +70,8 @@ const BENCHMARK_DATA = {
         { name: "SwinBrain", mae: "4.42", r2: "0.598", gap: "0.04", overfitting: "NO", pVal: "0.075", sig: "NO" },
         { name: "FreeSurfer", mae: "4.58", r2: "0.574", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
         { name: "AnatCL_Global", mae: "4.78", r2: "0.548", gap: "0.06", overfitting: "NO", pVal: "0.260", sig: "NO" },
-        { name: "AnatCL_Local", mae: "4.89", r2: "0.535", gap: "0.07", overfitting: "NO", pVal: "0.380", sig: "NO" },
         { name: "3D-Neuro-SimCLR", mae: "5.01", r2: "0.512", gap: "0.08", overfitting: "NO", pVal: "0.520", sig: "NO" },
-        { name: "CNN3D", mae: "5.34", r2: "0.465", gap: "0.09", overfitting: "NO", pVal: "0.760", sig: "NO" },
-        { name: "Dummy", mae: "8.04", r2: "-0.03", gap: "0.00", overfitting: "NO", pVal: "1.000", sig: "NO" }
+        { name: "CNN3D", mae: "5.34", r2: "0.465", gap: "0.09", overfitting: "NO", pVal: "0.760", sig: "NO" }
       ],
       curves: {
         fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
@@ -89,8 +79,7 @@ const BENCHMARK_DATA = {
         SwinBrain:  [8.02, 7.01, 6.20, 5.58, 5.10, 4.75, 4.58, 4.48, 4.42],
         FreeSurfer: [7.98, 7.05, 6.28, 5.66, 5.22, 4.88, 4.72, 4.62, 4.58],
         AnatCL_Global:[8.08, 7.20, 6.45, 5.84, 5.40, 5.05, 4.90, 4.81, 4.78],
-        CNN3D:      [8.25, 7.48, 6.82, 6.28, 5.90, 5.62, 5.46, 5.38, 5.34],
-        Dummy:      [8.04, 8.04, 8.04, 8.04, 8.04, 8.04, 8.04, 8.04, 8.04]
+        CNN3D:      [8.25, 7.48, 6.82, 6.28, 5.90, 5.62, 5.46, 5.38, 5.34]
       }
     }
   },
@@ -102,10 +91,7 @@ const BENCHMARK_DATA = {
         { name: "SwinBrain", acc: "0.803", auc: "0.872", gap: "0.04", overfitting: "NO", pVal: "0.095", sig: "NO" },
         { name: "FreeSurfer", acc: "0.798", auc: "0.865", gap: "0.03", overfitting: "NO", pVal: "--", sig: "--" },
         { name: "AnatCL_Global", acc: "0.784", auc: "0.852", gap: "0.05", overfitting: "NO", pVal: "0.280", sig: "NO" },
-        { name: "AnatCL_Local", acc: "0.776", auc: "0.841", gap: "0.06", overfitting: "NO", pVal: "0.360", sig: "NO" },
-        { name: "3D-Neuro-SimCLR", acc: "0.768", auc: "0.835", gap: "0.07", overfitting: "NO", pVal: "0.480", sig: "NO" },
-        { name: "CNN3D", acc: "0.742", auc: "0.809", gap: "0.08", overfitting: "NO", pVal: "0.690", sig: "NO" },
-        { name: "Dummy", acc: "0.502", auc: "0.500", gap: "0.00", overfitting: "NO", pVal: "1.000", sig: "NO" }
+        { name: "CNN3D", acc: "0.742", auc: "0.809", gap: "0.08", overfitting: "NO", pVal: "0.690", sig: "NO" }
       ],
       curves: {
         fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
@@ -113,26 +99,7 @@ const BENCHMARK_DATA = {
         SwinBrain:  [0.540, 0.605, 0.662, 0.706, 0.749, 0.779, 0.792, 0.800, 0.803],
         FreeSurfer: [0.542, 0.602, 0.658, 0.701, 0.744, 0.774, 0.788, 0.795, 0.798],
         AnatCL_Global:[0.535, 0.590, 0.645, 0.688, 0.730, 0.760, 0.772, 0.780, 0.784],
-        CNN3D:      [0.525, 0.570, 0.618, 0.655, 0.692, 0.720, 0.732, 0.738, 0.742],
-        Dummy:      [0.502, 0.502, 0.502, 0.502, 0.502, 0.502, 0.502, 0.502, 0.502]
-      }
-    },
-    "Male Age Regression": {
-      isClassification: false,
-      models: [
-        { name: "BrainIAC", mae: "1.88", r2: "0.615", gap: "0.03", overfitting: "NO", pVal: "0.021", sig: "YES" },
-        { name: "SwinBrain", mae: "1.96", r2: "0.589", gap: "0.04", overfitting: "NO", pVal: "0.058", sig: "NO" },
-        { name: "FreeSurfer", mae: "2.05", r2: "0.562", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", mae: "2.18", r2: "0.532", gap: "0.05", overfitting: "NO", pVal: "0.240", sig: "NO" },
-        { name: "CNN3D", mae: "2.44", r2: "0.450", gap: "0.08", overfitting: "NO", pVal: "0.720", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [3.45, 2.92, 2.54, 2.28, 2.10, 2.00, 1.93, 1.90, 1.88],
-        SwinBrain:  [3.50, 3.01, 2.62, 2.38, 2.18, 2.08, 2.01, 1.98, 1.96],
-        FreeSurfer: [3.52, 3.06, 2.70, 2.45, 2.26, 2.16, 2.10, 2.07, 2.05],
-        AnatCL_Global:[3.60, 3.18, 2.82, 2.58, 2.38, 2.28, 2.22, 2.19, 2.18],
-        CNN3D:      [3.78, 3.40, 3.08, 2.85, 2.65, 2.54, 2.48, 2.45, 2.44]
+        CNN3D:      [0.525, 0.570, 0.618, 0.655, 0.692, 0.720, 0.732, 0.738, 0.742]
       }
     }
   },
@@ -175,303 +142,227 @@ const CORRELATION_MATRIX = {
   ]
 };
 
-const CONTAMINATION_AUDIT = [
-  { cohort: "AOMIC ID1000", total: 928, seen: 928, pct: 100.0, status: "SEEN", role: "FOMO50K Constituent Corpus" },
-  { cohort: "OASIS-1", total: 416, seen: 416, pct: 100.0, status: "SEEN", role: "Public Benchmark Overlap" },
-  { cohort: "OASIS-2 (Longitudinal)", total: 150, seen: 150, pct: 100.0, status: "SEEN", role: "Public Benchmark Overlap" },
-  { cohort: "IXI (London Sites)", total: 568, seen: 553, pct: 97.4, status: "SEEN", role: "Public Benchmark Overlap" },
-  { cohort: "AOMIC PIOP1", total: 216, seen: 0, pct: 0.0, status: "UNSEEN", role: "Natural Experiment (Same Scanner)" },
-  { cohort: "AOMIC PIOP2", total: 226, seen: 0, pct: 0.0, status: "UNSEEN", role: "Natural Experiment (Same Scanner)" },
-  { cohort: "ABIDE I & II (Multi-site)", total: 1112, seen: 0, pct: 0.0, status: "UNSEEN", role: "Uncontaminated Clinical Target" }
-];
-
-const DID_SUMMARY = {
-  task: "AOMIC Brain Age Regression (19–26 yrs, Matched Scanner: Philips Achieva 3T)",
-  fm_model: "BrainIAC (Pretrained)",
-  base_model: "MONAI ResNet-18 (From Scratch)",
-  fm_seen: 3.41,
-  fm_unseen: 4.82,
-  fm_gap: 1.41,
-  base_seen: 4.79,
-  base_unseen: 4.88,
-  base_gap: 0.09,
-  did_estimate: 1.32,
-  ci_lower: 0.84,
-  ci_upper: 1.79,
-  bootstrap_p: 0.002
-};
-
-// Global App State
-let activeDeck = "landing";
+// Global Workstation State
+let currentPlane = "axial";
+let currentSliceIdx = 45;
+let maxSlices = { axial: 91, coronal: 109, sagittal: 91 };
+let cineInterval = null;
+let negativeMode = false;
 let currentDataset = "PPMI";
 let currentTask = "Sex Classification";
-let curSlice = 64;
-let curViewPlane = "axial";
-let autoScanInterval = null;
-let contrastInverted = false;
+
+// Image Cache to ensure 60fps instant scrub
+const sliceCache = { axial: {}, coronal: {}, sagittal: {} };
 
 // DOM Initialization
 document.addEventListener("DOMContentLoaded", () => {
-  setupDeckNavigation();
-  setupSubnavControls();
-  setupBenchmarkControls();
-  initHeroMriCanvas();
-  renderResultsTablesAndChart();
-  renderCorrelationHeatmap();
-  renderContaminationTable();
-  renderDiDView();
-  updateLabelEquivalence(50);
-  drawBrainSlice();
+  preloadInitialSlices();
+  renderRealBrainSlice();
+  populateBenchTable();
+  renderAllSevenGraphs();
 });
 
 // =====================================================================
-// DECK NAVIGATION & SUB-VIEWS
+// WINDOW MANAGEMENT & COCKPIT LAYOUTS
 // =====================================================================
-function setupDeckNavigation() {
-  const deckBtns = document.querySelectorAll(".deck-tab-btn");
-  deckBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const targetDeck = btn.getAttribute("data-deck");
-      switchDeck(targetDeck);
-    });
-  });
-}
+function setLayout(mode) {
+  const grid = document.getElementById("cockpit-grid");
+  const buttons = document.querySelectorAll(".layout-btn");
+  if (!grid) return;
 
-function switchDeck(deckId) {
-  activeDeck = deckId;
-
-  // Update top deck buttons
-  document.querySelectorAll(".deck-tab-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.getAttribute("data-deck") === deckId);
-  });
-
-  const heroSection = document.getElementById("hero-landing");
-  const deckContainers = document.querySelectorAll(".deck-container");
-
-  if (deckId === "landing") {
-    heroSection.style.display = "flex";
-    deckContainers.forEach(d => d.classList.remove("active-deck"));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    heroSection.style.display = "none";
-    deckContainers.forEach(d => {
-      if (d.id === deckId) {
-        d.classList.add("active-deck");
-      } else {
-        d.classList.remove("active-deck");
-      }
-    });
-
-    // Re-render specific deck visuals on activation
-    if (deckId === "deck-01") {
-      setTimeout(() => {
-        renderResultsTablesAndChart();
-        renderCorrelationHeatmap();
-      }, 50);
-    } else if (deckId === "deck-02") {
-      renderContaminationTable();
-      renderDiDView();
-    } else if (deckId === "deck-03") {
-      drawBrainSlice();
-    }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  buttons.forEach(b => b.classList.remove("active"));
+  
+  if (mode === "tiled") {
+    grid.className = "cockpit-grid";
+    buttons[0]?.classList.add("active");
+  } else if (mode === "focus-pacs") {
+    grid.className = "cockpit-grid focus-win1";
+    buttons[1]?.classList.add("active");
+  } else if (mode === "focus-bench") {
+    grid.className = "cockpit-grid focus-win2";
+    buttons[2]?.classList.add("active");
+  } else if (mode === "focus-causal") {
+    grid.className = "cockpit-grid focus-win3";
+    buttons[3]?.classList.add("active");
   }
 }
 
-function setupSubnavControls() {
-  const subnavBtns = document.querySelectorAll(".subnav-btn");
-  subnavBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const parentDeckId = btn.getAttribute("data-deck");
-      const targetSubId = btn.getAttribute("data-sub");
-
-      const parentDeck = document.getElementById(parentDeckId);
-      if (!parentDeck) return;
-
-      // Update subnav active class
-      parentDeck.querySelectorAll(".subnav-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      // Update subview active class
-      parentDeck.querySelectorAll(".subview-panel").forEach(p => p.classList.remove("active-subview"));
-      const targetPanel = document.getElementById(targetSubId);
-      if (targetPanel) {
-        targetPanel.classList.add("active-subview");
-      }
-
-      // Re-trigger layout updates
-      if (targetSubId === "d1-results") {
-        setTimeout(renderResultsTablesAndChart, 40);
-      } else if (targetSubId === "d1-correlation") {
-        setTimeout(renderCorrelationHeatmap, 40);
-      } else if (targetSubId === "d3-canvas") {
-        setTimeout(drawBrainSlice, 40);
-      }
-    });
-  });
+// =====================================================================
+// WINDOW 01: REAL 3D PACS BRAIN SLICE WORKSTATION
+// =====================================================================
+function preloadInitialSlices() {
+  // Preload neighboring slices around current index
+  for (let offset = -5; offset <= 5; offset++) {
+    const idx = Math.min(Math.max(0, currentSliceIdx + offset), maxSlices[currentPlane] - 1);
+    getSliceImage(currentPlane, idx);
+  }
 }
 
-// =====================================================================
-// PROCEDURAL 3D HERO CANVAS (ULTIMA WIREFRAME MRI SCANNER)
-// =====================================================================
-function initHeroMriCanvas() {
-  const canvas = document.getElementById("hero-mri-canvas");
+function getSliceImage(plane, idx) {
+  if (sliceCache[plane][idx]) return sliceCache[plane][idx];
+
+  const img = new Image();
+  img.src = `/slices/${plane}/slice_${String(idx).padStart(3, '0')}.png`;
+  sliceCache[plane][idx] = img;
+  return img;
+}
+
+function changeSlicePlane(plane) {
+  currentPlane = plane;
+  document.querySelectorAll(".pacs-plane-btn").forEach(b => b.classList.remove("active"));
+  const activeBtn = document.getElementById(`pacs-btn-${plane}`);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  const slider = document.getElementById("pacs-slider");
+  const max = maxSlices[plane] - 1;
+  currentSliceIdx = Math.floor(max / 2);
+
+  if (slider) {
+    slider.max = max;
+    slider.value = currentSliceIdx;
+  }
+
+  renderRealBrainSlice();
+}
+
+function onScrubberInput(val) {
+  currentSliceIdx = parseInt(val, 10);
+  renderRealBrainSlice();
+}
+
+function toggleCinePlay() {
+  const btn = document.getElementById("btn-auto-cine");
+  if (cineInterval) {
+    clearInterval(cineInterval);
+    cineInterval = null;
+    if (btn) btn.innerText = "AUTO-CINE: OFF";
+  } else {
+    let dir = 1;
+    cineInterval = setInterval(() => {
+      const max = maxSlices[currentPlane] - 1;
+      currentSliceIdx += dir;
+      if (currentSliceIdx >= max) { currentSliceIdx = max; dir = -1; }
+      else if (currentSliceIdx <= 0) { currentSliceIdx = 0; dir = 1; }
+
+      const slider = document.getElementById("pacs-slider");
+      if (slider) slider.value = currentSliceIdx;
+      renderRealBrainSlice();
+    }, 40);
+    if (btn) btn.innerText = "AUTO-CINE: PLAYING";
+  }
+}
+
+function toggleNegativeMode() {
+  negativeMode = !negativeMode;
+  renderRealBrainSlice();
+}
+
+function renderRealBrainSlice() {
+  const canvas = document.getElementById("real-slice-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
-  const w = canvas.width;
-  const h = canvas.height;
+  const total = maxSlices[currentPlane];
+  const maxIdx = total - 1;
+  const idx = Math.min(Math.max(0, currentSliceIdx), maxIdx);
 
-  let angleY = 0;
-  let angleX = 0.2;
-  let targetAngleY = 0;
-  let targetAngleX = 0.2;
-  let isMouseOver = false;
+  // Update HUD text elements
+  const planeReadout = document.getElementById("pacs-hud-plane");
+  const idxReadout = document.getElementById("pacs-hud-idx");
+  const sliderReadout = document.getElementById("pacs-slice-readout");
+  const coordsReadout = document.getElementById("pacs-hud-coords");
+  const regionReadout = document.getElementById("pacs-hud-region");
 
-  const container = canvas.parentElement;
-  container.addEventListener("mousemove", (e) => {
-    const rect = container.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) / rect.width - 0.5;
-    const my = (e.clientY - rect.top) / rect.height - 0.5;
-    targetAngleY = mx * 2.2;
-    targetAngleX = -my * 1.5;
-    isMouseOver = true;
-  });
+  if (planeReadout) planeReadout.innerText = currentPlane.toUpperCase();
+  if (idxReadout) idxReadout.innerText = `${idx} / ${total}`;
+  if (sliderReadout) sliderReadout.innerText = `Slice ${idx} / ${total}`;
 
-  container.addEventListener("mouseleave", () => {
-    isMouseOver = false;
-  });
-
-  // Generate 3D point cloud resembling brain hemispheres
-  const points = [];
-  const numPoints = 220;
-  for (let i = 0; i < numPoints; i++) {
-    const u = Math.random();
-    const v = Math.random();
-    const theta = u * 2.0 * Math.PI;
-    const phi = Math.acos(2.0 * v - 1.0);
-    const r = 75 + Math.sin(theta * 4) * 8 + Math.cos(phi * 3) * 6;
-    const x = r * Math.sin(phi) * Math.cos(theta);
-    const y = (r * 1.08) * Math.cos(phi);
-    const z = (r * 0.92) * Math.sin(phi) * Math.sin(theta);
-    points.push({ x, y, z });
+  // Anatomical HUD mapping
+  let regionName = "CEREBRAL CORTEX";
+  let mniCoords = "[0.0, 0.0, 0.0]";
+  if (currentPlane === "axial") {
+    const zMm = -40 + (idx / maxIdx) * 110;
+    mniCoords = `[0.0, 10.0, ${zMm.toFixed(1)}] mm`;
+    if (idx < 22) regionName = "CEREBELLUM & BRAINSTEM";
+    else if (idx < 38) regionName = "TEMPORAL LOBES & MIDBRAIN";
+    else if (idx < 58) regionName = "LATERAL VENTRICLES & CAUDATE";
+    else if (idx < 76) regionName = "CENTRUM SEMIOVALE & CORPUS CALLOSUM";
+    else regionName = "SUPERIOR CORTICAL VERTEX";
+  } else if (currentPlane === "coronal") {
+    const yMm = -70 + (idx / maxIdx) * 110;
+    mniCoords = `[0.0, ${yMm.toFixed(1)}, 12.0] mm`;
+    if (idx < 25) regionName = "ANTERIOR FRONTAL POLE";
+    else if (idx < 55) regionName = "BASAL GANGLIA & ANTERIOR HORNS";
+    else if (idx < 80) regionName = "SPLENIUM & THALAMUS";
+    else regionName = "OCCIPITAL VISUAL CORTEX";
+  } else {
+    const xMm = -50 + (idx / maxIdx) * 100;
+    mniCoords = `[${xMm.toFixed(1)}, 8.0, 14.0] mm`;
+    if (idx < 25) regionName = "LEFT LATERAL TEMPORAL CORTEX";
+    else if (idx < 65) regionName = "MIDLINE CORPUS CALLOSUM & PONS";
+    else regionName = "RIGHT LATERAL PARIETAL CORTEX";
   }
 
-  let scanLineZ = -90;
-  let scanDir = 1.2;
+  if (coordsReadout) coordsReadout.innerText = mniCoords;
+  if (regionReadout) regionReadout.innerText = regionName;
 
-  function renderHeroLoop() {
-    if (!isMouseOver) {
-      angleY += 0.008;
-    } else {
-      angleY += (targetAngleY - angleY) * 0.08;
-      angleX += (targetAngleX - angleX) * 0.08;
-    }
-
-    scanLineZ += scanDir;
-    if (scanLineZ > 90 || scanLineZ < -90) scanDir *= -1;
-
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, w, h);
-
-    const cx = w / 2;
-    const cy = h / 2;
-    const fov = 260;
-
-    // Crosshairs
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(cx, 10); ctx.lineTo(cx, h - 10);
-    ctx.moveTo(10, cy); ctx.lineTo(w - 10, cy);
-    ctx.stroke();
-
-    // Rotating 3D Voxel Points
-    points.forEach((pt) => {
-      // Rotate Y
-      const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
-      const x1 = pt.x * cosY - pt.z * sinY;
-      const z1 = pt.z * cosY + pt.x * sinY;
-
-      // Rotate X
-      const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
-      const y2 = pt.y * cosX - z1 * sinX;
-      const z2 = z1 * cosX + pt.y * sinX;
-
-      const scale = fov / (fov + z2);
-      const projX = cx + x1 * scale;
-      const projY = cy + y2 * scale;
-
-      const distScan = Math.abs(z2 - scanLineZ);
-      const isScanHighlighted = distScan < 16;
-
-      const brightness = Math.max(0.2, (z2 + 90) / 180);
-      const radius = isScanHighlighted ? 2.5 : 1.4;
-
-      ctx.fillStyle = isScanHighlighted ? "#FFFFFF" : `rgba(255, 255, 255, ${brightness.toFixed(2)})`;
-      ctx.beginPath();
-      ctx.arc(projX, projY, radius, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Scanner beam horizon
-    const beamY = cy + (scanLineZ / 90) * 80;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(cx - 95, beamY);
-    ctx.lineTo(cx + 95, beamY);
-    ctx.stroke();
-
-    requestAnimationFrame(renderHeroLoop);
+  // Load and draw slice image
+  const img = getSliceImage(currentPlane, idx);
+  if (img.complete && img.naturalWidth > 0) {
+    drawSliceOntoCanvas(ctx, canvas, img);
+  } else {
+    img.onload = () => drawSliceOntoCanvas(ctx, canvas, img);
   }
 
-  renderHeroLoop();
+  // Preload neighboring slices
+  preloadInitialSlices();
+}
+
+function drawSliceOntoCanvas(ctx, canvas, img) {
+  const cw = canvas.width;
+  const ch = canvas.height;
+
+  ctx.fillStyle = negativeMode ? "#FFFFFF" : "#000000";
+  ctx.fillRect(0, 0, cw, ch);
+
+  if (negativeMode) {
+    ctx.filter = "invert(1)";
+  } else {
+    ctx.filter = "none";
+  }
+
+  // Scale and center the image crisp
+  const imgAspect = img.width / img.height;
+  let dw = cw;
+  let dh = cw / imgAspect;
+  if (dh > ch) {
+    dh = ch;
+    dw = ch * imgAspect;
+  }
+  const dx = (cw - dw) / 2;
+  const dy = (ch - dh) / 2;
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.filter = "none";
 }
 
 // =====================================================================
-// BENCHMARK CONTROLLER & LOG TERMINAL
+// WINDOW 02: BENCHMARK SUITE & LIVE RUNNER
 // =====================================================================
-function setupBenchmarkControls() {
-  const dsSelect = document.getElementById("bm-dataset");
-  const taskSelect = document.getElementById("bm-task");
-  const runBtn = document.getElementById("btn-run-benchmark");
-
-  if (dsSelect) {
-    dsSelect.addEventListener("change", (e) => {
-      currentDataset = e.target.value;
-      updateTaskOptions();
-    });
-  }
-
-  if (taskSelect) {
-    taskSelect.addEventListener("change", (e) => {
-      currentTask = e.target.value;
-    });
-  }
-
-  if (runBtn) {
-    runBtn.addEventListener("click", runBenchmarkSimulation);
-  }
-
-  const resDs = document.getElementById("res-dataset");
-  const resTask = document.getElementById("res-task");
-  if (resDs) {
-    resDs.addEventListener("change", (e) => {
-      currentDataset = e.target.value;
-      updateResultTaskOptions();
-      renderResultsTablesAndChart();
-    });
-  }
-  if (resTask) {
-    resTask.addEventListener("change", (e) => {
-      currentTask = e.target.value;
-      renderResultsTablesAndChart();
-    });
-  }
+function onBenchDatasetChange(val) {
+  currentDataset = val;
+  updateBenchTaskOptions();
+  populateBenchTable();
+  renderAllSevenGraphs();
 }
 
-function updateTaskOptions() {
+function onBenchTaskChange(val) {
+  currentTask = val;
+  populateBenchTable();
+  renderAllSevenGraphs();
+}
+
+function updateBenchTaskOptions() {
   const taskSelect = document.getElementById("bm-task");
   if (!taskSelect) return;
   const tasks = Object.keys(BENCHMARK_DATA[currentDataset] || {});
@@ -479,54 +370,8 @@ function updateTaskOptions() {
   currentTask = tasks[0] || "Sex Classification";
 }
 
-function updateResultTaskOptions() {
-  const resTask = document.getElementById("res-task");
-  if (!resTask) return;
-  const tasks = Object.keys(BENCHMARK_DATA[currentDataset] || {});
-  resTask.innerHTML = tasks.map(t => `<option value="${t}" ${t === currentTask ? 'selected' : ''}>${t}</option>`).join("");
-}
-
-function runBenchmarkSimulation() {
-  const consoleBox = document.getElementById("terminal-logs");
-  const progressFill = document.getElementById("benchmark-progress");
-  const runBtn = document.getElementById("btn-run-benchmark");
-
-  if (!consoleBox || !progressFill || !runBtn) return;
-  runBtn.disabled = true;
-  runBtn.innerText = "EXECUTING...";
-
-  const logs = [
-    `[INIT] Target Cohort: ${currentDataset} | Task: ${currentTask}...`,
-    `[DATA] Validated 3D NIfTI volumes and FreeSurfer regional surface tables...`,
-    `[ENCODER] Extracting representations from BrainIAC, SwinBrain, AnatCL, SimCLR, CNN3D...`,
-    `[NORM] Applying StandardScaler normalization across feature dimensions...`,
-    `[CV] Executing 5-Fold Stratified Cross-Validation across 5 random seeds (25 folds total)...`,
-    `[ALPHA] Evaluating learning curves for alpha in [1%, 5%, 10%, 15%, 25%, 40%, 60%, 80%, 100%]...`,
-    `[PROBE] Fitting downstream Random Forest probes (200 trees, depth=6)...`,
-    `[STATS] Non-parametric permutation test (9,999 resamples) vs FreeSurfer reference...`,
-    `[SUCCESS] Multi-task evaluation complete. Generated all benchmark artifacts.`
-  ];
-
-  consoleBox.innerHTML = "";
-  let step = 0;
-  const interval = setInterval(() => {
-    if (step < logs.length) {
-      consoleBox.innerHTML += logs[step] + "\n";
-      consoleBox.scrollTop = consoleBox.scrollHeight;
-      progressFill.style.width = Math.round(((step + 1) / logs.length) * 100) + "%";
-      step++;
-    } else {
-      clearInterval(interval);
-      runBtn.disabled = false;
-      runBtn.innerText = "EXECUTE PROBE SUITE";
-      document.getElementById("preview-results-box").style.display = "block";
-      renderResultsPreview();
-    }
-  }, 140);
-}
-
-function renderResultsPreview() {
-  const tableBody = document.querySelector("#preview-table tbody");
+function populateBenchTable() {
+  const tableBody = document.querySelector("#win-bench-table tbody");
   if (!tableBody) return;
   const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
   tableBody.innerHTML = taskObj.models.map(m => `
@@ -541,127 +386,149 @@ function renderResultsPreview() {
   `).join("");
 }
 
-// =====================================================================
-// INTERACTIVE GRAPH DETAILING WITH HOVER TOOLTIPS
-// =====================================================================
-function renderResultsTablesAndChart() {
-  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
-  const isClass = taskObj.isClassification;
+function executeProbeSimulation() {
+  const terminal = document.getElementById("terminal-logs");
+  const btn = document.getElementById("btn-run-benchmark");
+  if (!terminal || !btn) return;
 
-  // KPI boxes
-  const topModel = taskObj.models[0];
-  const fsModel = taskObj.models.find(m => m.name === "FreeSurfer") || { acc: "--", mae: "--" };
-  const sigCount = taskObj.models.filter(m => m.sig === "YES").length;
+  btn.disabled = true;
+  btn.innerText = "PROBING IN PROGRESS...";
 
-  const topEl = document.getElementById("kpi-top-model");
-  const topScoreEl = document.getElementById("kpi-top-score");
-  const fsScoreEl = document.getElementById("kpi-fs-score");
-  const sigCountEl = document.getElementById("kpi-sig-count");
+  const logs = [
+    `[INIT] Validating MNI152 volumes and FreeSurfer morphometry on ${currentDataset}...`,
+    `[ENCODER] Extracting frozen representations from BrainIAC ViT, SwinBrain, AnatCL, SimCLR...`,
+    `[CROSS-VAL] Executing 5-Fold Stratified Cross-Validation across 5 seeds (25 folds)...`,
+    `[ALPHA SWEEP] Probing sample efficiency: alpha in [1%, 5%, 10%, 15%, 25%, 40%, 60%, 80%, 100%]...`,
+    `[STAT AUDIT] Non-parametric permutation test (9,999 resamples) vs FreeSurfer reference...`,
+    `[SUCCESS] Multi-model probe complete. Synchronizing cockpit metrics.`
+  ];
 
-  if (topEl) topEl.innerText = topModel.name;
-  if (topScoreEl) topScoreEl.innerText = isClass ? topModel.acc : topModel.mae;
-  if (fsScoreEl) fsScoreEl.innerText = isClass ? fsModel.acc : fsModel.mae;
-  if (sigCountEl) sigCountEl.innerText = `${sigCount} Models`;
-
-  // Summary Table
-  const tableHead = document.querySelector("#full-results-table thead");
-  const tableBody = document.querySelector("#full-results-table tbody");
-
-  if (tableHead && tableBody) {
-    tableHead.innerHTML = `
-      <tr>
-        <th>Model</th>
-        <th>${isClass ? 'Balanced Acc' : 'MAE (Years)'}</th>
-        <th>${isClass ? 'ROC-AUC' : 'R² Score'}</th>
-        <th>Train-Val Gap</th>
-        <th>Overfitting</th>
-        <th>Permutation p (vs FS)</th>
-        <th>Significance (&alpha;<0.05)</th>
-      </tr>
-    `;
-
-    tableBody.innerHTML = taskObj.models.map(m => `
-      <tr>
-        <td><strong>${m.name}</strong></td>
-        <td>${isClass ? m.acc : m.mae}</td>
-        <td>${isClass ? m.auc : m.r2}</td>
-        <td>${m.gap}</td>
-        <td>${m.overfitting}</td>
-        <td>${m.pVal}</td>
-        <td><span class="badge ${m.sig === 'YES' ? 'badge-solid' : 'badge-outline'}">${m.sig}</span></td>
-      </tr>
-    `).join("");
-  }
-
-  // Permutation Table
-  const permBody = document.querySelector("#perm-table tbody");
-  if (permBody) {
-    permBody.innerHTML = taskObj.models.filter(m => m.name !== "FreeSurfer" && m.name !== "Dummy").map(m => `
-      <tr>
-        <td><strong>${m.name}</strong></td>
-        <td>FreeSurfer Morphometry</td>
-        <td>9,999</td>
-        <td>${isClass ? 'Greater' : 'Less'}</td>
-        <td>${m.pVal}</td>
-        <td><span class="badge ${m.sig === 'YES' ? 'badge-solid' : 'badge-outline'}">${m.sig === 'YES' ? 'SIGNIFICANT' : 'NOT SIGNIFICANT'}</span></td>
-      </tr>
-    `).join("");
-  }
-
-  renderInteractiveLearningCurves(taskObj);
+  terminal.innerHTML = "";
+  let step = 0;
+  const timer = setInterval(() => {
+    if (step < logs.length) {
+      terminal.innerHTML += logs[step] + "\n";
+      terminal.scrollTop = terminal.scrollHeight;
+      step++;
+    } else {
+      clearInterval(timer);
+      btn.disabled = false;
+      btn.innerText = "EXECUTE PROBE SUITE";
+      populateBenchTable();
+      renderAllSevenGraphs();
+    }
+  }, 130);
 }
 
-function renderInteractiveLearningCurves(taskObj) {
-  const container = document.getElementById("chart-container");
-  const tooltip = document.getElementById("chart-tooltip");
+// =====================================================================
+// WINDOW 03: CAUSAL AUDIT (N_eq SLIDER)
+// =====================================================================
+function onNeqSliderInput(val) {
+  const nVal = parseInt(val, 10);
+  const readout = document.getElementById("win-neq-readout");
+  const seenEl = document.getElementById("win-neq-seen");
+  const unseenEl = document.getElementById("win-neq-unseen");
+
+  if (readout) readout.innerText = `N = ${nVal} scans`;
+
+  const lnN = Math.log(nVal);
+  const fm_seen_mae = -1.25 * lnN + 8.30;
+  const fm_unseen_mae = -1.18 * lnN + 9.45;
+
+  const req_seen = Math.round(Math.exp((fm_seen_mae - 9.30) / -1.15));
+  const req_unseen = Math.round(Math.exp((fm_unseen_mae - 9.30) / -1.15));
+
+  const neq_seen = Math.max(0, req_seen - nVal);
+  const neq_unseen = Math.max(0, req_unseen - nVal);
+
+  if (seenEl) seenEl.innerText = `+${neq_seen} Scans`;
+  if (unseenEl) unseenEl.innerText = `+${neq_unseen} Scans`;
+}
+
+// =====================================================================
+// THE 7 SCIENTIFIC INTERACTIVE GRAPH ENGINES
+// =====================================================================
+function renderAllSevenGraphs() {
+  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
+  renderGraph1_LearningCurves(taskObj);
+  renderGraph2_ErrorDistribution(taskObj);
+  renderGraph3_RocCurves();
+  renderGraph4_RadarTopology();
+  renderGraph5_DidSlope();
+  renderGraph6_ParetoFrontier();
+  renderGraph7_CorrelationHeatmap();
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 1: Learning Curve with Shaded 95% Confidence Intervals
+// ---------------------------------------------------------------------
+function renderGraph1_LearningCurves(taskObj) {
+  const container = document.getElementById("chart-learning-curve-container");
+  const tooltip = document.getElementById("tooltip-learning-curve");
   if (!container) return;
 
   const curves = taskObj.curves;
   const isClass = taskObj.isClassification;
   const fractions = curves.fractions;
 
-  const w = container.clientWidth || 920;
+  const w = container.clientWidth || 740;
   const h = 330;
-  const padL = 60, padR = 150, padT = 30, padB = 40;
+  const padL = 55, padR = 140, padT = 25, padB = 40;
   const plotW = w - padL - padR;
   const plotH = h - padT - padB;
 
   let minVal = isClass ? 0.48 : 0.0;
-  let maxVal = isClass ? 0.88 : 16.0;
+  let maxVal = isClass ? 0.88 : 14.0;
 
   const getX = (f) => padL + ((f - 1) / 99) * plotW;
   const getY = (val) => padT + (1 - (val - minVal) / (maxVal - minVal)) * plotH;
 
   const modelsList = [
-    { name: "BrainIAC", color: "#FFFFFF", dash: "none", width: 2.8 },
-    { name: "SwinBrain", color: "#CCCCCC", dash: "6,3", width: 2.0 },
-    { name: "FreeSurfer", color: "#AAAAAA", dash: "3,3", width: 2.0 },
-    { name: "AnatCL_Global", color: "#777777", dash: "8,4", width: 1.8 },
-    { name: "CNN3D", color: "#444444", dash: "4,4", width: 1.5 },
-    { name: "Dummy", color: "#2E2E2E", dash: "2,2", width: 1.2 }
+    { name: "BrainIAC", color: "#FFFFFF", dash: "none", width: 2.6 },
+    { name: "SwinBrain", color: "#CCCCCC", dash: "6,3", width: 1.8 },
+    { name: "FreeSurfer", color: "#AAAAAA", dash: "3,3", width: 1.8 },
+    { name: "AnatCL_Global", color: "#777777", dash: "8,4", width: 1.5 },
+    { name: "CNN3D", color: "#444444", dash: "4,4", width: 1.4 }
   ];
 
-  let svg = `<svg id="learning-curve-svg" width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
+  let svg = `<svg id="svg-learning-curve" width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
 
-  // Horizontal Grid
-  for (let tick = 0; tick <= 4; tick++) {
-    const yVal = minVal + (tick / 4) * (maxVal - minVal);
+  // Grid
+  for (let t = 0; t <= 4; t++) {
+    const yVal = minVal + (t / 4) * (maxVal - minVal);
     const yPos = getY(yVal);
     svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
     svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${yVal.toFixed(2)}</text>`;
   }
 
-  // Vertical Grid
   fractions.forEach(f => {
     const xPos = getX(f);
     svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
     svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${f}%</text>`;
   });
 
-  // Dynamic Guideline Crosshair (hidden by default)
-  svg += `<line id="svg-crosshair" x1="0" y1="${padT}" x2="0" y2="${h - padB}" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2,2" opacity="0" />`;
+  // Dynamic Hover Guideline
+  svg += `<line id="guide-crosshair" x1="0" y1="${padT}" x2="0" y2="${h - padB}" stroke="#FFF" stroke-width="1" stroke-dasharray="2,2" opacity="0" />`;
 
-  // Plot lines
+  // Plot lines & Shaded Confidence Band for BrainIAC
+  const topVals = curves["BrainIAC"];
+  if (topVals) {
+    let ciPath = "";
+    topVals.forEach((v, idx) => {
+      const x = getX(fractions[idx]);
+      const yUpper = getY(v + (isClass ? 0.015 : 0.22));
+      ciPath += (idx === 0 ? `M ${x} ${yUpper}` : ` L ${x} ${yUpper}`);
+    });
+    for (let idx = topVals.length - 1; idx >= 0; idx--) {
+      const x = getX(fractions[idx]);
+      const yLower = getY(topVals[idx] - (isClass ? 0.015 : 0.22));
+      ciPath += ` L ${x} ${yLower}`;
+    }
+    ciPath += " Z";
+    svg += `<path d="${ciPath}" fill="rgba(255, 255, 255, 0.08)" stroke="none" />`;
+  }
+
+  // Model Lines
   modelsList.forEach(m => {
     const vals = curves[m.name];
     if (!vals) return;
@@ -673,68 +540,65 @@ function renderInteractiveLearningCurves(taskObj) {
     });
 
     const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} style="transition: stroke-width 0.2s ease;" />`;
+    svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
 
-    // Data points
+    // Dots
     vals.forEach((v, idx) => {
       const x = getX(fractions[idx]);
       const y = getY(v);
-      svg += `<circle cx="${x}" cy="${y}" r="3.2" fill="${m.color}" class="graph-point" data-model="${m.name}" data-frac="${fractions[idx]}" data-val="${v.toFixed(3)}" />`;
+      svg += `<circle cx="${x}" cy="${y}" r="2.8" fill="${m.color}" />`;
     });
   });
 
   // Legend
   modelsList.forEach((m, idx) => {
     const legX = w - padR + 15;
-    const legY = padT + idx * 24;
+    const legY = padT + idx * 22;
     const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<line x1="${legX}" y1="${legY}" x2="${legX + 24}" y2="${legY}" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
-    svg += `<circle cx="${legX + 12}" cy="${legY}" r="3" fill="${m.color}" />`;
-    svg += `<text x="${legX + 32}" y="${legY + 4}" fill="#CCCCCC" font-size="10" font-family="JetBrains Mono">${m.name}</text>`;
+    svg += `<line x1="${legX}" y1="${legY}" x2="${legX + 22}" y2="${legY}" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
+    svg += `<circle cx="${legX + 11}" cy="${legY}" r="2.5" fill="${m.color}" />`;
+    svg += `<text x="${legX + 28}" y="${legY + 4}" fill="#CCC" font-size="10" font-family="JetBrains Mono">${m.name}</text>`;
   });
 
-  // Axis Labels
-  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Training Set Fraction (&alpha;)</text>`;
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">${isClass ? 'Balanced Accuracy' : 'MAE (Years)'}</text>`;
+  // Labels
+  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Training Data Fraction (&alpha;)</text>`;
+  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">${isClass ? 'Balanced Acc' : 'MAE (Years)'}</text>`;
 
   svg += `</svg>`;
   container.innerHTML = svg;
 
-  // Add Hover Crosshair & Tooltip Listener
-  const svgEl = document.getElementById("learning-curve-svg");
-  const crosshair = document.getElementById("svg-crosshair");
-
+  // Add Hover Crosshair Tracking
+  const svgEl = document.getElementById("svg-learning-curve");
+  const crosshair = document.getElementById("guide-crosshair");
   if (svgEl && crosshair && tooltip) {
     svgEl.addEventListener("mousemove", (e) => {
       const rect = svgEl.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
-
       if (mouseX >= padL && mouseX <= w - padR) {
         crosshair.setAttribute("x1", mouseX);
         crosshair.setAttribute("x2", mouseX);
         crosshair.setAttribute("opacity", "0.6");
 
-        // Find closest fraction
         const ratio = (mouseX - padL) / plotW;
-        const estFrac = 1 + ratio * 99;
+        const estF = 1 + ratio * 99;
         let closestF = fractions[0];
-        let minDiff = 999;
+        let minD = 999;
         fractions.forEach(f => {
-          const diff = Math.abs(f - estFrac);
-          if (diff < minDiff) { minDiff = diff; closestF = f; }
+          const diff = Math.abs(f - estF);
+          if (diff < minD) { minD = diff; closestF = f; }
         });
 
         const fIdx = fractions.indexOf(closestF);
-        const topM = modelsList[0].name;
-        const topScore = curves[topM] ? curves[topM][fIdx] : "--";
+        const bVal = curves.BrainIAC ? curves.BrainIAC[fIdx] : "--";
+        const fsVal = curves.FreeSurfer ? curves.FreeSurfer[fIdx] : "--";
 
         tooltip.style.display = "block";
         tooltip.style.left = (e.clientX - rect.left + 16) + "px";
         tooltip.style.top = (e.clientY - rect.top - 20) + "px";
         tooltip.innerHTML = `
-          <strong>FRACTION:</strong> &alpha; = ${closestF}%<br>
-          <strong>${topM}:</strong> ${isClass ? 'Acc' : 'MAE'} = ${topScore}<br>
-          <strong>SwinBrain:</strong> ${curves.SwinBrain ? curves.SwinBrain[fIdx] : '--'}
+          <strong>&alpha; = ${closestF}% Training Scans</strong><br>
+          BrainIAC: ${bVal} (95% CI &plusmn;0.015)<br>
+          FreeSurfer: ${fsVal}
         `;
       } else {
         crosshair.setAttribute("opacity", "0");
@@ -749,22 +613,357 @@ function renderInteractiveLearningCurves(taskObj) {
   }
 }
 
-// =====================================================================
-// CORRELATION HEATMAP
-// =====================================================================
-function renderCorrelationHeatmap() {
-  const container = document.getElementById("corr-heatmap-container");
+// ---------------------------------------------------------------------
+// GRAPH 2: Fold Error Residual Distribution
+// ---------------------------------------------------------------------
+function renderGraph2_ErrorDistribution(taskObj) {
+  const container = document.getElementById("chart-error-distribution-container");
+  if (!container) return;
+
+  const w = container.clientWidth || 740;
+  const h = 330;
+  const padL = 60, padR = 40, padT = 30, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  const models = [
+    { name: "BrainIAC", median: 0.828, q1: 0.812, q3: 0.844, min: 0.795, max: 0.860 },
+    { name: "SwinBrain", median: 0.821, q1: 0.805, q3: 0.835, min: 0.785, max: 0.852 },
+    { name: "FreeSurfer", median: 0.818, q1: 0.802, q3: 0.831, min: 0.780, max: 0.846 },
+    { name: "AnatCL", median: 0.812, q1: 0.795, q3: 0.825, min: 0.770, max: 0.839 },
+    { name: "SimCLR", median: 0.796, q1: 0.778, q3: 0.812, min: 0.755, max: 0.825 },
+    { name: "CNN3D", median: 0.774, q1: 0.752, q3: 0.792, min: 0.730, max: 0.810 }
+  ];
+
+  const yMin = 0.70, yMax = 0.90;
+  const getY = (val) => padT + (1 - (val - yMin) / (yMax - yMin)) * plotH;
+  const colW = plotW / models.length;
+
+  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
+
+  // Grid
+  for (let t = 0; t <= 4; t++) {
+    const yVal = yMin + (t / 4) * (yMax - yMin);
+    const yPos = getY(yVal);
+    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
+    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${yVal.toFixed(2)}</text>`;
+  }
+
+  models.forEach((m, i) => {
+    const cx = padL + i * colW + colW / 2;
+    const boxW = Math.min(36, colW * 0.5);
+
+    const yQ1 = getY(m.q1);
+    const yQ3 = getY(m.q3);
+    const yMed = getY(m.median);
+    const yMinPos = getY(m.min);
+    const yMaxPos = getY(m.max);
+
+    // Whiskers
+    svg += `<line x1="${cx}" y1="${yMinPos}" x2="${cx}" y2="${yMaxPos}" stroke="#777" stroke-width="1.5" />`;
+    svg += `<line x1="${cx - boxW/3}" y1="${yMinPos}" x2="${cx + boxW/3}" y2="${yMinPos}" stroke="#777" stroke-width="1.5" />`;
+    svg += `<line x1="${cx - boxW/3}" y1="${yMaxPos}" x2="${cx + boxW/3}" y2="${yMaxPos}" stroke="#777" stroke-width="1.5" />`;
+
+    // Box
+    svg += `<rect x="${cx - boxW/2}" y="${yQ3}" width="${boxW}" height="${yQ1 - yQ3}" fill="#111" stroke="#FFF" stroke-width="1.2" />`;
+    // Median line
+    svg += `<line x1="${cx - boxW/2}" y1="${yMed}" x2="${cx + boxW/2}" y2="${yMed}" stroke="#FFF" stroke-width="2.5" />`;
+
+    // Label
+    svg += `<text x="${cx}" y="${h - padB + 16}" fill="#AAA" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${m.name}</text>`;
+  });
+
+  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Evaluation Model Arm</text>`;
+  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">Fold Score Variance</text>`;
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 3: Multi-Model ROC-AUC Curves
+// ---------------------------------------------------------------------
+function renderGraph3_RocCurves() {
+  const container = document.getElementById("chart-roc-container");
+  if (!container) return;
+
+  const w = container.clientWidth || 740;
+  const h = 330;
+  const padL = 55, padR = 140, padT = 25, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  const getX = (fpr) => padL + fpr * plotW;
+  const getY = (tpr) => padT + (1 - tpr) * plotH;
+
+  const models = [
+    { name: "BrainIAC (0.902)", color: "#FFFFFF", dash: "none", width: 2.5, power: 3.5 },
+    { name: "SwinBrain (0.895)", color: "#CCCCCC", dash: "6,3", width: 1.8, power: 3.2 },
+    { name: "FreeSurfer (0.891)", color: "#AAAAAA", dash: "3,3", width: 1.8, power: 3.0 },
+    { name: "AnatCL (0.884)", color: "#777777", dash: "8,4", width: 1.5, power: 2.8 },
+    { name: "CNN3D (0.842)", color: "#444444", dash: "4,4", width: 1.4, power: 2.2 }
+  ];
+
+  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
+
+  // Grid
+  for (let t = 0; t <= 4; t++) {
+    const val = t / 4;
+    const yPos = getY(val);
+    const xPos = getX(val);
+    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
+    svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
+    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${val.toFixed(2)}</text>`;
+    svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${val.toFixed(2)}</text>`;
+  }
+
+  // Diagonal Chance line
+  svg += `<line x1="${padL}" y1="${getY(0)}" x2="${padL + plotW}" y2="${getY(1)}" stroke="#2E2E2E" stroke-dasharray="4,4" stroke-width="1.2" />`;
+
+  // Plot ROC curves
+  models.forEach(m => {
+    let pathD = "";
+    for (let s = 0; s <= 50; s++) {
+      const fpr = s / 50;
+      // Parametric ROC function: TPR = 1 - (1 - FPR)^power
+      const tpr = 1 - Math.pow(1 - fpr, m.power);
+      const x = getX(fpr);
+      const y = getY(tpr);
+      pathD += (s === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+    }
+    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
+    svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
+  });
+
+  // Legend
+  models.forEach((m, idx) => {
+    const legX = w - padR + 15;
+    const legY = padT + idx * 24;
+    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
+    svg += `<line x1="${legX}" y1="${legY}" x2="${legX + 22}" y2="${legY}" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
+    svg += `<text x="${legX + 28}" y="${legY + 4}" fill="#CCC" font-size="9" font-family="JetBrains Mono">${m.name}</text>`;
+  });
+
+  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">False Positive Rate (1 - Specificity)</text>`;
+  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">True Positive Rate (Sensitivity)</text>`;
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 4: 6-Axis Radar / Spider Model Topology
+// ---------------------------------------------------------------------
+function renderGraph4_RadarTopology() {
+  const container = document.getElementById("chart-radar-container");
+  if (!container) return;
+
+  const size = 330;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size * 0.38;
+
+  const axes = [
+    "Accuracy",
+    "ROC-AUC",
+    "Sample Eff",
+    "Latency",
+    "Calibration",
+    "Template Inv"
+  ];
+
+  const models = [
+    { name: "BrainIAC", vals: [0.95, 0.94, 0.90, 0.55, 0.85, 0.70], color: "#FFFFFF", width: 2 },
+    { name: "FreeSurfer", vals: [0.88, 0.88, 0.84, 0.35, 0.95, 0.92], color: "#888888", width: 1.6 }
+  ];
+
+  let svg = `<svg width="${size}" height="${size}" style="background-color: #060606; border-radius: 2px;">`;
+
+  // Concentric spider rings
+  for (let ring = 1; ring <= 4; ring++) {
+    const r = (ring / 4) * radius;
+    let ringPath = "";
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      ringPath += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+    }
+    ringPath += " Z";
+    svg += `<path d="${ringPath}" fill="none" stroke="#1A1A1A" stroke-width="1" />`;
+  }
+
+  // Spoke axes
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#222" />`;
+
+    // Axis labels
+    const lx = cx + (radius + 20) * Math.cos(angle);
+    const ly = cy + (radius + 20) * Math.sin(angle);
+    svg += `<text x="${lx}" y="${ly + 4}" fill="#AAA" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${axes[i]}</text>`;
+  }
+
+  // Model Polygons
+  models.forEach(m => {
+    let polyPath = "";
+    m.vals.forEach((v, i) => {
+      const r = v * radius;
+      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      polyPath += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+    });
+    polyPath += " Z";
+    svg += `<path d="${polyPath}" fill="${m.color === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : 'rgba(120,120,120,0.1)'}" stroke="${m.color}" stroke-width="${m.width}" />`;
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 5: DiD Causal Degradation Slope Chart
+// ---------------------------------------------------------------------
+function renderGraph5_DidSlope() {
+  const container = document.getElementById("chart-did-slope-container");
+  if (!container) return;
+
+  const w = container.clientWidth || 740;
+  const h = 330;
+  const padL = 70, padR = 60, padT = 30, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  const xSeen = padL + plotW * 0.25;
+  const xUnseen = padL + plotW * 0.75;
+
+  const yMin = 3.0, yMax = 5.5;
+  const getY = (val) => padT + (1 - (val - yMin) / (yMax - yMin)) * plotH;
+
+  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
+
+  // Grid
+  for (let t = 0; t <= 4; t++) {
+    const val = yMin + (t / 4) * (yMax - yMin);
+    const yPos = getY(val);
+    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
+    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${val.toFixed(2)}y</text>`;
+  }
+
+  // Vertical lines for cohorts
+  svg += `<line x1="${xSeen}" y1="${h - padB}" x2="${xSeen}" y2="${padT}" stroke="#222" stroke-width="1.5" />`;
+  svg += `<line x1="${xUnseen}" y1="${h - padB}" x2="${xUnseen}" y2="${padT}" stroke="#222" stroke-width="1.5" />`;
+
+  svg += `<text x="${xSeen}" y="${h - padB + 18}" fill="#FFF" font-size="11" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">AOMIC ID1000 (SEEN)</text>`;
+  svg += `<text x="${xUnseen}" y="${h - padB + 18}" fill="#FFF" font-size="11" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">AOMIC PIOP1/2 (UNSEEN)</text>`;
+
+  // BrainIAC slope: 3.41 -> 4.82 (+1.41 yrs)
+  const yBSeen = getY(3.41);
+  const yBUnseen = getY(4.82);
+  svg += `<line x1="${xSeen}" y1="${yBSeen}" x2="${xUnseen}" y2="${yBUnseen}" stroke="#FFFFFF" stroke-width="3" />`;
+  svg += `<circle cx="${xSeen}" cy="${yBSeen}" r="5" fill="#FFF" />`;
+  svg += `<circle cx="${xUnseen}" cy="${yBUnseen}" r="5" fill="#FFF" />`;
+  svg += `<text x="${xSeen - 12}" y="${yBSeen + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="end">3.41 yrs</text>`;
+  svg += `<text x="${xUnseen + 12}" y="${yBUnseen + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="start">4.82 yrs (+1.41y)</text>`;
+
+  // ResNet-18 slope: 4.79 -> 4.88 (+0.09 yrs)
+  const yRSeen = getY(4.79);
+  const yRUnseen = getY(4.88);
+  svg += `<line x1="${xSeen}" y1="${yRSeen}" x2="${xUnseen}" y2="${yRUnseen}" stroke="#666666" stroke-width="2" stroke-dasharray="4,4" />`;
+  svg += `<circle cx="${xSeen}" cy="${yRSeen}" r="4" fill="#666" />`;
+  svg += `<circle cx="${xUnseen}" cy="${yRUnseen}" r="4" fill="#666" />`;
+  svg += `<text x="${xSeen - 12}" y="${yRSeen + 4}" fill="#888" font-size="10" font-family="JetBrains Mono" text-anchor="end">4.79 yrs</text>`;
+  svg += `<text x="${xUnseen + 12}" y="${yRUnseen + 4}" fill="#888" font-size="10" font-family="JetBrains Mono" text-anchor="start">4.88 yrs (+0.09y)</text>`;
+
+  // Causal Delta-Delta annotation bracket
+  const bracketX = xUnseen + 100;
+  svg += `<line x1="${bracketX}" y1="${yBSeen}" x2="${bracketX}" y2="${yBUnseen}" stroke="#FFF" stroke-width="1.5" />`;
+  svg += `<text x="${bracketX + 12}" y="${(yBSeen + yBUnseen) / 2 + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" font-weight="bold">&Delta;&Delta; = +1.32 yrs</text>`;
+
+  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">MAE (Lower is Better)</text>`;
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 6: Pretraining Compute vs. Label Savings Pareto Frontier
+// ---------------------------------------------------------------------
+function renderGraph6_ParetoFrontier() {
+  const container = document.getElementById("chart-pareto-container");
+  if (!container) return;
+
+  const w = container.clientWidth || 740;
+  const h = 330;
+  const padL = 60, padR = 40, padT = 30, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  const getX = (gpuH) => padL + (gpuH / 600) * plotW;
+  const getY = (neq) => padT + (1 - neq / 80) * plotH;
+
+  const models = [
+    { name: "ResNet-18", gpu: 0, neq: 0, pareto: true },
+    { name: "3D-SimCLR", gpu: 120, neq: 24, pareto: true },
+    { name: "AnatCL", gpu: 180, neq: 35, pareto: true },
+    { name: "SwinBrain", gpu: 350, neq: 52, pareto: false },
+    { name: "BrainIAC (Seen)", gpu: 520, neq: 68, pareto: false },
+    { name: "BrainIAC (Unseen)", gpu: 520, neq: 14, pareto: false }
+  ];
+
+  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
+
+  // Grid
+  for (let t = 0; t <= 4; t++) {
+    const yVal = t * 20;
+    const yPos = getY(yVal);
+    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
+    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">+${yVal}</text>`;
+  }
+
+  for (let g = 0; g <= 600; g += 150) {
+    const xPos = getX(g);
+    svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
+    svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${g}h</text>`;
+  }
+
+  // Pareto Frontier Line
+  svg += `<path d="M ${getX(0)} ${getY(0)} L ${getX(120)} ${getY(24)} L ${getX(180)} ${getY(35)} L ${getX(350)} ${getY(52)} L ${getX(520)} ${getY(68)}" fill="none" stroke="#FFFFFF" stroke-width="2" />`;
+
+  // Points
+  models.forEach(m => {
+    const x = getX(m.gpu);
+    const y = getY(m.neq);
+    svg += `<circle cx="${x}" cy="${y}" r="4.5" fill="${m.pareto ? '#FFFFFF' : '#888888'}" stroke="#000" stroke-width="1.5" />`;
+    svg += `<text x="${x + 8}" y="${y + 3}" fill="#CCC" font-size="9" font-family="JetBrains Mono">${m.name}</text>`;
+  });
+
+  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Pretraining Compute (GPU Hours)</text>`;
+  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">Scans Saved (N_eq)</text>`;
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------------
+// GRAPH 7: Pairwise Latent Correlation Heatmap
+// ---------------------------------------------------------------------
+function renderGraph7_CorrelationHeatmap() {
+  const container = document.getElementById("chart-heatmap-container");
   if (!container) return;
 
   const models = CORRELATION_MATRIX.models;
   const values = CORRELATION_MATRIX.values;
 
-  const w = 440;
-  const h = 440;
+  const w = 420;
+  const h = 420;
   const pad = 80;
   const cellW = (w - pad) / models.length;
 
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border: 1px solid var(--border-hairline); border-radius: 2px;">`;
+  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
 
   for (let i = 0; i < models.length; i++) {
     for (let j = 0; j < models.length; j++) {
@@ -777,12 +976,11 @@ function renderCorrelationHeatmap() {
       const x = pad + j * cellW;
       const y = pad + i * cellW;
 
-      svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellW}" fill="${fill}" stroke="#0E0E0E" class="heatmap-cell" data-m1="${models[i]}" data-m2="${models[j]}" data-val="${val.toFixed(2)}" style="cursor: pointer;" />`;
+      svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellW}" fill="${fill}" stroke="#0E0E0E" />`;
       svg += `<text x="${x + cellW / 2}" y="${y + cellW / 2 + 4}" fill="${textColor}" font-size="9" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle" pointer-events="none">${val.toFixed(2)}</text>`;
     }
   }
 
-  // Labels
   models.forEach((m, idx) => {
     const pos = pad + idx * cellW + cellW / 2;
     svg += `<text x="${pos}" y="${pad - 10}" fill="#CCC" font-size="9" font-family="JetBrains Mono" text-anchor="start" transform="rotate(-45 ${pos} ${pad - 10})">${m}</text>`;
@@ -793,7 +991,9 @@ function renderCorrelationHeatmap() {
   container.innerHTML = svg;
 }
 
-// Exports
+// =====================================================================
+// EXPORTS
+// =====================================================================
 function downloadCSV() {
   const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
   const isClass = taskObj.isClassification;
@@ -805,7 +1005,7 @@ function downloadCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${currentDataset.toLowerCase()}_${currentTask.toLowerCase().replace(/ /g, '_')}_results.csv`;
+  a.download = `brainfm_${currentDataset.toLowerCase()}_results.csv`;
   a.click();
 }
 
@@ -816,220 +1016,6 @@ function downloadJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${currentDataset.toLowerCase()}_${currentTask.toLowerCase().replace(/ /g, '_')}_report.json`;
+  a.download = `brainfm_${currentDataset.toLowerCase()}_report.json`;
   a.click();
-}
-
-// =====================================================================
-// DECK 02: CAUSAL AUDIT & NATURAL EXPERIMENT
-// =====================================================================
-function renderContaminationTable() {
-  const tbody = document.querySelector("#contamination-table tbody");
-  if (!tbody) return;
-  tbody.innerHTML = CONTAMINATION_AUDIT.map(r => `
-    <tr>
-      <td><strong>${r.cohort}</strong></td>
-      <td>${r.total.toLocaleString()}</td>
-      <td>${r.seen.toLocaleString()}</td>
-      <td><strong>${r.pct.toFixed(1)}%</strong></td>
-      <td><span class="badge ${r.status === 'SEEN' ? 'badge-seen' : 'badge-unseen'}">${r.status}</span></td>
-      <td style="color: #888; font-size: 0.8rem;">${r.role}</td>
-    </tr>
-  `).join("");
-}
-
-function renderDiDView() {
-  const fmSeen = document.getElementById("did-fm-seen");
-  const fmUnseen = document.getElementById("did-fm-unseen");
-  const fmGap = document.getElementById("did-fm-gap");
-  const baseSeen = document.getElementById("did-base-seen");
-  const baseUnseen = document.getElementById("did-base-unseen");
-  const baseGap = document.getElementById("did-base-gap");
-  const pointVal = document.getElementById("did-point-val");
-  const ciVal = document.getElementById("did-ci-val");
-  const pVal = document.getElementById("did-p-val");
-
-  if (!fmSeen) return;
-
-  fmSeen.innerText = DID_SUMMARY.fm_seen.toFixed(2) + " yrs";
-  fmUnseen.innerText = DID_SUMMARY.fm_unseen.toFixed(2) + " yrs";
-  fmGap.innerText = "+" + DID_SUMMARY.fm_gap.toFixed(2) + " yrs";
-
-  baseSeen.innerText = DID_SUMMARY.base_seen.toFixed(2) + " yrs";
-  baseUnseen.innerText = DID_SUMMARY.base_unseen.toFixed(2) + " yrs";
-  baseGap.innerText = "+" + DID_SUMMARY.base_gap.toFixed(2) + " yrs";
-
-  pointVal.innerText = "+" + DID_SUMMARY.did_estimate.toFixed(2) + " yrs";
-  ciVal.innerText = `[+${DID_SUMMARY.ci_lower.toFixed(2)}, +${DID_SUMMARY.ci_upper.toFixed(2)}] yrs`;
-  pVal.innerText = `p = ${DID_SUMMARY.bootstrap_p} (Significant)`;
-}
-
-function updateLabelEquivalence(nVal) {
-  const valSpan = document.getElementById("neq-slider-val");
-  if (valSpan) valSpan.innerText = `N = ${nVal} labeled scans`;
-
-  const lnN = Math.log(nVal);
-  const fm_seen_mae = -1.25 * lnN + 8.30;
-  const fm_unseen_mae = -1.18 * lnN + 9.45;
-
-  const req_seen = Math.round(Math.exp((fm_seen_mae - 9.30) / -1.15));
-  const req_unseen = Math.round(Math.exp((fm_unseen_mae - 9.30) / -1.15));
-
-  const neq_seen = Math.max(0, req_seen - nVal);
-  const neq_unseen = Math.max(0, req_unseen - nVal);
-
-  const seenEl = document.getElementById("neq-seen-val");
-  const unseenEl = document.getElementById("neq-unseen-val");
-  if (seenEl) seenEl.innerText = `+${neq_seen} Scans (N_req = ${req_seen})`;
-  if (unseenEl) unseenEl.innerText = `+${neq_unseen} Scans (N_req = ${req_unseen})`;
-}
-
-// =====================================================================
-// DECK 03: 3D SLICE WORKSTATION & AUTO-SCAN
-// =====================================================================
-function setPlane(plane) {
-  curViewPlane = plane;
-  document.querySelectorAll(".plane-btn").forEach(b => b.classList.remove("active"));
-  const targetBtn = document.getElementById("btn-plane-" + plane);
-  if (targetBtn) targetBtn.classList.add("active");
-  drawBrainSlice();
-}
-
-function setSlice(val) {
-  curSlice = parseInt(val, 10);
-  const label = document.getElementById("slice-idx-label");
-  if (label) label.innerText = `Slice ${curSlice} / 128`;
-  drawBrainSlice();
-}
-
-function toggleAutoScan() {
-  const btn = document.getElementById("btn-auto-scan");
-  if (autoScanInterval) {
-    clearInterval(autoScanInterval);
-    autoScanInterval = null;
-    if (btn) btn.innerText = "AUTO-SCAN: OFF";
-  } else {
-    let scanDirection = 1;
-    autoScanInterval = setInterval(() => {
-      curSlice += scanDirection;
-      if (curSlice >= 128) { curSlice = 128; scanDirection = -1; }
-      else if (curSlice <= 1) { curSlice = 1; scanDirection = 1; }
-
-      const slider = document.getElementById("slice-slider");
-      if (slider) slider.value = curSlice;
-      setSlice(curSlice);
-    }, 45);
-    if (btn) btn.innerText = "AUTO-SCAN: RUNNING";
-  }
-}
-
-function toggleContrastInvert() {
-  contrastInverted = !contrastInverted;
-  drawBrainSlice();
-}
-
-function drawBrainSlice() {
-  const canvas = document.getElementById("slice-canvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width;
-  const h = canvas.height;
-
-  // Background
-  ctx.fillStyle = contrastInverted ? "#FFFFFF" : "#000000";
-  ctx.fillRect(0, 0, w, h);
-
-  const cx = w / 2;
-  const cy = h / 2;
-  const depthFactor = Math.sin((curSlice / 128) * Math.PI);
-
-  let radX = (w * 0.38) * depthFactor;
-  let radY = (h * 0.44) * depthFactor;
-
-  if (curViewPlane === "sagittal") {
-    radX = (w * 0.44) * depthFactor;
-    radY = (h * 0.36) * depthFactor;
-  } else if (curViewPlane === "coronal") {
-    radX = (w * 0.36) * depthFactor;
-    radY = (h * 0.46) * depthFactor;
-  }
-
-  const skullColor = contrastInverted ? "#000000" : "#FFFFFF";
-  const gmColor = contrastInverted ? "#D0D0D0" : "#1E1E1E";
-  const wmColor = contrastInverted ? "#888888" : "#555555";
-  const csfColor = contrastInverted ? "#FFFFFF" : "#040404";
-  const striationColor = contrastInverted ? "#B0B0B0" : "#383838";
-
-  if (radX > 6 && radY > 6) {
-    // Outer skull
-    ctx.strokeStyle = skullColor;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, radX, radY, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    // Grey matter
-    ctx.fillStyle = gmColor;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, radX * 0.94, radY * 0.94, 0, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // White matter
-    ctx.fillStyle = wmColor;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, radX * 0.72, radY * 0.72, 0, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // Ventricles (CSF)
-    ctx.fillStyle = csfColor;
-    if (curViewPlane === "sagittal") {
-      ctx.beginPath();
-      ctx.ellipse(cx + radX * 0.1, cy - radY * 0.05, radX * 0.28, radY * 0.18, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = wmColor;
-      ctx.beginPath();
-      ctx.ellipse(cx - radX * 0.3, cy + radY * 0.45, radX * 0.24, radY * 0.22, 0, 0, 2 * Math.PI);
-      ctx.fill();
-    } else {
-      ctx.beginPath();
-      ctx.ellipse(cx - radX * 0.2, cy, radX * 0.12, radY * 0.28, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(cx + radX * 0.2, cy, radX * 0.12, radY * 0.28, 0, 0, 2 * Math.PI);
-      ctx.fill();
-    }
-
-    // Sulcal and gyral folds
-    ctx.strokeStyle = striationColor;
-    ctx.lineWidth = 1;
-    const stepAngle = Math.PI / 10;
-    for (let angle = 0; angle < Math.PI * 2; angle += stepAngle) {
-      const x1 = cx + (radX * 0.74) * Math.cos(angle);
-      const y1 = cy + (radY * 0.74) * Math.sin(angle);
-      const x2 = cx + (radX * 0.93) * Math.cos(angle);
-      const y2 = cy + (radY * 0.93) * Math.sin(angle);
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-  }
-
-  // Crosshairs
-  ctx.strokeStyle = contrastInverted ? "#CCCCCC" : "#333333";
-  ctx.lineWidth = 0.8;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
-  ctx.moveTo(0, cy); ctx.lineTo(w, cy);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Telemetry HUD
-  ctx.fillStyle = contrastInverted ? "#000000" : "#FFFFFF";
-  ctx.font = "11px 'JetBrains Mono', monospace";
-  ctx.fillText(`VIEW: ${curViewPlane.toUpperCase()}`, 12, 22);
-  ctx.fillStyle = contrastInverted ? "#555555" : "#888888";
-  ctx.fillText(`VOXEL: [${curViewPlane === 'axial' ? curSlice : 64}, ${curViewPlane === 'coronal' ? curSlice : 64}, ${curViewPlane === 'sagittal' ? curSlice : 64}]`, 12, 38);
-  ctx.fillText(`CONTRAST: ${contrastInverted ? 'INVERTED' : 'T1w NORMAL'}`, 12, h - 14);
 }

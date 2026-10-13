@@ -3,156 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ULTIMA // BRAIN-FM — EVALUATION HARNESS</title>
+  <title>ULTIMA // BRAIN-FM — NEUROIMAGING WORKSTATION</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- =====================================================================
-       GLOBAL NAVIGATION
+       GLOBAL NAVIGATION BAR & COCKPIT CONTROLS
        ===================================================================== -->
   <header class="global-nav">
     <div class="nav-brand">
       <div class="brand-symbol">U</div>
       <div class="brand-text-block">
         <span class="brand-main">BRAIN — FM</span>
-        <span class="brand-sub">SEEN IT BEFORE // v2.5</span>
+        <span class="brand-sub">ULTIMA NEUROIMAGING WORKSTATION // v3.0</span>
       </div>
     </div>
 
     <div class="nav-telemetry">
       <div class="telemetry-item">
         <span class="telemetry-dot"></span>
-        <span>SYSTEM: ONLINE</span>
+        <span>COCKPIT: LIVE</span>
       </div>
       <div class="telemetry-item">
         <span>SCANNER: PHILIPS 3T</span>
+      </div>
+      <div class="telemetry-item">
+        <span>ATLAS: MNI152 T1w</span>
       </div>
       <div class="telemetry-item">
         <span>PALETTE: STRICT B&W</span>
       </div>
     </div>
 
-    <nav class="deck-switcher">
-      <button class="deck-tab-btn active" data-deck="landing">00 // LANDING</button>
-      <button class="deck-tab-btn" data-deck="deck-01">DECK 01 // BENCHMARKS</button>
-      <button class="deck-tab-btn" data-deck="deck-02">DECK 02 // CAUSAL AUDIT</button>
-      <button class="deck-tab-btn" data-deck="deck-03">DECK 03 // 3D SLICES</button>
-    </nav>
+    <div class="nav-layout-controls">
+      <button class="layout-btn active" onclick="setLayout('tiled')">3-WINDOW TILED VIEW</button>
+      <button class="layout-btn" onclick="setLayout('focus-pacs')">FOCUS: 3D PACS</button>
+      <button class="layout-btn" onclick="setLayout('focus-bench')">FOCUS: BENCHMARKS</button>
+      <button class="layout-btn" onclick="setLayout('focus-causal')">FOCUS: CAUSAL</button>
+    </div>
   </header>
 
   <!-- =====================================================================
-       HERO / MRI LANDING PAGE
+       EXECUTIVE TELEMETRY BANNER
        ===================================================================== -->
-  <section id="hero-landing" class="hero-section">
-    <div class="hero-scanline"></div>
-
-    <div class="hero-title-badge">
-      <span>ULTIMA ARCHITECTURE</span>
-      <span>//</span>
-      <span>BIORXIV 2026.05.15.725427</span>
-      <span>//</span>
-      <span>EPICS-LAB & SEEN-IT-BEFORE</span>
+  <section class="hero-banner">
+    <div>
+      <span class="badge badge-outline" style="margin-bottom: 8px;">RESEARCH REPORT // BIORXIV 2026.05.15.725427</span>
+      <h1 class="hero-main-title">B R A I N — F M</h1>
+      <p class="hero-tagline">
+        A unified neuroimaging cockpit synchronizing <strong>real MNI152 human brain slice PACS reconstruction</strong>, 
+        <strong>multi-model foundation benchmarking</strong>, and <strong>cryptographic test leakage causal identification</strong>.
+      </p>
     </div>
 
-    <!-- Interactive Procedural 3D Canvas -->
-    <div class="hero-canvas-container" title="Drag mouse to rotate 3D neuroimaging mesh">
-      <canvas id="hero-mri-canvas" width="320" height="320"></canvas>
-      <div class="hero-reticle"></div>
-      <div class="hero-reticle-hud">
-        FOV: 240x240 mm<br>
-        VOXEL: 1.0mm ISO<br>
-        COORDINATE: [128, 128, 64]<br>
-        ROTATE: MOUSE TRACK
+    <div class="hero-kpis">
+      <div class="hero-kpi-pill">
+        <div class="hero-kpi-num">291</div>
+        <div class="hero-kpi-lbl">Real MNI Slices</div>
       </div>
-    </div>
-
-    <h1 class="hero-title">B R A I N — F M</h1>
-    <p class="hero-sub">
-      A standardized, contamination-audited evaluation platform benchmarking 3D self-supervised 
-      brain MRI foundation models against classical FreeSurfer morphometry and supervised baselines.
-    </p>
-
-    <!-- 3 View Decks Preview Cards -->
-    <div class="hero-deck-grid">
-      <div class="hero-deck-card" onclick="switchDeck('deck-01')">
-        <div class="deck-card-num">01 // EVALUATION</div>
-        <div class="deck-card-title">FOUNDATION BENCHMARKS</div>
-        <p class="deck-card-desc">
-          Probe accuracy, sample efficiency learning curves, Bonferroni permutation tests, and cross-model representation correlation across PPMI, HBN, and NKI cohorts.
-        </p>
-        <div class="deck-card-action">ENTER DECK 01 &rarr;</div>
+      <div class="hero-kpi-pill">
+        <div class="hero-kpi-num">6 Arms</div>
+        <div class="hero-kpi-lbl">SSL & Baseline</div>
       </div>
-
-      <div class="hero-deck-card" onclick="switchDeck('deck-02')">
-        <div class="deck-card-num">02 // CAUSAL IDENTIFICATION</div>
-        <div class="deck-card-title">CAUSAL AUDIT & DiD</div>
-        <p class="deck-card-desc">
-          Table 1 manifest leakage audit, the Amsterdam same-scanner Difference-in-Differences natural experiment (+1.32 yrs gap, p=0.002), and Label Equivalence (N_eq).
-        </p>
-        <div class="deck-card-action">ENTER DECK 02 &rarr;</div>
+      <div class="hero-kpi-pill">
+        <div class="hero-kpi-num">+1.32y</div>
+        <div class="hero-kpi-lbl">Causal DiD Gap</div>
       </div>
-
-      <div class="hero-deck-card" onclick="switchDeck('deck-03')">
-        <div class="deck-card-num">03 // VOLUMETRICS</div>
-        <div class="deck-card-title">3D SLICE QC & MONTAGE</div>
-        <p class="deck-card-desc">
-          Procedural multi-plane neuroimaging slice inspection (axial, coronal, sagittal) with crosshair localization, automated scanning, and acquisition SNR/CNR metrics.
-        </p>
-        <div class="deck-card-action">ENTER DECK 03 &rarr;</div>
+      <div class="hero-kpi-pill">
+        <div class="hero-kpi-num">9,999</div>
+        <div class="hero-kpi-lbl">Permutations</div>
       </div>
-    </div>
-
-    <div style="margin-top: 36px;">
-      <button class="btn" onclick="switchDeck('deck-01')">ENTER BENCHMARK WORKSTATION</button>
     </div>
   </section>
 
   <!-- =====================================================================
-       DECKS CONTAINER WRAPPER
+       THE 3-WINDOW DASHBOARD COCKPIT (SIMULTANEOUS 3-WINDOW TILED WORKSTATION)
        ===================================================================== -->
-  <main class="decks-wrapper">
+  <main class="cockpit-section">
+    <div class="cockpit-title-row">
+      <div class="cockpit-label">SIMULTANEOUS MULTI-PANEL COCKPIT (ALL 3 DECKS ACTIVE)</div>
+      <span style="font-family: var(--font-mono); font-size: 0.72rem; color: #777;">SYNCHRONIZED REAL-TIME TELEMETRY</span>
+    </div>
 
-    <!-- ===================================================================
-         DECK 01: FOUNDATION BENCHMARKS
-         =================================================================== -->
-    <section id="deck-01" class="deck-container">
-      <div class="deck-header">
-        <div class="deck-meta-row">
-          <span class="badge badge-solid">DECK 01</span>
-          <span class="badge badge-outline">6 MODEL ARMS</span>
-          <span class="badge badge-outline">2,852 SCANS</span>
+    <div id="cockpit-grid" class="cockpit-grid">
+
+      <!-- =================================================================
+           WINDOW 01: REAL 3D PACS BRAIN SLICE WORKSTATION
+           ================================================================= -->
+      <section class="deck-window" id="win-pacs">
+        <div class="window-header">
+          <div class="window-title-block">
+            <span class="window-indicator"></span>
+            <span class="window-title">WIN 01 // 3D PACS VOLUMETRIC SLICE WORKSTATION</span>
+          </div>
+          <div class="window-tools">
+            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-pacs')">&square;</button>
+            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
+          </div>
         </div>
-        <h2 class="deck-title">FOUNDATION MODEL BENCHMARKS</h2>
-        <p class="deck-subtitle">
-          Standardized downstream probing, sample efficiency learning curves, cross-model correlation, and non-parametric permutation tests against FreeSurfer gold standards.
-        </p>
 
-        <!-- Deck 01 Sub-navigation -->
-        <div class="deck-subnav">
-          <button class="subnav-btn active" data-deck="deck-01" data-sub="d1-runner">01 // BENCHMARK RUNNER</button>
-          <button class="subnav-btn" data-deck="deck-01" data-sub="d1-results">02 // LEARNING CURVES & STATS</button>
-          <button class="subnav-btn" data-deck="deck-01" data-sub="d1-correlation">03 // CORRELATION HEATMAP</button>
-          <button class="subnav-btn" data-deck="deck-01" data-sub="d1-sensitivity">04 // PREPROCESSING SENSITIVITY</button>
+        <div class="window-body">
+          <div class="pacs-container">
+            <!-- Plane Selectors -->
+            <div class="plane-selector-bar">
+              <button id="pacs-btn-axial" class="pacs-plane-btn active" onclick="changeSlicePlane('axial')">AXIAL (Z)</button>
+              <button id="pacs-btn-coronal" class="pacs-plane-btn" onclick="changeSlicePlane('coronal')">CORONAL (Y)</button>
+              <button id="pacs-btn-sagittal" class="pacs-plane-btn" onclick="changeSlicePlane('sagittal')">SAGITTAL (X)</button>
+            </div>
+
+            <!-- Real Canvas Viewport -->
+            <div class="pacs-viewport">
+              <canvas id="real-slice-canvas" width="220" height="220"></canvas>
+              <div class="pacs-crosshair-x"></div>
+              <div class="pacs-crosshair-y"></div>
+              
+              <div class="pacs-hud-top">
+                PLANE: <span id="pacs-hud-plane">AXIAL</span><br>
+                SLICE: <span id="pacs-hud-idx">45 / 91</span>
+              </div>
+              <div class="pacs-hud-bottom">
+                MNI: <span id="pacs-hud-coords">[-0.2, 12.4, 45.0] mm</span><br>
+                FOV: 240x240 mm | 1mm ISO
+              </div>
+              <div id="pacs-hud-region" class="pacs-hud-region">VENTRICLES & BASAL GANGLIA</div>
+            </div>
+
+            <!-- Scrubber & Action Controls -->
+            <div class="pacs-controls">
+              <div class="scrubber-row">
+                <label for="pacs-slider">SLICING DEPTH SCRUBBER</label>
+                <span id="pacs-slice-readout">Slice 45 / 91</span>
+              </div>
+              <input type="range" id="pacs-slider" min="0" max="90" value="45" oninput="onScrubberInput(this.value)" />
+
+              <div class="action-button-row">
+                <button id="btn-auto-cine" class="btn btn-secondary" onclick="toggleCinePlay()" style="flex: 1; font-size: 0.68rem; padding: 8px;">AUTO-CINE: OFF</button>
+                <button class="btn btn-secondary" onclick="toggleNegativeMode()" style="flex: 1; font-size: 0.68rem; padding: 8px;">INVERT T1w</button>
+              </div>
+            </div>
+
+            <!-- Acquisition QC Telemetry Box -->
+            <div style="width: 100%; margin-top: 18px; border-top: 1px solid var(--border-hairline); padding-top: 12px;">
+              <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 8px;">ACQUISITION QC TELEMETRY</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 0.72rem;">
+                <div>SNR: <strong style="color: #FFF;">24.8 dB</strong></div>
+                <div>CNR: <strong style="color: #FFF;">3.42</strong></div>
+                <div>EFC: <strong style="color: #FFF;">0.418</strong></div>
+                <div>MNI RESIDUAL: <strong style="color: #FFF;">&lt; 1.18 mm</strong></div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Subview 1.1: Runner -->
-      <div id="d1-runner" class="subview-panel active-subview">
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header"><span class="card-title">COHORT & DOWNSTREAM TASK TARGET</span></div>
-            <div class="form-group">
-              <label for="bm-dataset">Target Neuroimaging Cohort</label>
-              <select id="bm-dataset">
-                <option value="PPMI">PPMI (Parkinson's Progression Markers)</option>
+      <!-- =================================================================
+           WINDOW 02: FOUNDATION BENCHMARK SUITE
+           ================================================================= -->
+      <section class="deck-window" id="win-bench">
+        <div class="window-header">
+          <div class="window-title-block">
+            <span class="window-indicator"></span>
+            <span class="window-title">WIN 02 // FOUNDATION BENCHMARK SUITE</span>
+          </div>
+          <div class="window-tools">
+            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-bench')">&square;</button>
+            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
+          </div>
+        </div>
+
+        <div class="window-body">
+          <!-- Selection Controls -->
+          <div class="bench-form-grid">
+            <div class="bench-field">
+              <label for="bm-dataset">Cohort Dataset</label>
+              <select id="bm-dataset" onchange="onBenchDatasetChange(this.value)">
+                <option value="PPMI">PPMI (Parkinson's Progression)</option>
                 <option value="HBN">HBN (Healthy Brain Network)</option>
                 <option value="NKI">NKI (Rockland Lifespan)</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="bm-task">Downstream Clinical Task</label>
-              <select id="bm-task">
+            <div class="bench-field">
+              <label for="bm-task">Downstream Task</label>
+              <select id="bm-task" onchange="onBenchTaskChange(this.value)">
                 <option value="Sex Classification">Sex Classification</option>
                 <option value="Parkinson Classification">Parkinson Classification</option>
                 <option value="Male Age Regression">Male Age Regression</option>
@@ -161,571 +194,339 @@
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-header"><span class="card-title">EVALUATION PROTOCOL</span></div>
-            <div class="form-group">
-              <label>Cross-Validation Specification</label>
-              <input type="text" value="5 Seeds x 5-Fold Stratified (25 Folds Total)" readonly />
-            </div>
-            <div class="form-group">
-              <label>Downstream Linear / RF Probe</label>
-              <input type="text" value="Random Forest (200 Trees, max_depth=6)" readonly />
-            </div>
+          <!-- Model Arm Checkbox Pills -->
+          <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase;">ACTIVE EVALUATION ARMS</div>
+          <div class="model-arm-pills">
+            <label class="arm-pill"><input type="checkbox" checked /> BrainIAC (ViT-B)</label>
+            <label class="arm-pill"><input type="checkbox" checked /> SwinBrain (UNETR)</label>
+            <label class="arm-pill"><input type="checkbox" checked /> FreeSurfer Gold</label>
+            <label class="arm-pill"><input type="checkbox" checked /> AnatCL ResNet-18</label>
+            <label class="arm-pill"><input type="checkbox" checked /> SimCLR 3D</label>
+            <label class="arm-pill"><input type="checkbox" checked /> CNN3D Random</label>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="card-header"><span class="card-title">INCLUDED FOUNDATION & BASELINE MODEL ARMS</span></div>
-          <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" checked /> BrainIAC (ViT-B)</label>
-            <label class="checkbox-item"><input type="checkbox" checked /> SwinBrain (Swin UNETR)</label>
-            <label class="checkbox-item"><input type="checkbox" checked /> FreeSurfer (Gold Morphometry)</label>
-            <label class="checkbox-item"><input type="checkbox" checked /> AnatCL (ResNet-18)</label>
-            <label class="checkbox-item"><input type="checkbox" checked /> 3D-Neuro-SimCLR</label>
-            <label class="checkbox-item"><input type="checkbox" checked /> CNN3D (Untrained Random Baseline)</label>
-          </div>
-        </div>
+          <!-- Execution Action Button -->
+          <button id="btn-run-benchmark" class="btn-execute" onclick="executeProbeSimulation()">EXECUTE PROBE SUITE</button>
 
-        <div style="margin: 20px 0;">
-          <button id="btn-run-benchmark" class="btn" style="min-width: 280px; padding: 14px;">EXECUTE PROBE SUITE</button>
-        </div>
+          <!-- Streaming Telemetry Console -->
+          <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase;">PROBE LOG TELEMETRY</div>
+          <div id="terminal-logs" class="bench-terminal">[READY] Benchmark engine primed. Ready for execution.</div>
 
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">EXECUTION TERMINAL & STREAMING LOGS</span>
-            <span class="badge badge-outline">TELEMETRY</span>
-          </div>
-          <div class="progress-bar">
-            <div id="benchmark-progress" class="progress-fill"></div>
-          </div>
-          <div id="terminal-logs" class="terminal">[READY] Benchmark engine primed. Awaiting execution trigger...</div>
-        </div>
-
-        <div id="preview-results-box" class="card" style="display: none;">
-          <div class="card-header">
-            <span class="card-title">PROBE RESULTS PREVIEW</span>
-            <span class="badge badge-solid">COMPLETE</span>
-          </div>
-          <div class="table-wrapper">
-            <table id="preview-table">
+          <!-- Mini Results Table -->
+          <div style="margin-top: 14px;">
+            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 6px;">EVALUATION METRICS SUMMARY</div>
+            <table class="results-mini-table" id="win-bench-table">
               <thead>
                 <tr>
                   <th>Model</th>
                   <th>Primary Metric</th>
-                  <th>Secondary Metric</th>
-                  <th>Train-Val Gap</th>
-                  <th>Permutation p</th>
-                  <th>Significance</th>
+                  <th>ROC-AUC / R²</th>
+                  <th>Gap</th>
+                  <th>Perm p</th>
+                  <th>Sig</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Subview 1.2: Results & Curves -->
-      <div id="d1-results" class="subview-panel">
-        <div class="grid-2" style="margin-bottom: 20px;">
-          <div class="form-group">
-            <label for="res-dataset">Filter Dataset</label>
-            <select id="res-dataset">
-              <option value="PPMI">PPMI (Parkinson's Progression Markers)</option>
-              <option value="HBN">HBN (Healthy Brain Network)</option>
-              <option value="NKI">NKI (Rockland Lifespan)</option>
-            </select>
+      <!-- =================================================================
+           WINDOW 03: CAUSAL AUDIT & LEAKAGE LEDGER
+           ================================================================= -->
+      <section class="deck-window" id="win-causal">
+        <div class="window-header">
+          <div class="window-title-block">
+            <span class="window-indicator"></span>
+            <span class="window-title">WIN 03 // CAUSAL AUDIT & LEAKAGE LEDGER</span>
           </div>
-          <div class="form-group">
-            <label for="res-task">Filter Task</label>
-            <select id="res-task">
-              <option value="Sex Classification">Sex Classification</option>
-              <option value="Parkinson Classification">Parkinson Classification</option>
-              <option value="Male Age Regression">Male Age Regression</option>
-              <option value="Female Age Regression">Female Age Regression</option>
-            </select>
+          <div class="window-tools">
+            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-causal')">&square;</button>
+            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
           </div>
         </div>
 
-        <div class="grid-4">
-          <div class="kpi-box">
-            <div class="kpi-label">TOP RANKED MODEL</div>
-            <div id="kpi-top-model" class="kpi-value">BrainIAC</div>
-            <div class="kpi-delta">SimCLR SSL ViT</div>
+        <div class="window-body">
+          <!-- Amsterdam Natural Experiment -->
+          <div class="did-callout-box">
+            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; text-transform: uppercase; margin-bottom: 4px;">
+              AMSTERDAM NATURAL EXPERIMENT // PHILIPS ACHIEVA 3T
+            </div>
+            <p style="font-size: 0.8rem; color: #888; line-height: 1.45;">
+              Comparing AOMIC ID1000 (pretraining seen) vs PIOP1/2 (unseen) on the exact same scanner hardware at Spinoza Centre.
+            </p>
+
+            <!-- 2x2 Causal Matrix -->
+            <div class="did-2x2-matrix">
+              <div class="did-cell">
+                <div class="did-cell-lbl">BRAINIAC (FOUNDATION)</div>
+                <div class="did-cell-val" id="did-win-fm-gap">+1.41 yrs</div>
+                <div class="did-cell-gap">Seen: 3.41y &rarr; Unseen: 4.82y</div>
+              </div>
+              <div class="did-cell">
+                <div class="did-cell-lbl">RESNET-18 (SUPERVISED)</div>
+                <div class="did-cell-val" id="did-win-base-gap">+0.09 yrs</div>
+                <div class="did-cell-gap">Seen: 4.79y &rarr; Unseen: 4.88y</div>
+              </div>
+            </div>
+
+            <div class="did-result-banner">
+              <div style="font-family: var(--font-mono); font-size: 0.65rem; color: #888; text-transform: uppercase; margin-bottom: 2px;">
+                CAUSAL CONTAMINATION ADVANTAGE (&Delta;&Delta;)
+              </div>
+              <div class="did-result-val">+1.32 YEARS</div>
+              <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; margin-top: 2px;">
+                95% CI: [+0.84, +1.79] yrs // p = 0.002 (Significant)
+              </div>
+            </div>
           </div>
-          <div class="kpi-box">
-            <div class="kpi-label">TOP SCORE</div>
-            <div id="kpi-top-score" class="kpi-value">0.828</div>
-            <div class="kpi-delta">Balanced Accuracy</div>
+
+          <!-- Dynamic Label Equivalence Slider -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; text-transform: uppercase;">LABEL EQUIVALENCE BUDGET (N_eq)</span>
+              <span id="win-neq-readout" class="badge badge-solid">N = 50 scans</span>
+            </div>
+            <input type="range" id="win-neq-slider" min="10" max="250" value="50" step="5" oninput="onNeqSliderInput(this.value)" />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+              <div class="did-cell">
+                <div class="did-cell-lbl">ON SEEN (ID1000)</div>
+                <div id="win-neq-seen" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #FFF;">+68 Scans</div>
+                <div style="font-size: 0.65rem; color: #777;">Multiplier: 2.36x</div>
+              </div>
+              <div class="did-cell">
+                <div class="did-cell-lbl">ON UNSEEN (PIOP)</div>
+                <div id="win-neq-unseen" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #FFF;">+14 Scans</div>
+                <div style="font-size: 0.65rem; color: #777;">Multiplier: 1.28x</div>
+              </div>
+            </div>
           </div>
-          <div class="kpi-box">
-            <div class="kpi-label">FREESURFER REFERENCE</div>
-            <div id="kpi-fs-score" class="kpi-value">0.818</div>
-            <div class="kpi-delta">Morphometry Gold Standard</div>
-          </div>
-          <div class="kpi-box">
-            <div class="kpi-label">STATISTICAL AUDIT</div>
-            <div id="kpi-sig-count" class="kpi-value">1 Model</div>
-            <div class="kpi-delta">p &lt; 0.05 corrected</div>
+
+          <!-- Manifest Contamination Table -->
+          <div style="margin-top: 16px;">
+            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 6px;">
+              TABLE 1 // MANIFEST OVERLAP AUDIT
+            </div>
+            <table class="results-mini-table">
+              <thead>
+                <tr>
+                  <th>Cohort</th>
+                  <th>Scans</th>
+                  <th>Leakage %</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>AOMIC ID1000</strong></td><td>928</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
+                <tr><td><strong>OASIS-1</strong></td><td>416</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
+                <tr><td><strong>OASIS-2</strong></td><td>150</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
+                <tr><td><strong>IXI London</strong></td><td>568</td><td>97.4%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
+                <tr><td><strong>AOMIC PIOP1</strong></td><td>216</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
+                <tr><td><strong>AOMIC PIOP2</strong></td><td>226</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
+                <tr><td><strong>ABIDE I & II</strong></td><td>1112</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
+      </section>
 
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">SAMPLE EFFICIENCY: INTERACTIVE MONOCHROME LEARNING CURVES</span>
+    </div>
+  </main>
+
+  <!-- =====================================================================
+       DEEP SCROLLABLE RESEARCH & GRAPH NARRATIVE (7 SCIENTIFIC GRAPHS)
+       ===================================================================== -->
+  <section class="narrative-wrapper">
+
+    <!-- ===================================================================
+         SECTION 01: SAMPLE EFFICIENCY & MULTI-MODEL LEARNING CURVES
+         =================================================================== -->
+    <div class="narrative-section">
+      <span class="section-tag">ANALYTICS 01 // SAMPLE EFFICIENCY TRAJECTORIES</span>
+      <h2 class="section-heading">MONOCHROME LEARNING CURVES & ERROR RESIDUALS</h2>
+      <p class="section-desc">
+        Investigating sample efficiency as training data fraction &alpha; increases from 1% to 100%. Shaded bands denote 
+        95% bootstrap confidence intervals across 25 stratified folds. Hover over any point to inspect exact scores.
+      </p>
+
+      <div class="grid-2">
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">SAMPLE EFFICIENCY LEARNING CURVE (&alpha; &isin; [1%, 100%])</span>
             <span class="badge badge-outline">HOVER CROSSHAIR ENABLED</span>
           </div>
-          <p style="color: #888; font-size: 0.82rem; margin-bottom: 12px;">
-            Hover mouse over the plot to inspect exact fold performance and training fraction coordinates (&alpha; &isin; [1%, 100%]).
-          </p>
-          <div class="chart-container-wrapper">
-            <div id="chart-container"></div>
-            <div id="chart-tooltip" class="graph-tooltip"></div>
-          </div>
+          <div id="chart-learning-curve-container" style="position: relative; width: 100%; min-height: 340px;"></div>
+          <div id="tooltip-learning-curve" class="interactive-tooltip"></div>
         </div>
 
-        <div class="card">
-          <div class="card-header"><span class="card-title">DOWNSTREAM BENCHMARK SUMMARY TABLE</span></div>
-          <div class="table-wrapper">
-            <table id="full-results-table">
-              <thead></thead>
-              <tbody></tbody>
-            </table>
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">FOLD-LEVEL ERROR RESIDUAL DISTRIBUTION</span>
+            <span class="badge badge-outline">25 STRATIFIED FOLDS</span>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">BONFERRONI-CORRECTED PERMUTATION AUDIT (9,999 RESAMPLES)</span>
-            <span class="badge badge-solid">EXACT TEST</span>
-          </div>
-          <div class="table-wrapper">
-            <table id="perm-table">
-              <thead>
-                <tr>
-                  <th>Tested Model</th>
-                  <th>Reference Arm</th>
-                  <th>Permutation Samples</th>
-                  <th>Hypothesis</th>
-                  <th>Adjusted p-value</th>
-                  <th>Significance</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 14px; margin-top: 18px;">
-          <button class="btn btn-secondary" onclick="downloadCSV()">DOWNLOAD SUMMARY CSV</button>
-          <button class="btn btn-secondary" onclick="downloadJSON()">DOWNLOAD JSON REPORT</button>
+          <div id="chart-error-distribution-container" style="position: relative; width: 100%; min-height: 340px;"></div>
         </div>
       </div>
-
-      <!-- Subview 1.3: Correlation -->
-      <div id="d1-correlation" class="subview-panel">
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">CROSS-MODEL CORRELATION MATRIX</span>
-              <span class="badge badge-outline">PEARSON |r|</span>
-            </div>
-            <p style="color: #888; font-size: 0.82rem; margin-bottom: 14px;">
-              Hover over matrix cells to inspect pairwise representation alignment.
-            </p>
-            <div style="display: flex; justify-content: center;">
-              <div id="corr-heatmap-container"></div>
-            </div>
-          </div>
-
-          <div>
-            <div class="card">
-              <div class="card-header"><span class="card-title">01 // MORPHOMETRY DIVERGENCE</span></div>
-              <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 6px;">
-                Foundation models (BrainIAC, SwinBrain) display only moderate correlation (<strong>r &approx; 0.28 - 0.31</strong>) with FreeSurfer cortical thickness and surface area.
-              </p>
-              <p style="font-size: 0.82rem; color: #888;">
-                SSL volumetric representations capture features distinct from classical cortical surface parcellations.
-              </p>
-            </div>
-
-            <div class="card">
-              <div class="card-header"><span class="card-title">02 // ARCHITECTURAL CONVERGENCE</span></div>
-              <p style="font-size: 0.85rem; color: #CCC;">
-                The highest correlation occurs between <strong>BrainIAC & SwinBrain (r &approx; 0.38)</strong>, reflecting shared self-supervised 3D volumetric objectives.
-              </p>
-            </div>
-
-            <div class="card">
-              <div class="card-header"><span class="card-title">03 // UNTRAINED CNN PRIORS</span></div>
-              <p style="font-size: 0.85rem; color: #CCC;">
-                Untrained CNN3D maintains a baseline correlation of <strong>r &approx; 0.25 - 0.27</strong> with all foundation models, acting as a geometric spatial prior.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Subview 1.4: Sensitivity -->
-      <div id="d1-sensitivity" class="subview-panel">
-        <div class="callout">
-          <div class="callout-title">THE PREPROCESSING CONFOUND PROBLEM</div>
-          <div class="callout-body">
-            BrainIAC and SwinBrain ship with distinct native preprocessing protocols. When evaluated on standardized TurboPrep volumes versus native templates, models display noticeable shifts in performance and feature stability.
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><span class="card-title">PREPROCESSING SENSITIVITY TABLE</span></div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Preprocessing Variant</th>
-                  <th>Resolution</th>
-                  <th>Balanced Acc</th>
-                  <th>MAE (Years)</th>
-                  <th>Feature Stability</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td><strong>BrainIAC</strong></td><td>TurboPrep (Standard)</td><td>96x96x96</td><td>0.828</td><td>4.18</td><td>Baseline (1.00)</td></tr>
-                <tr><td><strong>BrainIAC</strong></td><td>Native T1 Pipeline</td><td>96x96x96</td><td>0.834</td><td>4.12</td><td>High (0.94)</td></tr>
-                <tr><td><strong>BrainIAC</strong></td><td>Native T2 Pipeline</td><td>96x96x96</td><td>0.806</td><td>4.39</td><td>Moderate (0.83)</td></tr>
-                <tr><td><strong>SwinBrain</strong></td><td>TurboPrep (Standard)</td><td>128x128x64</td><td>0.821</td><td>4.31</td><td>Baseline (1.00)</td></tr>
-                <tr><td><strong>SwinBrain</strong></td><td>Native T1 Pipeline</td><td>128x128x64</td><td>0.825</td><td>4.25</td><td>High (0.92)</td></tr>
-                <tr><td><strong>SwinBrain</strong></td><td>Native T2 Pipeline</td><td>128x128x64</td><td>0.792</td><td>4.58</td><td>Moderate (0.79)</td></tr>
-                <tr><td><strong>CNN3D</strong></td><td>TurboPrep (Standard)</td><td>91x109x91</td><td>0.774</td><td>5.15</td><td>Baseline (1.00)</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
 
     <!-- ===================================================================
-         DECK 02: CAUSAL AUDIT & NATURAL EXPERIMENT
+         SECTION 02: MULTI-MODEL ROC-AUC & RADAR TOPOLOGY
          =================================================================== -->
-    <section id="deck-02" class="deck-container">
-      <div class="deck-header">
-        <div class="deck-meta-row">
-          <span class="badge badge-solid">DECK 02</span>
-          <span class="badge badge-outline">SEEN IT BEFORE</span>
-          <span class="badge badge-outline">CAUSAL INFERENCE</span>
-        </div>
-        <h2 class="deck-title">CAUSAL AUDIT & NATURAL EXPERIMENT</h2>
-        <p class="deck-subtitle">
-          Cryptographic participant leakage audit, Amsterdam same-scanner Difference-in-Differences quasi-experiment, and Label Equivalence ($N_{\text{eq}}$) Pareto analysis.
-        </p>
+    <div class="narrative-section">
+      <span class="section-tag">ANALYTICS 02 // MULTI-DIMENSIONAL BENCHMARK TOPOLOGY</span>
+      <h2 class="section-heading">MULTI-MODEL ROC-AUC & 6-AXIS RADAR EVALUATION</h2>
+      <p class="section-desc">
+        Full receiver operating characteristic curves measuring true positive rates against false positive rates, 
+        and a 6-axis spider evaluation measuring robustness, parameter efficiency, calibration, and inference speed.
+      </p>
 
-        <!-- Deck 02 Sub-navigation -->
-        <div class="deck-subnav">
-          <button class="subnav-btn active" data-deck="deck-02" data-sub="d2-table1">01 // TABLE 1 CONTAMINATION LEDGER</button>
-          <button class="subnav-btn" data-deck="deck-02" data-sub="d2-did">02 // AMSTERDAM EXPERIMENT (DiD)</button>
-          <button class="subnav-btn" data-deck="deck-02" data-sub="d2-pareto">03 // LABEL EQUIVALENCE & PARETO</button>
-        </div>
-      </div>
-
-      <!-- Subview 2.1: Table 1 Contamination -->
-      <div id="d2-table1" class="subview-panel active-subview">
-        <div class="callout">
-          <div class="callout-title">THE TEST LEAKAGE PROBLEM IN NEUROIMAGING FOUNDATION MODELS</div>
-          <div class="callout-body">
-            Foundation models trained on aggregate collections (FOMO-50K, UK Biobank) frequently ingest standard neuroimaging cohorts. 
-            When benchmarked on OASIS-1, OASIS-2, or IXI, models are evaluated on subjects they already observed during pretraining, 
-            artificially inflating apparent generalizability and masking true generalization failure.
+      <div class="grid-2">
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">RECEIVER OPERATING CHARACTERISTIC (ROC-AUC)</span>
+            <span class="badge badge-outline">MULTI-MODEL DISCRIMINATION</span>
           </div>
+          <div id="chart-roc-container" style="position: relative; width: 100%; min-height: 340px;"></div>
         </div>
 
-        <div class="grid-4">
-          <div class="kpi-box">
-            <div class="kpi-label">AUDITED COHORTS</div>
-            <div class="kpi-value">7 Cohorts</div>
-            <div class="kpi-delta">3,596 Scans Audited</div>
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">6-AXIS MODEL TOPOLOGY RADAR</span>
+            <span class="badge badge-outline">SYSTEM PROFILE</span>
           </div>
-          <div class="kpi-box">
-            <div class="kpi-label">OASIS-1 OVERLAP</div>
-            <div class="kpi-value">100.0%</div>
-            <div class="kpi-delta">416 / 416 Ingested (SEEN)</div>
-          </div>
-          <div class="kpi-box">
-            <div class="kpi-label">IXI OVERLAP</div>
-            <div class="kpi-value">97.4%</div>
-            <div class="kpi-delta">553 / 568 Ingested (SEEN)</div>
-          </div>
-          <div class="kpi-box">
-            <div class="kpi-label">AOMIC NATURAL EXP</div>
-            <div class="kpi-value">ID1000 vs PIOP</div>
-            <div class="kpi-delta">100% Seen vs 0% Seen (Same Scanner)</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><span class="card-title">TABLE 1 // MANIFEST CONTAMINATION REPLICATION</span></div>
-          <div class="table-wrapper">
-            <table id="contamination-table">
-              <thead>
-                <tr>
-                  <th>Cohort / Dataset</th>
-                  <th>Total Scans</th>
-                  <th>Pretraining Overlap</th>
-                  <th>Contamination %</th>
-                  <th>Status</th>
-                  <th>Audit Role / Benchmark Context</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
+          <div id="chart-radar-container" style="position: relative; width: 100%; min-height: 340px; display: flex; justify-content: center;"></div>
         </div>
       </div>
-
-      <!-- Subview 2.2: Amsterdam DiD -->
-      <div id="d2-did" class="subview-panel">
-        <div class="callout">
-          <div class="callout-title">THE SCANNER CONFOUND IDENTIFICATION STRATEGY</div>
-          <div class="callout-body">
-            At the Spinoza Centre in Amsterdam, AOMIC ID1000 (pretraining constituent) and PIOP1/PIOP2 (unseen test) were acquired 
-            on the <strong>exact same scanner</strong> (Philips Achieva 3T) with matched healthy young adult demographics. 
-            Subtracting the supervised baseline's error cancels scanner effects and isolates the true causal contamination boost (&Delta;&Delta;).
-          </div>
-        </div>
-
-        <div id="did-metrics-box" class="grid-3">
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">BRAINIAC (FOUNDATION)</span>
-              <span class="badge badge-solid">PRETRAINED</span>
-            </div>
-            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Seen (ID1000): <strong id="did-fm-seen" style="color: #FFF;">--</strong></div>
-            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Unseen (PIOP1/2): <strong id="did-fm-unseen" style="color: #FFF;">--</strong></div>
-            <hr style="margin: 10px 0;"/>
-            <div style="font-size: 0.88rem; color: #FFF;">Seen &rarr; Unseen Degradation: <strong id="did-fm-gap" style="font-size: 1.1rem; color: #FFF;">--</strong></div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">RESNET-18 (SUPERVISED)</span>
-              <span class="badge badge-outline">FROM SCRATCH</span>
-            </div>
-            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Seen (ID1000): <strong id="did-base-seen" style="color: #FFF;">--</strong></div>
-            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Unseen (PIOP1/2): <strong id="did-base-unseen" style="color: #FFF;">--</strong></div>
-            <hr style="margin: 10px 0;"/>
-            <div style="font-size: 0.88rem; color: #FFF;">Seen &rarr; Unseen Degradation: <strong id="did-base-gap" style="font-size: 1.1rem; color: #FFF;">--</strong></div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">CAUSAL ESTIMATOR (&Delta;&Delta;)</span>
-              <span class="badge badge-solid">DiD EFFECT</span>
-            </div>
-            <div style="font-size: 0.82rem; color: #AAA; margin-bottom: 4px;">Contamination Advantage:</div>
-            <div id="did-point-val" style="font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">--</div>
-            <div style="font-size: 0.78rem; color: #888;">95% Bootstrap CI: <span id="did-ci-val" style="color: #CCC;">--</span></div>
-            <div style="font-size: 0.78rem; color: #888; margin-top: 4px;">Hypothesis Test: <span id="did-p-val" style="color: #FFF; font-weight: 700;">--</span></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><span class="card-title">SCIENTIFIC CONCLUSION & MATHEMATICAL FORMULATION</span></div>
-          <div style="background-color: #050505; border: 1px solid var(--border-hairline); padding: 14px; font-family: var(--font-mono); font-size: 0.82rem; color: #FFF; margin-bottom: 12px;">
-            &Delta;&Delta; = [MAE(FM, Unseen) - MAE(FM, Seen)] - [MAE(Base, Unseen) - MAE(Base, Seen)]<br>
-            &Delta;&Delta; = (+1.41 yrs) - (+0.09 yrs) = +1.32 yrs (p = 0.002, 10,000 bootstrap resamples)
-          </div>
-          <p style="font-size: 0.86rem; color: #CCC;">
-            Because the supervised baseline trained from scratch exhibits virtually no difference across ID1000 and PIOP1/2 (only 0.09 yrs), 
-            <strong>over 90% of the perceived performance advantage</strong> of BrainIAC is causally driven by having already seen the subjects during pretraining.
-          </p>
-        </div>
-      </div>
-
-      <!-- Subview 2.3: Label Equivalence & Pareto -->
-      <div id="d2-pareto" class="subview-panel">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">DYNAMIC LABEL BUDGET SIMULATOR (N_eq)</span>
-            <span id="neq-slider-val" class="badge badge-solid">N = 50 labeled scans</span>
-          </div>
-          <p style="font-size: 0.82rem; color: #888; margin-bottom: 8px;">
-            Drag the downstream labeled scan budget slider to observe foundation model sample efficiency advantages on Seen vs Unseen cohorts:
-          </p>
-          <input type="range" id="neq-slider" min="10" max="250" value="50" step="5" oninput="updateLabelEquivalence(this.value)" />
-          
-          <div class="grid-2" style="margin-top: 18px;">
-            <div class="kpi-box">
-              <div class="kpi-label">LABEL SAVINGS ON SEEN COHORT (ID1000)</div>
-              <div id="neq-seen-val" class="kpi-value" style="font-size: 1.3rem;">+68 Scans</div>
-              <div class="kpi-delta">Effective budget multiplier: 2.36x</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">LABEL SAVINGS ON UNSEEN COHORT (PIOP1/2)</div>
-              <div id="neq-unseen-val" class="kpi-value" style="font-size: 1.3rem;">+14 Scans</div>
-              <div class="kpi-delta">Effective budget multiplier: 1.28x</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><span class="card-title">PARETO EFFICIENCY: PRETRAINING COMPUTE VS LABEL SAVINGS</span></div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Model Architecture</th>
-                  <th>Pretraining GPU Hours</th>
-                  <th>Emissions (kg CO2e)</th>
-                  <th>Label Savings (N_eq Seen)</th>
-                  <th>Label Savings (N_eq Unseen)</th>
-                  <th>Pareto Frontier</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>ResNet-18 (Supervised Baseline)</strong></td>
-                  <td>0 h</td>
-                  <td>0.0 kg</td>
-                  <td>0 (Baseline)</td>
-                  <td>0 (Baseline)</td>
-                  <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
-                </tr>
-                <tr>
-                  <td><strong>3D-Neuro-SimCLR</strong></td>
-                  <td>120 h</td>
-                  <td>18.4 kg</td>
-                  <td>+24 Scans</td>
-                  <td>+11 Scans</td>
-                  <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
-                </tr>
-                <tr>
-                  <td><strong>AnatCL (ResNet-18)</strong></td>
-                  <td>180 h</td>
-                  <td>27.6 kg</td>
-                  <td>+35 Scans</td>
-                  <td>+18 Scans</td>
-                  <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
-                </tr>
-                <tr>
-                  <td><strong>SwinBrain (Swin UNETR)</strong></td>
-                  <td>350 h</td>
-                  <td>53.6 kg</td>
-                  <td>+52 Scans</td>
-                  <td>+16 Scans</td>
-                  <td><span class="badge badge-outline">DOMINATED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>BrainIAC (Vision Transformer)</strong></td>
-                  <td>520 h</td>
-                  <td>79.8 kg</td>
-                  <td>+68 Scans</td>
-                  <td>+14 Scans</td>
-                  <td><span class="badge badge-outline">DOMINATED (ON UNSEEN)</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
 
     <!-- ===================================================================
-         DECK 03: 3D SLICE INSPECTOR & VOLUMETRIC QC
+         SECTION 03: THE CAUSAL PROOF & DiD SLOPE ANALYSIS
          =================================================================== -->
-    <section id="deck-03" class="deck-container">
-      <div class="deck-header">
-        <div class="deck-meta-row">
-          <span class="badge badge-solid">DECK 03</span>
-          <span class="badge badge-outline">PACS QUALITY CONTROL</span>
-          <span class="badge badge-outline">PROCEDURAL RENDERING</span>
-        </div>
-        <h2 class="deck-title">3D SLICE INSPECTOR & VOLUMETRIC QC</h2>
-        <p class="deck-subtitle">
-          Interactive multi-plane cross-sectional MRI workstation with automated continuous slice scanning, coordinate tracking, and automated NIfTI montage generation.
-        </p>
+    <div class="narrative-section">
+      <span class="section-tag">ANALYTICS 03 // CAUSAL IDENTIFICATION PROOF</span>
+      <h2 class="section-heading">THE AMSTERDAM NATURAL EXPERIMENT & DiD SLOPE</h2>
+      <p class="section-desc">
+        Standard benchmarks confound scanner domain shift with test set leakage. By evaluating on matched subjects 
+        acquired on the identical Philips Achieva 3T scanner in Amsterdam, scanner variance is cancelled out.
+      </p>
 
-        <!-- Deck 03 Sub-navigation -->
-        <div class="deck-subnav">
-          <button class="subnav-btn active" data-deck="deck-03" data-sub="d3-canvas">01 // VOLUMETRIC SLICE WORKSTATION</button>
-          <button class="subnav-btn" data-deck="deck-03" data-sub="d3-qc">02 // ACQUISITION QC METRICS</button>
+      <div class="grid-2">
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">CAUSAL DEGRADATION SLOPE: SEEN &rarr; UNSEEN</span>
+            <span class="badge badge-solid">&Delta;&Delta; = +1.32 YRS (p = 0.002)</span>
+          </div>
+          <div id="chart-did-slope-container" style="position: relative; width: 100%; min-height: 340px;"></div>
+        </div>
+
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">COMPUTE VS. LABEL SAVINGS PARETO FRONTIER</span>
+            <span class="badge badge-outline">GPU HOURS VS N_eq</span>
+          </div>
+          <div id="chart-pareto-container" style="position: relative; width: 100%; min-height: 340px;"></div>
         </div>
       </div>
+    </div>
 
-      <!-- Subview 3.1: Canvas -->
-      <div id="d3-canvas" class="subview-panel active-subview">
-        <div class="grid-2">
-          <div class="card" style="text-align: center;">
-            <div class="card-header">
-              <span class="card-title">CROSS-SECTIONAL SLICE CANVAS</span>
-              <div style="display: flex; gap: 6px;">
-                <button id="btn-plane-axial" class="plane-btn active" onclick="setPlane('axial')">AXIAL (Z)</button>
-                <button id="btn-plane-coronal" class="plane-btn" onclick="setPlane('coronal')">CORONAL (Y)</button>
-                <button id="btn-plane-sagittal" class="plane-btn" onclick="setPlane('sagittal')">SAGITTAL (X)</button>
-              </div>
-            </div>
+    <!-- ===================================================================
+         SECTION 04: LATENT SPACE CORRELATION & PREPROCESSING SENSITIVITY
+         =================================================================== -->
+    <div class="narrative-section">
+      <span class="section-tag">ANALYTICS 04 // LATENT SPACE AUDIT & PIPELINE ABLATION</span>
+      <h2 class="section-heading">CROSS-MODEL CORRELATION HEATMAP & PREPROCESSING ABLATION</h2>
+      <p class="section-desc">
+        Examining pairwise latent representation alignment between foundation models and classical FreeSurfer morphometry, 
+        and isolating template confounds (TurboPrep vs Native T1 vs Native T2).
+      </p>
 
-            <canvas id="slice-canvas" width="360" height="360" class="slice-canvas"></canvas>
-
-            <div style="margin-top: 16px; text-align: left;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label for="slice-slider">Slice Depth Scrubber</label>
-                <span id="slice-idx-label" style="font-family: var(--font-mono); font-size: 0.8rem; color: #FFF;">Slice 64 / 128</span>
-              </div>
-              <input type="range" id="slice-slider" min="1" max="128" value="64" oninput="setSlice(this.value)" />
-
-              <div style="display: flex; gap: 10px; margin-top: 12px;">
-                <button id="btn-auto-scan" class="btn btn-secondary" onclick="toggleAutoScan()" style="font-size: 0.72rem; padding: 6px 14px;">AUTO-SCAN: OFF</button>
-                <button class="btn btn-secondary" onclick="toggleContrastInvert()" style="font-size: 0.72rem; padding: 6px 14px;">INVERT T1w CONTRAST</button>
-              </div>
-            </div>
+      <div class="grid-2">
+        <div class="graph-card">
+          <div class="graph-card-header">
+            <span class="graph-title">PAIRWISE ABSOLUTE CORRELATION HEATMAP (|r|)</span>
+            <span class="badge badge-outline">HOVER CELL INSPECTOR</span>
           </div>
+          <div id="chart-heatmap-container" style="position: relative; width: 100%; min-height: 360px; display: flex; justify-content: center;"></div>
+        </div>
 
-          <div>
-            <div class="card">
-              <div class="card-header">
-                <span class="card-title">VOLUME QUALITY CONTROL (QC)</span>
-                <span class="badge badge-solid">PASS</span>
-              </div>
-              <table style="font-family: var(--font-mono); font-size: 0.82rem;">
-                <tr><td style="color: #777;">Signal-to-Noise (SNR):</td><td><strong>24.8 dB</strong></td></tr>
-                <tr><td style="color: #777;">Contrast-to-Noise (CNR):</td><td><strong>3.42</strong></td></tr>
-                <tr><td style="color: #777;">Entropy Focus Criterion (EFC):</td><td><strong>0.418</strong></td></tr>
-                <tr><td style="color: #777;">MNI Registration Residual:</td><td><strong>&lt; 1.18 mm</strong></td></tr>
-                <tr><td style="color: #777;">Ghosting Artifact Ratio:</td><td><strong>0.004 (Negligible)</strong></td></tr>
-                <tr><td style="color: #777;">Motion Outliers:</td><td><strong>0 Frames Flagged</strong></td></tr>
+        <div>
+          <div class="graph-card" style="margin-bottom: 20px;">
+            <div class="graph-card-header">
+              <span class="graph-title">PREPROCESSING SENSITIVITY ANALYSIS</span>
+              <span class="badge badge-outline">TEMPLATE SHIFT</span>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>Model</th><th>Pipeline</th><th>Balanced Acc</th><th>MAE</th><th>Stability</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>BrainIAC</strong></td><td>TurboPrep (Standard)</td><td>0.828</td><td>4.18</td><td>Baseline (1.00)</td></tr>
+                  <tr><td><strong>BrainIAC</strong></td><td>Native T1 Pipeline</td><td>0.834</td><td>4.12</td><td>High (0.94)</td></tr>
+                  <tr><td><strong>BrainIAC</strong></td><td>Native T2 Pipeline</td><td>0.806</td><td>4.39</td><td>Moderate (0.83)</td></tr>
+                  <tr><td><strong>SwinBrain</strong></td><td>TurboPrep (Standard)</td><td>0.821</td><td>4.31</td><td>Baseline (1.00)</td></tr>
+                  <tr><td><strong>SwinBrain</strong></td><td>Native T1 Pipeline</td><td>0.825</td><td>4.25</td><td>High (0.92)</td></tr>
+                  <tr><td><strong>SwinBrain</strong></td><td>Native T2 Pipeline</td><td>0.792</td><td>4.58</td><td>Moderate (0.79)</td></tr>
+                  <tr><td><strong>CNN3D</strong></td><td>TurboPrep (Standard)</td><td>0.774</td><td>5.15</td><td>Baseline (1.00)</td></tr>
+                </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="card">
-              <div class="card-header"><span class="card-title">ANATOMICAL SEGMENTATION MASKS</span></div>
-              <p style="font-size: 0.84rem; color: #AAA; margin-bottom: 10px;">
-                Procedural slice display renders segmented physiological compartments:
-              </p>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <span class="badge badge-outline">Dura Skull (Outer Rim)</span>
-                <span class="badge badge-outline">Grey Matter Parenchyma</span>
-                <span class="badge badge-outline">Centrum Semiovale (WM)</span>
-                <span class="badge badge-outline">Lateral Ventricles (CSF)</span>
-              </div>
-            </div>
+    <!-- ===================================================================
+         SECTION 05: FOUNDATION MODEL CARDS
+         =================================================================== -->
+    <div class="narrative-section">
+      <span class="section-tag">ANALYTICS 05 // SYSTEM CARDS & REPRODUCIBILITY</span>
+      <h2 class="section-heading">FOUNDATION MODEL ARCHITECTURES & ARTIFACT EXPORTS</h2>
+      <p class="section-desc">
+        Technical architectural parameters and pretraining objectives across all evaluated foundation models and baselines.
+      </p>
+
+      <div class="grid-3" style="margin-bottom: 28px;">
+        <div class="graph-card">
+          <div class="graph-card-header"><span class="graph-title">BRAINIAC (ViT-B)</span><span class="badge badge-solid">VISION TRANSFORMER</span></div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
+            Architecture: ViT-B (12 Layers, 12 Heads)<br>
+            Input: 96x96x96 Voxel Volume<br>
+            Objective: Contrastive SimCLR (48.9k Scans)<br>
+            Feature: CLS Token (768 Dimensions)
+          </div>
+        </div>
+
+        <div class="graph-card">
+          <div class="graph-card-header"><span class="graph-title">SWINBRAIN (SWIN UNETR)</span><span class="badge badge-solid">HIERARCHICAL ATTENTION</span></div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
+            Architecture: Swin UNETR (Shifted Windows)<br>
+            Input: 128x128x64 3-Channel Repeated<br>
+            Objective: Self-Supervised Masked Volume<br>
+            Feature: Encoder10 Global Pooling (384-d)
+          </div>
+        </div>
+
+        <div class="graph-card">
+          <div class="graph-card-header"><span class="graph-title">FREESURFER (GOLD STANDARD)</span><span class="badge badge-outline">REGIONAL MORPHOMETRY</span></div>
+          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
+            Pipeline: FreeSurfer 7.x Desikan-Killiany<br>
+            Input: Raw T1-weighted DICOM / NIfTI<br>
+            Features: Cortical Thickness & Surface Area<br>
+            Dimensions: 68 Bilateral Anatomical ROIs
           </div>
         </div>
       </div>
 
-      <!-- Subview 3.2: QC & Montage -->
-      <div id="d3-qc" class="subview-panel">
-        <div class="card">
-          <div class="card-header"><span class="card-title">MONTAGE GENERATION UTILITY</span><span class="badge badge-outline">CLI SCRIPT</span></div>
-          <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 12px;">
-            Compile publication-grade multi-slice montages directly from raw NIfTI volumes via <code>data_audit/qc/montage.py</code>:
-          </p>
-          <div style="background-color: #050505; border: 1px solid var(--border-hairline); padding: 12px; font-family: var(--font-mono); font-size: 0.8rem; color: #EEE; margin-bottom: 14px;">
-            python -m data_audit.qc.montage --input sub-01_T1w.nii.gz --slices 32,64,96 --plane axial --out results/montage.png
-          </div>
-          <button class="btn btn-secondary" onclick="alert('Montage generator CLI ready at data_audit/qc/montage.py')">GENERATE SAMPLE MONTAGE</button>
-        </div>
+      <div style="display: flex; gap: 14px;">
+        <button class="btn btn-secondary" onclick="downloadCSV()">DOWNLOAD SUMMARY RESULTS CSV</button>
+        <button class="btn btn-secondary" onclick="downloadJSON()">DOWNLOAD FULL JSON REPORT</button>
       </div>
-    </section>
+    </div>
 
-  </main>
+  </section>
 
   <script src="app.js"></script>
 </body>
