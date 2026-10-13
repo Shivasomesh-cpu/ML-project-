@@ -22,7 +22,14 @@ src/checkpoints/
 # Generated research outputs: regenerate only from verified observed inputs
 results/*
 !results/.gitkeep
+results_test/
 work/
+data_mock/
+.streamlit/
+
+# NIfTI large binary files
+*.nii
+*.nii.gz
 
 # Operating-system and editor files
 .DS_Store

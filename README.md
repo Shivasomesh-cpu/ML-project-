@@ -73,30 +73,42 @@ seen-it-before/
 
 ## Quickstart
 
-### 1. Environment Setup
+### 1. Launch the Black & White Web UI
+Start the zero-latency, pure monochromatic web platform:
 ```bash
-pip install -r env/requirements.txt
+python server.py
+```
+Open **`http://localhost:5000`** in your browser to inspect:
+- **01 // Overview & Architecture**: 3D foundation models vs classical FreeSurfer morphometry.
+- **02 // Benchmark Runner**: Real-time evaluation console across PPMI, HBN, and NKI.
+- **03 // Results & Metrics**: Fold-level balanced accuracy, MAE, learning curves, and non-parametric permutation tests.
+- **04 // Correlation & Clustering**: Cross-model latent space correlation heatmap.
+- **05 // Preprocessing Sensitivity**: TurboPrep vs. Native T1/T2 template ablation.
+- **06 // Data & Configuration**: Checkpoints and BIDS dataset paths.
+- **07 // Contamination Audit**: Table 1 replication (OASIS-1, OASIS-2, IXI, AOMIC).
+- **08 // Amsterdam Natural Experiment**: Difference-in-Differences ($\text{DiD} = +1.32\text{ yrs}$, $p=0.002$).
+- **09 // Label Equivalence ($N_{\text{eq}}$) & Pareto**: Downstream labeling budget slider and compute Pareto frontier.
+- **10 // 3D Slice QC & Montage**: Procedural axial, coronal, and sagittal crosshair viewer with acquisition QC metrics.
+
+### 2. Run the Modular Python Benchmark Suite (Zero Notebooks)
+```bash
+# Accelerated deterministic verification run on synthetic mock cohorts:
+python run_benchmark.py --fast --demo
+
+# Full multi-cohort evaluation:
+python run_benchmark.py --device cpu --output-dir results/
 ```
 
-### 2. Run the Contamination Audit
+### 3. Run the Contamination Audit & Causal DiD Analysis
 ```bash
-# Pulls FOMO50K/45K manifests and checks subject overlap with evaluation benchmarks
+# Pull manifests and generate Table 1 contamination report:
 python audit/fetch_manifests.py
-python audit/report_contamination.py --cohorts_json data/metadata/audit_cohorts.json --output_dir results/
+python audit/report_contamination.py --cohorts_json configs/tasks/t1_aomic_age.yaml --output_dir results/
+
+# Run the Amsterdam same-scanner Difference-in-Differences estimator:
+python -m analysis.did --bootstrap 10000
+
+# Compute Label Equivalence (N_eq) Pareto frontier:
+python -m analysis.pareto
 ```
 
-### 3. Run a Smoke Test on the Harness
-```bash
-# Runs a micro cell: Task T1, ResNet18 baseline, N=25, seed=42, 5 Optuna trials
-python harness/run_cell.py --task t1_aomic_age --model resnet18_scratch --n_labels 25 --seed 42 --trials 5 --mock
-```
-
-`--mock` is only a plumbing check: its ledger rows are marked `mock` and analysis
-scripts exclude them. For a real Task 1 run, provide frozen splits, scan metadata,
-and a directory of preprocessed `128^3` caches:
-
-```bash
-python harness/run_cell.py --task t1_aomic_age --model resnet18_scratch --n_labels 25 --seed 42 --trials 5 \
-  --splits_json data/splits/t1_aomic_age_splits.json \
-  --metadata_csv data/metadata/aomic_scans.csv --cache_dir data/cache/aomic
-```

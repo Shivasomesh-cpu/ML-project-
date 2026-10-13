@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRAIN-FM // EVALUATION HARNESS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-label">EPICS-LAB // RESEARCH</div>
+        <div class="brand-title">BRAIN-FM</div>
+        <div class="brand-sub">EVALUATION HARNESS</div>
+        <div class="badge-row">
+          <span class="badge badge-solid">MONOCHROME</span>
+          <span class="badge badge-outline">v2.4</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-tab="overview">01 // OVERVIEW & ARCHITECTURE</a>
+        <a href="#" class="nav-item" data-tab="benchmark">02 // BENCHMARK SUITE</a>
+        <a href="#" class="nav-item" data-tab="results">03 // RESULTS & METRICS</a>
+        <a href="#" class="nav-item" data-tab="correlation">04 // CORRELATION & CLUSTERING</a>
+        <a href="#" class="nav-item" data-tab="sensitivity">05 // PREPROCESSING SENSITIVITY</a>
+        <a href="#" class="nav-item" data-tab="data">06 // DATA & CONFIGURATION</a>
+        <a href="#" class="nav-item" data-tab="contamination">07 // CONTAMINATION AUDIT (TABLE 1)</a>
+        <a href="#" class="nav-item" data-tab="did">08 // AMSTERDAM EXPERIMENT (DiD)</a>
+        <a href="#" class="nav-item" data-tab="neq">09 // LABEL EQUIVALENCE & PARETO</a>
+        <a href="#" class="nav-item" data-tab="qc">10 // 3D SLICE QC & MONTAGE</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div><strong>STUDIES:</strong> EPICS-Lab & Seen-It-Before</div>
+        <div><strong>MODELS:</strong> BrainIAC, SwinBrain, AnatCL, SimCLR, ResNet</div>
+        <div><strong>LEAKAGE AUDIT:</strong> OASIS, IXI, AOMIC</div>
+        <div><strong>MODE:</strong> Offline Zero-ML</div>
+        <div><strong>PALETTE:</strong> Pure B&W</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- ========================================================
+           VIEW 1: OVERVIEW & ARCHITECTURE
+           ======================================================== -->
+      <section id="view-overview" class="view-panel">
+        <div class="header-banner">
+          <span class="badge badge-solid">SYSTEM SPECIFICATION</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">BIORXIV 2026.05.15.725427</span>
+          <h1 class="header-title">MRI FOUNDATION MODELS BENCHMARK</h1>
+          <p class="header-desc">
+            A standardized evaluation platform benchmarking 3D self-supervised neuroimaging foundation models 
+            against classical FreeSurfer morphometry across large-scale public cohorts and clinical tasks.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">CORE HYPOTHESIS & RESEARCH QUESTION</div>
+          <div class="callout-body">
+            "Foundation models for brain MRI promise general-purpose representations that transfer across tasks — 
+            but how well do they actually hold up against classical pipelines like FreeSurfer and simple untrained baselines?"
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="kpi-box">
+            <div class="kpi-label">EVALUATED MODELS</div>
+            <div class="kpi-value">6 Models</div>
+            <div class="kpi-delta">5 SSL + 1 Untrained Baseline</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">CLINICAL COHORTS</div>
+            <div class="kpi-value">3 Datasets</div>
+            <div class="kpi-delta">2,852 Total Subjects</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">CROSS-VALIDATION</div>
+            <div class="kpi-value">25 Folds</div>
+            <div class="kpi-delta">5 Seeds x 5-Fold Stratified</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">PERMUTATION AUDIT</div>
+            <div class="kpi-value">9,999</div>
+            <div class="kpi-delta">Bonferroni-corrected non-parametric</div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">PIPELINE ARCHITECTURE</h3>
+        <div class="grid-4">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">01 // PREPROCESS</span>
+              <span class="badge badge-outline">INPUT</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;"><strong>CAT12 VBM:</strong> Modulated grey matter maps <code>(121, 128, 121)</code></p>
+            <p style="font-size: 0.85rem; color: #888;"><strong>TurboPrep:</strong> Skull stripped, MNI registered T1w volumes</p>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">02 // ENCODE</span>
+              <span class="badge badge-outline">MODELS</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;"><strong>ViT / Swin / ResNet:</strong> Inference representation extraction.</p>
+            <p style="font-size: 0.85rem; color: #888;">Fixed-size latent subject embeddings (384-d to 768-d).</p>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">03 // PROBE</span>
+              <span class="badge badge-outline">BENCHMARK</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;"><strong>Random Forest Probe:</strong> 200 trees, <code>depth=6</code>.</p>
+            <p style="font-size: 0.85rem; color: #888;">Sample efficiency learning curves &alpha; &isin; [1%, 100%].</p>
+          </div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">04 // STATS</span>
+              <span class="badge badge-outline">AUDIT</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;"><strong>Permutation Tests:</strong> Exact non-parametric test vs FreeSurfer.</p>
+            <p style="font-size: 0.85rem; color: #888;">Cross-model hierarchical clustering & feature correlation.</p>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">FOUNDATION & BASELINE MODEL CARDS</h3>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">BRAINIAC</span>
+              <span class="badge badge-solid">VISION TRANSFORMER</span>
+            </div>
+            <table style="font-family: var(--mono-font); font-size: 0.8rem;">
+              <tr><td style="color: #777;">Architecture:</td><td>ViT (12 layers, 12 heads, 96x96x96)</td></tr>
+              <tr><td style="color: #777;">Pretraining:</td><td>Self-supervised SimCLR contrastive (~48.9k scans)</td></tr>
+              <tr><td style="color: #777;">Extracted Feature:</td><td>CLS token output (768-d)</td></tr>
+              <tr><td style="color: #777;">Study Preprocessing:</td><td>TurboPrep (Main) + Native T1/T2 (Sensitivity)</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">SWINBRAIN</span>
+              <span class="badge badge-solid">SWIN UNETR</span>
+            </div>
+            <table style="font-family: var(--mono-font); font-size: 0.8rem;">
+              <tr><td style="color: #777;">Architecture:</td><td>Swin UNETR (128x128x64, 3-channel repeat)</td></tr>
+              <tr><td style="color: #777;">Pretraining:</td><td>Self-supervised masked / contrastive pretraining</td></tr>
+              <tr><td style="color: #777;">Extracted Feature:</td><td>Global avg pool on encoder10 hook (384-d)</td></tr>
+              <tr><td style="color: #777;">Study Preprocessing:</td><td>TurboPrep (Main) + Native T1/T2 (Sensitivity)</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">ANATCL (GLOBAL & LOCAL)</span>
+              <span class="badge badge-solid">RESNET-18</span>
+            </div>
+            <table style="font-family: var(--mono-font); font-size: 0.8rem;">
+              <tr><td style="color: #777;">Architecture:</td><td>3D ResNet-18 (121x128x121)</td></tr>
+              <tr><td style="color: #777;">Pretraining:</td><td>Weakly contrastive anatomical morphometry</td></tr>
+              <tr><td style="color: #777;">Extracted Feature:</td><td>Average of 5 cross-validation fold encoders (512-d)</td></tr>
+              <tr><td style="color: #777;">Study Preprocessing:</td><td>CAT12 VBM Modulated Grey Matter (mwp1)</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">CNN3D BASELINE</span>
+              <span class="badge badge-outline">UNTRAINED RANDOM INIT</span>
+            </div>
+            <table style="font-family: var(--mono-font); font-size: 0.8rem;">
+              <tr><td style="color: #777;">Architecture:</td><td>Custom 4-layer 3D CNN (91x109x91)</td></tr>
+              <tr><td style="color: #777;">Pretraining:</td><td>None (Random weight projection, seeds 0 & 42)</td></tr>
+              <tr><td style="color: #777;">Extracted Feature:</td><td>Fully-connected layer projection (512-d)</td></tr>
+              <tr><td style="color: #777;">Purpose:</td><td>Control baseline to quantify pretraining utility</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 2: BENCHMARK SUITE
+           ======================================================== -->
+      <section id="view-benchmark" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">BENCHMARK RUNNER</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">ZERO-LATENCY ENGINE</span>
+          <h1 class="header-title">EVALUATION HARNESS CONTROLLER</h1>
+          <p class="header-desc">
+            Configure experimental parameters, select cohorts and tasks, and execute multi-model cross-validation probes.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">01 // COHORT & TASK TARGETS</span></div>
+            <div class="form-group">
+              <label for="bm-dataset">Target Neuroimaging Cohort</label>
+              <select id="bm-dataset">
+                <option value="PPMI">PPMI (Parkinson's Progression Markers)</option>
+                <option value="HBN">HBN (Healthy Brain Network)</option>
+                <option value="NKI">NKI (Rockland Lifespan)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="bm-task">Evaluation Task</label>
+              <select id="bm-task">
+                <option value="Sex Classification">Sex Classification</option>
+                <option value="Parkinson Classification">Parkinson Classification</option>
+                <option value="Male Age Regression">Male Age Regression</option>
+                <option value="Female Age Regression">Female Age Regression</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">02 // EVALUATION PROTOCOL</span></div>
+            <div class="form-group">
+              <label>Cross-Validation Protocol</label>
+              <input type="text" value="5 Seeds x 5-Fold Stratified (25 Folds Total)" readonly />
+            </div>
+            <div class="form-group">
+              <label>Downstream Probe</label>
+              <input type="text" value="Random Forest (200 Trees, max_depth=6)" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">03 // INCLUDED MODEL ARMS</span></div>
+          <div class="checkbox-group" style="display: flex; flex-direction: row; gap: 24px; flex-wrap: wrap;">
+            <label class="checkbox-item"><input type="checkbox" checked /> BrainIAC (ViT)</label>
+            <label class="checkbox-item"><input type="checkbox" checked /> SwinBrain (Swin UNETR)</label>
+            <label class="checkbox-item"><input type="checkbox" checked /> FreeSurfer (Reference)</label>
+            <label class="checkbox-item"><input type="checkbox" checked /> AnatCL (ResNet-18)</label>
+            <label class="checkbox-item"><input type="checkbox" checked /> 3D-Neuro-SimCLR</label>
+            <label class="checkbox-item"><input type="checkbox" checked /> CNN3D (Untrained Baseline)</label>
+          </div>
+        </div>
+
+        <div style="margin: 24px 0;">
+          <button id="btn-run-benchmark" class="btn" style="width: 280px; padding: 14px;">RUN BENCHMARK SUITE</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">EXECUTION TERMINAL & STREAMING LOGS</span>
+            <span class="badge badge-outline">CONSOLE</span>
+          </div>
+          <div class="progress-bar">
+            <div id="benchmark-progress" class="progress-fill"></div>
+          </div>
+          <div id="terminal-logs" class="terminal">[READY] System initialized. Awaiting user execution trigger...</div>
+        </div>
+
+        <div id="preview-results-box" class="card" style="display: none;">
+          <div class="card-header">
+            <span class="card-title">INSTANT BENCHMARK RESULTS PREVIEW</span>
+            <span class="badge badge-solid">COMPLETE</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="preview-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Primary Metric</th>
+                  <th>Secondary Metric</th>
+                  <th>Train-Val Gap</th>
+                  <th>Permutation p</th>
+                  <th>Significance</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 3: RESULTS & METRICS
+           ======================================================== -->
+      <section id="view-results" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">RESULTS & METRICS</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">EMPIRICAL BENCHMARKS</span>
+          <h1 class="header-title">DOWNSTREAM PERFORMANCE EVALUATION</h1>
+          <p class="header-desc">
+            Probe accuracy, sample efficiency learning curves, fold-level variance, and Bonferroni-corrected statistical audits.
+          </p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 20px;">
+          <div class="form-group">
+            <label for="res-dataset">Cohort Dataset</label>
+            <select id="res-dataset">
+              <option value="PPMI">PPMI (Parkinson's Progression Markers)</option>
+              <option value="HBN">HBN (Healthy Brain Network)</option>
+              <option value="NKI">NKI (Rockland Lifespan)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="res-task">Benchmark Task</label>
+            <select id="res-task">
+              <option value="Sex Classification">Sex Classification</option>
+              <option value="Parkinson Classification">Parkinson Classification</option>
+              <option value="Male Age Regression">Male Age Regression</option>
+              <option value="Female Age Regression">Female Age Regression</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="kpi-box">
+            <div class="kpi-label">TOP RANKED MODEL</div>
+            <div id="kpi-top-model" class="kpi-value">BrainIAC</div>
+            <div class="kpi-delta">SimCLR SSL ViT</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">TOP SCORE</div>
+            <div id="kpi-top-score" class="kpi-value">0.828</div>
+            <div class="kpi-delta">Balanced Accuracy</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">FREESURFER REFERENCE</div>
+            <div id="kpi-fs-score" class="kpi-value">0.818</div>
+            <div class="kpi-delta">Morphometry Gold Standard</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">STATISTICAL AUDIT</div>
+            <div id="kpi-sig-count" class="kpi-value">1 Model</div>
+            <div class="kpi-delta">p &lt; 0.05 corrected</div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">01 // DOWNSTREAM BENCHMARK SUMMARY TABLE</h3>
+        <div class="table-wrapper">
+          <table id="full-results-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 8px;">02 // SAMPLE EFFICIENCY: MONOCHROME LEARNING CURVES</h3>
+        <p style="color: #888; font-size: 0.85rem; margin-bottom: 16px;">Performance progression as training data fraction &alpha; increases from 1% to 100%.</p>
+        <div id="chart-container" style="width: 100%; min-height: 330px;"></div>
+
+        <hr/>
+        <h3 style="margin-bottom: 8px;">03 // STATISTICAL PERMUTATION TESTS (BONFERRONI CORRECTED)</h3>
+        <p style="color: #888; font-size: 0.85rem; margin-bottom: 16px;">
+          Exact non-parametric permutation test (9,999 resamples) comparing fold-level accuracy/MAE against FreeSurfer reference.
+        </p>
+        <div class="table-wrapper">
+          <table id="perm-table">
+            <thead>
+              <tr>
+                <th>Tested Model</th>
+                <th>Reference Arm</th>
+                <th>Permutation Samples</th>
+                <th>Hypothesis</th>
+                <th>Adjusted p-value</th>
+                <th>Significance</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">04 // EXPORT ARTIFACTS</h3>
+        <div style="display: flex; gap: 14px;">
+          <button class="btn btn-secondary" onclick="downloadCSV()">DOWNLOAD SUMMARY CSV</button>
+          <button class="btn btn-secondary" onclick="downloadJSON()">DOWNLOAD JSON REPORT</button>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 4: CORRELATION & CLUSTERING
+           ======================================================== -->
+      <section id="view-correlation" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">REPRESENTATION SIMILARITY</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">LATENT SPACE AUDIT</span>
+          <h1 class="header-title">CROSS-MODEL CORRELATION & CLUSTERING</h1>
+          <p class="header-desc">
+            Investigating how differently foundation models represent the brain relative to each other and classical FreeSurfer morphometry.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3 style="margin-bottom: 12px;">CROSS-MODEL CORRELATION MATRIX</h3>
+            <p style="color: #888; font-size: 0.85rem; margin-bottom: 14px;">Pairwise mean absolute Pearson correlation across standardized latent representations.</p>
+            <div id="corr-heatmap-container"></div>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 12px;">KEY OBSERVATIONS</h3>
+            <div class="card">
+              <div class="card-header"><span class="card-title">01 // MORPHOMETRY DIVERGENCE</span></div>
+              <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 6px;">
+                Foundation models (BrainIAC, SwinBrain) display only moderate correlation (<strong>r &approx; 0.28 - 0.31</strong>) with FreeSurfer cortical thickness and surface area.
+              </p>
+              <p style="font-size: 0.82rem; color: #888;">
+                This confirms that SSL pretraining learns latent features orthogonal to classical surface morphometry.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">02 // ARCHITECTURAL CONVERGENCE</span></div>
+              <p style="font-size: 0.85rem; color: #CCC;">
+                The highest cross-model correlation occurs between <strong>BrainIAC & SwinBrain (r &approx; 0.38)</strong>, reflecting shared self-supervised volumetric objectives.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">03 // RANDOM CNN PROJECTIONS</span></div>
+              <p style="font-size: 0.85rem; color: #CCC;">
+                Untrained CNN3D maintains a baseline correlation of <strong>r &approx; 0.25 - 0.27</strong> with all foundation models, acting as a geometric spatial prior.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">PAIRWISE CORRELATION RANKINGS</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Model A</th>
+                <th>Model B</th>
+                <th>Mean Absolute Correlation (|r|)</th>
+                <th>Representation Similarity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>AnatCL_Global</strong></td><td>AnatCL_Local</td><td>0.4591</td><td><span class="badge badge-solid">HIGH</span></td></tr>
+              <tr><td><strong>BrainIAC</strong></td><td>SwinBrain</td><td>0.3812</td><td><span class="badge badge-solid">HIGH</span></td></tr>
+              <tr><td><strong>FreeSurfer (Thick)</strong></td><td>FreeSurfer (Area)</td><td>0.4215</td><td><span class="badge badge-solid">HIGH</span></td></tr>
+              <tr><td><strong>BrainIAC</strong></td><td>3D-Neuro-SimCLR</td><td>0.3245</td><td><span class="badge badge-outline">MODERATE</span></td></tr>
+              <tr><td><strong>BrainIAC</strong></td><td>FreeSurfer (Thick)</td><td>0.3120</td><td><span class="badge badge-outline">MODERATE</span></td></tr>
+              <tr><td><strong>SwinBrain</strong></td><td>FreeSurfer (Thick)</td><td>0.3045</td><td><span class="badge badge-outline">MODERATE</span></td></tr>
+              <tr><td><strong>CNN3D (Baseline)</strong></td><td>FreeSurfer</td><td>0.2520</td><td><span class="badge badge-outline">LOW</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 5: PREPROCESSING SENSITIVITY
+           ======================================================== -->
+      <section id="view-sensitivity" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">SENSITIVITY ANALYSIS</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">PIPELINE ABLATION</span>
+          <h1 class="header-title">PREPROCESSING SENSITIVITY EVALUATION</h1>
+          <p class="header-desc">
+            Quantifying how much preprocessing choices alone (TurboPrep vs. Native T1/T2 pipelines) alter feature representations and downstream task accuracy.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">THE PREPROCESSING CONFOUND PROBLEM</div>
+          <div class="callout-body">
+            BrainIAC and SwinBrain ship with distinct native preprocessing protocols. In standard benchmarks, models are evaluated 
+            on unified TurboPrep volumes for fair comparison. Here, models are re-evaluated across all 3 variants on identical subjects 
+            to isolate preprocessing variance from model architectural superiority.
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-header"><span class="card-title">TURBOPREP (_TP)</span><span class="badge badge-outline">MAIN STUDY</span></div>
+            <p style="font-size: 0.85rem; color: #CCC;">Standardized skull stripping, bias correction, and non-linear MNI registration.</p>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">BRAINIAC T1 (_T1)</span><span class="badge badge-outline">NATIVE T1</span></div>
+            <p style="font-size: 0.85rem; color: #CCC;">Native BrainIAC preprocessing pipeline using standard T1-weighted reference template.</p>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">BRAINIAC T2 (_T2)</span><span class="badge badge-outline">TEMPLATE SHIFT</span></div>
+            <p style="font-size: 0.85rem; color: #CCC;">Native BrainIAC preprocessing using T2 template from original BrainIAC repository.</p>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">DOWNSTREAM PERFORMANCE ACROSS PREPROCESSING VARIANTS</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Preprocessing</th>
+                <th>Input Resolution</th>
+                <th>Balanced Acc</th>
+                <th>MAE (Years)</th>
+                <th>Feature Stability</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>BrainIAC</strong></td><td>TurboPrep (Standard)</td><td>96x96x96</td><td>0.828</td><td>4.18</td><td>Baseline (1.00)</td></tr>
+              <tr><td><strong>BrainIAC</strong></td><td>BrainIAC Native T1</td><td>96x96x96</td><td>0.834</td><td>4.12</td><td>High (0.94)</td></tr>
+              <tr><td><strong>BrainIAC</strong></td><td>BrainIAC Native T2</td><td>96x96x96</td><td>0.806</td><td>4.39</td><td>Moderate (0.83)</td></tr>
+              <tr><td><strong>SwinBrain</strong></td><td>TurboPrep (Standard)</td><td>128x128x64</td><td>0.821</td><td>4.31</td><td>Baseline (1.00)</td></tr>
+              <tr><td><strong>SwinBrain</strong></td><td>BrainIAC Native T1</td><td>128x128x64</td><td>0.825</td><td>4.25</td><td>High (0.92)</td></tr>
+              <tr><td><strong>SwinBrain</strong></td><td>BrainIAC Native T2</td><td>128x128x64</td><td>0.792</td><td>4.58</td><td>Moderate (0.79)</td></tr>
+              <tr><td><strong>CNN3D</strong></td><td>TurboPrep (Standard)</td><td>91x109x91</td><td>0.774</td><td>5.15</td><td>Baseline (1.00)</td></tr>
+              <tr><td><strong>CNN3D</strong></td><td>BrainIAC Native T1</td><td>91x109x91</td><td>0.770</td><td>5.21</td><td>High (0.91)</td></tr>
+              <tr><td><strong>CNN3D</strong></td><td>BrainIAC Native T2</td><td>91x109x91</td><td>0.741</td><td>5.56</td><td>Moderate (0.76)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 6: DATA & CONFIGURATION
+           ======================================================== -->
+      <section id="view-data" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">DATA & CONFIGURATION</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">FILESYSTEM AUDIT</span>
+          <h1 class="header-title">DATASET PATHS & CHECKPOINTS</h1>
+          <p class="header-desc">
+            Inspect cohort demographics, configure real neuroimaging filesystem paths, and verify foundation model weights.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">FILESYSTEM PATHS CONFIGURATION</span></div>
+            <div class="form-group">
+              <label>PPMI Root Directory</label>
+              <input type="text" value="/path/to/PPMI" />
+            </div>
+            <div class="form-group">
+              <label>HBN BIDS Directory</label>
+              <input type="text" value="/path/to/HBN_BIDS" />
+            </div>
+            <div class="form-group">
+              <label>NKI BIDS Directory</label>
+              <input type="text" value="/path/to/NKI_BIDS" />
+            </div>
+            <div class="form-group">
+              <label>Model Checkpoints Directory</label>
+              <input type="text" value="/path/to/checkpoints" />
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">CHECKPOINT WEIGHTS STATUS</span></div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>Model</th><th>Expected File</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>BrainIAC</strong></td><td>BrainIAC.ckpt</td><td><span class="badge badge-outline">OFFLINE</span></td></tr>
+                  <tr><td><strong>SwinBrain</strong></td><td>Brain_Swin_UNETR.pth</td><td><span class="badge badge-outline">OFFLINE</span></td></tr>
+                  <tr><td><strong>3D-Neuro-SimCLR</strong></td><td>simclr_3d_brain_foundation.tar</td><td><span class="badge badge-outline">OFFLINE</span></td></tr>
+                  <tr><td><strong>AnatCL Global</strong></td><td>weights_global_fold[0-4].pth</td><td><span class="badge badge-outline">OFFLINE</span></td></tr>
+                  <tr><td><strong>CNN3D Baseline</strong></td><td>Procedural (Seeds 0, 42)</td><td><span class="badge badge-solid">READY</span></td></tr>
+                  <tr><td><strong>FreeSurfer Gold</strong></td><td>Regional Tabular Metrics</td><td><span class="badge badge-solid">READY</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 8px;">SYNTHETIC / MOCK DATA GENERATOR</h3>
+        <p style="color: #888; font-size: 0.85rem; margin-bottom: 16px;">
+          Generate realistic lightweight synthetic NIfTI brain volumes and FreeSurfer morphometry tables for local pipeline testing.
+        </p>
+        <button class="btn" onclick="alert('Mock dataset generator ready at src/data/mock_data.py!')">GENERATE MOCK DATASET</button>
+      </section>
+
+      <!-- ========================================================
+           VIEW 7: CONTAMINATION AUDIT (TABLE 1)
+           ======================================================== -->
+      <section id="view-contamination" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">CONTAMINATION AUDIT</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">SEEN IT BEFORE // TABLE 1</span>
+          <h1 class="header-title">PRETRAINING OVERLAP & TEST LEAKAGE</h1>
+          <p class="header-desc">
+            Participant-level hashing and corpus manifest audit assessing downstream benchmark overlap against foundation model pretraining sets.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">THE TEST LEAKAGE PROBLEM IN NEUROIMAGING FOUNDATION MODELS</div>
+          <div class="callout-body">
+            Foundation models trained on aggregate collections (e.g. FOMO-50K, UK Biobank) frequently ingest standard neuroimaging cohorts. 
+            When benchmarked on OASIS-1, OASIS-2, or IXI, models are evaluated on subjects they already observed during pretraining, 
+            artificially inflating apparent generalizability and masking true generalization failure.
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="kpi-box">
+            <div class="kpi-label">AUDITED COHORTS</div>
+            <div class="kpi-value">7 Cohorts</div>
+            <div class="kpi-delta">3,596 Scans Audited</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">OASIS-1 OVERLAP</div>
+            <div class="kpi-value">100.0%</div>
+            <div class="kpi-delta">416 / 416 Ingested (SEEN)</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">IXI OVERLAP</div>
+            <div class="kpi-value">97.4%</div>
+            <div class="kpi-delta">553 / 568 Ingested (SEEN)</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">AOMIC NATURAL EXP</div>
+            <div class="kpi-value">ID1000 vs PIOP</div>
+            <div class="kpi-delta">100% Seen vs 0% Seen (Same Scanner)</div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">TABLE 1 // MANIFEST CONTAMINATION REPLICATION</h3>
+        <div class="table-wrapper">
+          <table id="contamination-table">
+            <thead>
+              <tr>
+                <th>Cohort / Dataset</th>
+                <th>Total Scans</th>
+                <th>Pretraining Overlap</th>
+                <th>Contamination %</th>
+                <th>Status</th>
+                <th>Audit Role / Benchmark Context</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">AUDIT METHODOLOGY & LEDGER</h3>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">01 // HASH-BASED DEDUPLICATION</span><span class="badge badge-outline">CRYPTO AUDIT</span></div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;">
+              Raw NIfTI header hashing (qform/sform matrices, subject identifiers, voxel dimensions) resolves anonymization alias collisions across federated repositories.
+            </p>
+            <p style="font-size: 0.82rem; color: #888;">
+              Matches verified via <code>audit/manifest_parser.py</code> and <code>audit/overlap.py</code>.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">02 // REPORT GENERATION</span><span class="badge badge-outline">AUTOMATED LEDGER</span></div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 8px;">
+              Generates provenance certificates documenting train/val/test split safety before benchmarking new foundation model weights.
+            </p>
+            <p style="font-size: 0.82rem; color: #888;">
+              Implemented in <code>audit/report_contamination.py</code> and <code>harness/ledger.py</code>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 8: AMSTERDAM EXPERIMENT (DiD)
+           ======================================================== -->
+      <section id="view-did" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">CAUSAL INFERENCE</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">NATURAL EXPERIMENT // DiD</span>
+          <h1 class="header-title">AMSTERDAM QUASI-EXPERIMENT</h1>
+          <p class="header-desc">
+            Difference-in-Differences causal identification exploiting identical Philips Achieva 3T scanner acquisition across seen (ID1000) and unseen (PIOP1/PIOP2) cohorts.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">THE SCANNER CONFOUND IDENTIFICATION STRATEGY</div>
+          <div class="callout-body">
+            Standard cross-dataset evaluations confound <em>scanner domain shift</em> with <em>pretraining contamination</em>. 
+            At the Spinoza Centre in Amsterdam, AOMIC ID1000 (pretraining constituent) and PIOP1/PIOP2 (unseen test) were acquired 
+            on the <strong>exact same scanner</strong> (Philips Achieva 3T) with matched healthy young adult demographics. 
+            Subtracting the baseline model's error cancels scanner effects and yields the true causal contamination boost (&Delta;&Delta;).
+          </div>
+        </div>
+
+        <div id="did-metrics-box" class="grid-3">
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">BRAINIAC (FOUNDATION)</span>
+              <span class="badge badge-solid">PRETRAINED</span>
+            </div>
+            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Seen (ID1000): <strong id="did-fm-seen" style="color: #FFF;">--</strong></div>
+            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Unseen (PIOP1/2): <strong id="did-fm-unseen" style="color: #FFF;">--</strong></div>
+            <hr style="margin: 10px 0;"/>
+            <div style="font-size: 0.88rem; color: #FFF;">Seen &rarr; Unseen Degradation: <strong id="did-fm-gap" style="font-size: 1.1rem; color: #FFF;">--</strong></div>
+          </div>
+
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">RESNET-18 (SUPERVISED)</span>
+              <span class="badge badge-outline">FROM SCRATCH</span>
+            </div>
+            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Seen (ID1000): <strong id="did-base-seen" style="color: #FFF;">--</strong></div>
+            <div style="font-size: 0.85rem; color: #AAA; margin-bottom: 6px;">Unseen (PIOP1/2): <strong id="did-base-unseen" style="color: #FFF;">--</strong></div>
+            <hr style="margin: 10px 0;"/>
+            <div style="font-size: 0.88rem; color: #FFF;">Seen &rarr; Unseen Degradation: <strong id="did-base-gap" style="font-size: 1.1rem; color: #FFF;">--</strong></div>
+          </div>
+
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header">
+              <span class="card-title">CAUSAL ESTIMATOR (&Delta;&Delta;)</span>
+              <span class="badge badge-solid">DiD EFFECT</span>
+            </div>
+            <div style="font-size: 0.82rem; color: #AAA; margin-bottom: 4px;">Contamination Advantage:</div>
+            <div id="did-point-val" style="font-family: var(--mono-font); font-size: 1.8rem; font-weight: 700; color: #FFF; margin-bottom: 4px;">--</div>
+            <div style="font-size: 0.78rem; color: #888;">95% Bootstrap CI: <span id="did-ci-val" style="color: #CCC;">--</span></div>
+            <div style="font-size: 0.78rem; color: #888; margin-top: 4px;">Hypothesis Test: <span id="did-p-val" style="color: #FFF; font-weight: 700;">--</span></div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">DIFFERENCE-IN-DIFFERENCES FORMULATION</h3>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">01 // EQUATION SPECIFICATION</span></div>
+            <div style="background-color: #000; border: 1px solid #222; padding: 14px; font-family: var(--mono-font); font-size: 0.82rem; color: #FFF; margin-bottom: 12px;">
+              &Delta;&Delta; = [MAE(FM, Unseen) - MAE(FM, Seen)]<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [MAE(Base, Unseen) - MAE(Base, Seen)]<br/>
+              &Delta;&Delta; = (+1.41 yrs) - (+0.09 yrs) = +1.32 yrs (p = 0.002)
+            </div>
+            <p style="font-size: 0.85rem; color: #AAA;">
+              Because ResNet-18 trained from scratch shows virtually zero degradation across ID1000 and PIOP1/2 (only 0.09 yrs), 
+              the 1.41 yrs degradation observed in BrainIAC is causally attributed to memorization rather than scanner distribution shifts.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">02 // SCIENTIFIC CONCLUSION</span></div>
+            <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 10px;">
+              <strong>Over 90% of the perceived performance leap</strong> of the foundation model over the from-scratch baseline 
+              vanishes once evaluated on scanners/cohorts absent from the pretraining set.
+            </p>
+            <p style="font-size: 0.82rem; color: #888;">
+              Implemented in <code>analysis/did.py</code> with 10,000 cluster-stratified bootstrap resamples.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 9: LABEL EQUIVALENCE & PARETO
+           ======================================================== -->
+      <section id="view-neq" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">SAMPLE EFFICIENCY</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">SEEN IT BEFORE // PARETO</span>
+          <h1 class="header-title">LABEL EQUIVALENCE (N_eq) & PARETO FRONTIER</h1>
+          <p class="header-desc">
+            Quantifying the precise number of additional labeled scans an un-pretrained baseline needs to match foundation model accuracy.
+          </p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">WHAT IS LABEL EQUIVALENCE ($N_{eq}$)?</div>
+          <div class="callout-body">
+            Instead of just comparing test MAE, $N_{eq}(N)$ asks: <em>"If a practitioner fine-tunes a foundation model with $N$ downstream labeled scans, 
+            how many additional labeled scans must they collect to match that performance using a standard ResNet trained from scratch?"</em>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">INTERACTIVE LABEL BUDGET SIMULATOR</span>
+            <span id="neq-slider-val" class="badge badge-solid">N = 50 labeled scans</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #888; margin-bottom: 8px;">
+            Drag the downstream labeling budget slider to observe how the foundation model's label savings change:
+          </p>
+          <input type="range" id="neq-slider" min="10" max="250" value="50" step="5" oninput="updateLabelEquivalence(this.value)" />
+          
+          <div class="grid-2" style="margin-top: 20px;">
+            <div class="kpi-box">
+              <div class="kpi-label">LABEL SAVINGS ON SEEN COHORT (ID1000)</div>
+              <div id="neq-seen-val" class="kpi-value" style="font-size: 1.4rem;">+68 Scans</div>
+              <div class="kpi-delta">Equivalent to collecting 118 total scans</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">LABEL SAVINGS ON UNSEEN COHORT (PIOP1/2)</div>
+              <div id="neq-unseen-val" class="kpi-value" style="font-size: 1.4rem;">+14 Scans</div>
+              <div class="kpi-delta">Equivalent to collecting only 64 total scans</div>
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+        <h3 style="margin-bottom: 16px;">PARETO EFFICIENCY: PRETRAINING COMPUTE VS LABEL SAVINGS</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Model Architecture</th>
+                <th>Pretraining GPU Hours</th>
+                <th>Pretraining Emissions (kg CO2e)</th>
+                <th>Downstream Label Savings ($N_{eq}$ Seen)</th>
+                <th>Downstream Label Savings ($N_{eq}$ Unseen)</th>
+                <th>Pareto Efficient?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ResNet-18 (Supervised Baseline)</strong></td>
+                <td>0 h</td>
+                <td>0.0 kg</td>
+                <td>0 (Baseline)</td>
+                <td>0 (Baseline)</td>
+                <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
+              </tr>
+              <tr>
+                <td><strong>3D-Neuro-SimCLR</strong></td>
+                <td>120 h</td>
+                <td>18.4 kg</td>
+                <td>+24 Scans</td>
+                <td>+11 Scans</td>
+                <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
+              </tr>
+              <tr>
+                <td><strong>AnatCL (ResNet-18)</strong></td>
+                <td>180 h</td>
+                <td>27.6 kg</td>
+                <td>+35 Scans</td>
+                <td>+18 Scans</td>
+                <td><span class="badge badge-solid">PARETO OPTIMAL</span></td>
+              </tr>
+              <tr>
+                <td><strong>SwinBrain (Swin UNETR)</strong></td>
+                <td>350 h</td>
+                <td>53.6 kg</td>
+                <td>+52 Scans</td>
+                <td>+16 Scans</td>
+                <td><span class="badge badge-outline">DOMINATED</span></td>
+              </tr>
+              <tr>
+                <td><strong>BrainIAC (Vision Transformer)</strong></td>
+                <td>520 h</td>
+                <td>79.8 kg</td>
+                <td>+68 Scans</td>
+                <td>+14 Scans</td>
+                <td><span class="badge badge-outline">DOMINATED (ON UNSEEN)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="color: #888; font-size: 0.8rem; margin-top: 10px;">
+          *Pareto analysis based on <code>analysis/pareto.py</code> and <code>analysis/label_equivalence.py</code>.
+        </p>
+      </section>
+
+      <!-- ========================================================
+           VIEW 10: 3D SLICE QC & MONTAGE
+           ======================================================== -->
+      <section id="view-qc" class="view-panel" style="display: none;">
+        <div class="header-banner">
+          <span class="badge badge-solid">QUALITY CONTROL</span>
+          <span class="badge badge-outline" style="margin-left: 6px;">DATA AUDIT // MONTAGE</span>
+          <h1 class="header-title">3D BRAIN SLICE QC & MONTAGE INSPECTOR</h1>
+          <p class="header-desc">
+            Procedural volumetric neuroimaging slice viewer with crosshair localization, tissue segmentation verification, and acquisition QC metrics.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="text-align: center;">
+            <div class="card-header">
+              <span class="card-title">VOLUMETRIC SLICE CANVAS</span>
+              <div style="display: flex; gap: 6px;">
+                <button id="btn-plane-axial" class="plane-btn active" onclick="setPlane('axial')">AXIAL (Z)</button>
+                <button id="btn-plane-coronal" class="plane-btn" onclick="setPlane('coronal')">CORONAL (Y)</button>
+                <button id="btn-plane-sagittal" class="plane-btn" onclick="setPlane('sagittal')">SAGITTAL (X)</button>
+              </div>
+            </div>
+
+            <canvas id="slice-canvas" width="360" height="360" class="slice-canvas"></canvas>
+
+            <div style="margin-top: 16px; text-align: left;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="slice-slider">Slice Coordinate Index</label>
+                <span id="slice-idx-label" style="font-family: var(--mono-font); font-size: 0.82rem; color: #FFF;">Slice 64 / 128</span>
+              </div>
+              <input type="range" id="slice-slider" min="1" max="128" value="64" oninput="setSlice(this.value)" />
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">VOLUME QUALITY CONTROL (QC)</span><span class="badge badge-solid">PASS</span></div>
+              <table style="font-family: var(--mono-font); font-size: 0.82rem;">
+                <tr><td style="color: #777;">Signal-to-Noise (SNR):</td><td><strong>24.8 dB</strong></td></tr>
+                <tr><td style="color: #777;">Contrast-to-Noise (CNR):</td><td><strong>3.42</strong></td></tr>
+                <tr><td style="color: #777;">Entropy Focus Criterion (EFC):</td><td><strong>0.418</strong></td></tr>
+                <tr><td style="color: #777;">MNI Registration Residual:</td><td><strong>&lt; 1.18 mm</strong></td></tr>
+                <tr><td style="color: #777;">Ghosting Artifact Ratio:</td><td><strong>0.004 (Negligible)</strong></td></tr>
+                <tr><td style="color: #777;">Motion Outliers:</td><td><strong>0 Frames Flagged</strong></td></tr>
+              </table>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title">MONTAGE GENERATION UTILITY</span><span class="badge badge-outline">CLI TOOL</span></div>
+              <p style="font-size: 0.85rem; color: #CCC; margin-bottom: 10px;">
+                Automated multi-slice montages can be compiled directly from 3D NIfTI volumes via <code>data_audit/montage.py</code>.
+              </p>
+              <div style="background-color: #000; border: 1px solid #222; padding: 10px; font-family: var(--mono-font); font-size: 0.78rem; color: #EEE;">
+                python -m data_audit.montage --input sub-01_T1w.nii.gz --slices 32,64,96 --plane axial --out montage.png
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
