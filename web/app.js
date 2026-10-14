@@ -15,6 +15,8 @@ const state = {
   equivalence: null,
   projectionMode: false,
   projectionData: null,
+  comparisonPreview: null,
+  comparisonVisibleModels: [],
   projectionSnapshot: null,
   projectionFilters: null,
   currentPage: "overview",
@@ -35,6 +37,11 @@ const modelLabels = {
   brainiac: "BrainIAC", densenet121_scratch: "DenseNet-121 (scratch)", fomo_unet_b: "FOMO U-Net B",
   fomo_unet_xl: "FOMO U-Net XL", resnet18_scratch: "ResNet-18 (scratch)", volumetric_gbm: "Volumetric + LightGBM"
 };
+const comparisonStyles = [
+  { color: "#111111", dash: "" }, { color: "#444444", dash: "8 4" },
+  { color: "#777777", dash: "2 4" }, { color: "#999999", dash: "12 4 2 4" },
+  { color: "#252525", dash: "5 3" }, { color: "#b3b3b3", dash: "1 4" }
+];
 const taskLabels = { t1_aomic_age: "T1 · AOMIC brain age" };
 const metricFields = {
   mae: ["seen_mae", "unseen_mae", "val_mae_mean", "val_mae_std", "MAE · years"],
@@ -504,7 +511,11 @@ function updateConfig(config) {
   const focusIds = allIds.length ? allIds : ["brainiac"];
   const currentFocus = focusIds.includes($("#focus-model").value) ? $("#focus-model").value : (focusIds.includes("brainiac") ? "brainiac" : focusIds[0]);
   $("#focus-model").value = currentFocus;
-  $("#run-model").value = currentFocus;
+  const runModels = [...$("#run-model").options];
+  const selectedRunModel = runModels.find((option) => option.value === currentFocus && !option.disabled);
+  const firstRunnableModel = runModels.find((option) => !option.disabled);
+  if (selectedRunModel) $("#run-model").value = selectedRunModel.value;
+  else if (firstRunnableModel) $("#run-model").value = firstRunnableModel.value;
   renderModelTable(models);
   renderDatasetTable(config.dataSources || []);
   setRunMode();
@@ -664,6 +675,174 @@ function makeLineChart(selector, series, xValues, yLabel = "MAE", sharedDomain =
   const legendStep=Math.min(150,(width-left-right)/Math.max(usable.length,1));
   const legend=usable.map((item,index)=>`<g transform="translate(${left+index*legendStep},${height-4})"><line class="${index%2===0?"chart-line":"chart-line-secondary"}" x1="0" x2="12" y1="0" y2="0"/><text class="chart-label" x="17" y="3">${esc(item.name)}</text></g>`).join("");
   target.innerHTML=`<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(yLabel)} by label budget">${grid}<line class="chart-axis" x1="${left}" x2="${width-right}" y1="${top+plotH}" y2="${top+plotH}"/>${lineParts}${xTicks}${legend}</svg>`;
+}
+
+function comparisonMean(rows, modelId, budget, field) {
+  const values = rows.filter((row) => row.model_id === modelId && row.n_labels === budget).map((row) => numeric(row[field])).filter((value) => value !== null);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}
+
+function comparisonDomain(rows, models) {
+  const values = rows.flatMap((row) => [numeric(row.seen_mae), numeric(row.unseen_mae)]).filter((value) => value !== null && Number.isFinite(value));
+  if (!values.length) return { min: 0, max: 1 };
+  const min = Math.min(...values), max = Math.max(...values);
+  const padding = (max - min || Math.max(Math.abs(max), 1)) * .08;
+  return { min: min - padding, max: max + padding, modelCount: models.length };
+}
+
+function makeComparisonLineChart(selector, rows, models, visibleModels, field, domain, focusModel = null) {
+  const target = $(selector);
+  const active = models.filter((model) => visibleModels.includes(model.id));
+  if (!active.length) {
+    target.innerHTML = '<div class="empty-state"><span class="empty-state-index">—</span><strong>No model traces selected</strong><p>Choose one or more model names above to draw comparison curves.</p></div>';
+    return;
+  }
+  const width = 720, height = 330, left = 58, right = 20, top = 20, bottom = 48;
+  const plotW = width - left - right, plotH = height - top - bottom;
+  const budgets = [...new Set(rows.map((row) => row.n_labels))].sort((a, b) => a - b);
+  const logMin = Math.log2(Math.min(...budgets)), logMax = Math.log2(Math.max(...budgets));
+  const x = (value) => left + (logMax === logMin ? .5 : (Math.log2(value) - logMin) / (logMax - logMin)) * plotW;
+  const y = (value) => top + (domain.max - value) / (domain.max - domain.min) * plotH;
+  const grid = Array.from({ length: 4 }, (_, index) => {
+    const value = domain.max - index * (domain.max - domain.min) / 3;
+    const yy = top + index * plotH / 3;
+    return `<line class="chart-gridline" x1="${left}" x2="${width - right}" y1="${yy}" y2="${yy}"/><text class="chart-label" x="${left - 9}" y="${yy + 3}" text-anchor="end">${fmt(value, 1)}</text>`;
+  }).join("");
+  const traces = active.map((model) => {
+    const modelIndex = models.findIndex((item) => item.id === model.id);
+    const style = comparisonStyles[modelIndex % comparisonStyles.length];
+    const isFocus = model.id === focusModel;
+    const points = budgets.map((budget) => ({ x: budget, value: comparisonMean(rows, model.id, budget, field) })).filter((point) => point.value !== null);
+    const path = points.map((point, index) => `${index ? "L" : "M"}${x(point.x)},${y(point.value)}`).join(" ");
+    const dash = style.dash ? `stroke-dasharray="${style.dash}"` : "";
+    const color = isFocus ? "#050505" : style.color;
+    const circles = points.map((point) => `<circle class="comparison-point" cx="${x(point.x)}" cy="${y(point.value)}" r="${isFocus ? 5 : 4}" fill="#fff" stroke="${color}" stroke-width="${isFocus ? 2.5 : 2}"><title>${esc(modelLabel(model.id))} · ${point.x} labels · ${fmt(point.value, 3)} years</title></circle>`).join("");
+    return `<path class="comparison-trace ${isFocus ? "is-focus" : ""}" d="${path}" stroke="${color}" stroke-width="${isFocus ? 3.8 : 2.2}" ${dash} style="--trace-delay:${modelIndex * 90}ms"/>${circles}`;
+  }).join("");
+  const xTicks = budgets.map((budget) => `<line class="chart-axis-tick" x1="${x(budget)}" x2="${x(budget)}" y1="${top + plotH}" y2="${top + plotH + 5}"/><text class="chart-label" x="${x(budget)}" y="${height - 19}" text-anchor="middle">${budget}</text>`).join("");
+  target.innerHTML = `<svg class="svg-chart comparison-svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${field === "seen_mae" ? "Seen" : "Unseen"} cohort MAE comparison across model profiles"><text class="chart-label-strong" x="${left}" y="12">MAE · years</text>${grid}<line class="chart-axis" x1="${left}" x2="${width - right}" y1="${top + plotH}" y2="${top + plotH}"/>${traces}${xTicks}<text class="chart-label-strong" x="${left + plotW / 2}" y="${height - 2}" text-anchor="middle">Training labels · log₂ scale</text></svg>`;
+}
+
+function makeComparisonGapChart(selector, rows, models, visibleModels, budget, focusModel = null) {
+  const target = $(selector);
+  const active = models.filter((model) => visibleModels.includes(model.id));
+  if (!active.length) return makeComparisonLineChart(selector, [], [], [], "unseen_mae", { min: 0, max: 1 });
+  const allValues = models.map((model) => ({ model, value: comparisonMean(rows, model.id, budget, "unseen_mae") - comparisonMean(rows, model.id, budget, "seen_mae") })).filter((item) => Number.isFinite(item.value));
+  const values = allValues.filter((item) => visibleModels.includes(item.model.id));
+  const maxValue = Math.max(.1, ...allValues.map((item) => item.value)) * 1.12;
+  const width = 720, rowHeight = 34, height = Math.max(205, 44 + values.length * rowHeight), left = 180, right = 48, top = 22;
+  const plotW = width - left - right;
+  const grid = Array.from({ length: 4 }, (_, index) => {
+    const value = maxValue * index / 3, xx = left + plotW * index / 3;
+    return `<line class="chart-gridline" x1="${xx}" x2="${xx}" y1="${top}" y2="${height - 24}"/><text class="chart-label" x="${xx}" y="${height - 8}" text-anchor="middle">${fmt(value, 2)} y</text>`;
+  }).join("");
+  const bars = values.map(({ model, value }, index) => {
+    const style = comparisonStyles[models.findIndex((item) => item.id === model.id) % comparisonStyles.length];
+    const yy = top + index * rowHeight + 2, barWidth = Math.max(2, plotW * value / maxValue);
+    const isFocus = model.id === focusModel;
+    return `<text class="chart-label-strong" x="${left - 10}" y="${yy + 15}" text-anchor="end">${esc(modelLabel(model.id))}</text><rect class="comparison-gap-bar ${isFocus ? "is-focus" : ""}" x="${left}" y="${yy}" width="${barWidth}" height="18" rx="3" fill="${style.color}" stroke="${isFocus ? "#050505" : "none"}" stroke-width="${isFocus ? 2 : 0}" style="--bar-delay:${index * 70}ms"><title>${esc(modelLabel(model.id))} · ${fmt(value, 3)} years unseen-cohort gap</title></rect><text class="chart-label-strong" x="${left + barWidth + 7}" y="${yy + 14}">${fmt(value, 2)}</text>`;
+  }).join("");
+  target.innerHTML = `<svg class="svg-chart comparison-gap-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Unseen minus seen MAE model comparison at ${budget} labels">${grid}${bars}</svg>`;
+}
+
+function renderComparisonPreview() {
+  const preview = state.comparisonPreview;
+  if (!preview) return;
+  const budget = Number($("#comparison-budget").value) || 50;
+  const visible = state.comparisonVisibleModels;
+  const domain = comparisonDomain(preview.rows, preview.models);
+  $("#comparison-output").hidden = false;
+  $("#comparison-empty").hidden = true;
+  $("#comparison-gap-budget").textContent = `N = ${budget}`;
+  const foundation = preview.models.filter((model) => model.checkpointRequired);
+  const readyCheckpoints = foundation.filter((model) => model.checkpointReady).length;
+  const requiredInputs = state.summary?.readiness?.checks?.filter((item) => item.required !== false) || [];
+  const readyInputs = requiredInputs.filter((item) => item.ready).length;
+  $("#comparison-stats").innerHTML = [
+    ["Configured profiles", `${preview.models.length} / ${preview.models.length}`],
+    ["Foundation checkpoints", `${readyCheckpoints} / ${foundation.length}`],
+    ["Required study inputs", `${readyInputs} / ${requiredInputs.length || 3}`],
+    ["Preview rows saved", "0 · memory only"]
+  ].map(([label, value]) => `<div class="comparison-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+  $("#comparison-legend").innerHTML = preview.models.map((model, index) => {
+    const style = comparisonStyles[index % comparisonStyles.length];
+    const pressed = visible.includes(model.id);
+    const localStatus = model.checkpointRequired && !model.checkpointReady ? "checkpoint missing · simulated" : model.available === false ? "configuration unavailable · simulated" : "profile simulated";
+    const pattern = style.dash ? `repeating-linear-gradient(90deg,${style.color} 0 4px,transparent 4px 7px)` : style.color;
+    const isFocus = model.id === preview.focusModel;
+    return `<button type="button" class="comparison-model-filter ${pressed ? "" : "is-muted"} ${isFocus ? "is-focus" : ""}" data-comparison-model="${esc(model.id)}" aria-pressed="${pressed}" title="${esc(localStatus)}"><span class="comparison-model-swatch" style="--model-color:${style.color};--model-pattern:${pattern}"></span><span>${esc(modelLabel(model.id))}</span>${isFocus ? '<span class="comparison-focus-mark">FOCUS</span>' : ""}</button>`;
+  }).join("");
+  makeComparisonLineChart("#comparison-seen-chart", preview.rows, preview.models, visible, "seen_mae", domain, preview.focusModel);
+  makeComparisonLineChart("#comparison-unseen-chart", preview.rows, preview.models, visible, "unseen_mae", domain, preview.focusModel);
+  makeComparisonGapChart("#comparison-gap-chart", preview.rows, preview.models, visible, budget, preview.focusModel);
+  $("#comparison-table-body").innerHTML = preview.models.map((model) => {
+    const seen = comparisonMean(preview.rows, model.id, budget, "seen_mae"), unseen = comparisonMean(preview.rows, model.id, budget, "unseen_mae");
+    const status = model.checkpointRequired && !model.checkpointReady ? "Checkpoint missing · simulated" : model.available === false ? "Config unavailable · simulated" : "Weights not loaded · simulated";
+    return `<tr class="${visible.includes(model.id) ? "" : "comparison-row-muted"} ${model.id === preview.focusModel ? "comparison-row-focus" : ""}"><td><strong>${esc(modelLabel(model.id))}${model.id === preview.focusModel ? " · focus" : ""}</strong></td><td><span class="comparison-status-pill">${esc(status)}</span></td><td>${fmt(seen, 2)} y</td><td>${fmt(unseen, 2)} y</td><td>${fmt(unseen - seen, 2)} y</td></tr>`;
+  }).join("");
+}
+
+async function startComparisonPreview() {
+  const button = $("#run-all-models-button");
+  const progress = $("#comparison-progress");
+  const title = $("#comparison-progress-title");
+  const step = $("#comparison-progress-step");
+  const copy = $("#comparison-progress-copy");
+  const fill = $("#comparison-progress-fill");
+  const stages = [
+    ["Checking configured model profiles", "6 configurations found · no checkpoint downloads"],
+    ["Building the synthetic comparison", "30 model × label-budget curves generated in memory"],
+    ["Drawing the comparison windows", "Seen, unseen, and cohort-gap views are ready"]
+  ];
+  const modelId = $("#run-model").value || "brainiac";
+  const chosenBudget = Number($("#run-budget").value);
+  const budget = chosenBudget > 0 ? chosenBudget : 500;
+  const models = (state.config?.models || Object.keys(modelLabels).map((id) => ({ id, available: false, checkpointRequired: true, checkpointReady: false }))).map((model) => typeof model === "string" ? { id: model, available: true } : model);
+  const modelIds = new Set(models.map((model) => model.id));
+  button.disabled = true;
+  button.classList.add("is-running");
+  button.innerHTML = 'Building comparison <span class="button-spinner" aria-hidden="true"></span>';
+  progress.hidden = false;
+  $("#comparison-output").hidden = true;
+  $("#comparison-empty").hidden = true;
+  fill.style.width = "8%";
+  try {
+    for (let index = 0; index < stages.length; index += 1) {
+      title.textContent = stages[index][0];
+      step.textContent = `${index + 1} / ${stages.length}`;
+      copy.textContent = stages[index][1];
+      fill.style.width = `${[31, 68, 94][index]}%`;
+      await new Promise((resolve) => setTimeout(resolve, 110));
+    }
+    const profiles = buildModelProjections({ focusModel: modelId });
+    state.comparisonPreview = {
+      rows: profiles.rows.filter((row) => modelIds.has(row.model_id)),
+      models,
+      focusModel: modelId,
+      generatedAt: new Date().toISOString()
+    };
+    state.comparisonVisibleModels = models.map((model) => model.id);
+    $("#comparison-budget").value = String(budget);
+    fill.style.width = "100%";
+    title.textContent = "Comparison ready · synthetic only";
+    step.textContent = `${models.length} / ${models.length} profiles`;
+    copy.textContent = "No model weights were executed and no files were saved. Use the single-cell runner for an actual harness run.";
+    $(".comparison-live-badge").innerHTML = "<i></i>PREVIEW READY";
+    renderComparisonPreview();
+    $("#comparison-output").classList.remove("is-live");
+    requestAnimationFrame(() => $("#comparison-output").classList.add("is-live"));
+    $("#comparison-workspace").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    button.innerHTML = 'Run instant comparison again <span aria-hidden="true">↻</span>';
+    showToast("Synthetic model comparison ready · nothing was saved.");
+  } catch (error) {
+    title.textContent = "Comparison could not be rendered";
+    copy.textContent = error.message;
+    $("#comparison-empty").hidden = false;
+    button.innerHTML = 'Try the instant comparison again <span aria-hidden="true">↻</span>';
+  } finally {
+    button.disabled = false;
+    button.classList.remove("is-running");
+  }
 }
 
 function resultMetric(row, metric, cohort) {
@@ -957,25 +1136,28 @@ function setRunMode() {
   const submit=$("#run-submit"),note=$("#run-mode-note"),trials=$("#run-trials");
   const smoke=[...trials.options].find((option)=>option.value==="2");
   if(mode==="observed"){
-    submit.innerHTML="Start observed cell <span aria-hidden=\"true\">→</span>";
+    submit.innerHTML="Run one observed cell <span aria-hidden=\"true\">→</span>";
     note.textContent="Observed runs use the real frozen split, metadata and cache. The ledger marks the cell observed.";
     if(smoke)smoke.disabled=true;
     if(trials.value==="2")trials.value="5";
   }else{
-    submit.innerHTML="Start synthetic smoke run <span aria-hidden=\"true\">→</span>";
+    submit.innerHTML="Run one synthetic harness cell <span aria-hidden=\"true\">↗</span>";
     note.textContent="Synthetic output checks the harness only; it is excluded from every scientific analysis.";
     if(smoke)smoke.disabled=false;
   }
 }
 
 function showJob(job) {
-  $("#job-card").hidden=false;
+  const card=$("#job-card");card.hidden=false;card.dataset.status=job.status;
   const labels={queued:"Queued",running:"Running",completed:"Completed",failed:"Failed"};
   $("#job-state-label").textContent=labels[job.status]||job.status;
   $("#job-state-dot").className=`job-state-dot ${job.status==="running"?"is-running":job.status==="completed"?"is-completed":job.status==="failed"?"is-failed":""}`;
   $("#job-id").textContent=job.id?`#${job.id}`:"";
   const description=job.mode==="analysis"?`Observed ${modelLabel(job.modelId)} vs ${modelLabel(job.baseModel)} · ${job.trials} bootstrap resamples`:job.mode==="mock-suite"?"Synthetic PPMI/HBN/NKI fast suite · local outputs":`${job.mode==="mock"?"Synthetic run":"Observed"} · ${modelLabel(job.modelId)} · N=${job.nLabels==="all"?"all":job.nLabels} · ${job.trials} trials`;
   $("#job-description").textContent=description;
+  const progressHint={queued:"The local runner accepted this cell and is starting it.",running:"The local runner is active; no percentage is reported by the process.",completed:"The local process finished and saved its output.",failed:"The local process stopped before producing a complete output."};
+  $("#job-progress-hint").textContent=progressHint[job.status]||"Checking local runner status…";
+  $("#job-progress-fill").textContent="";
   const log=$("#job-log");log.textContent=job.log||job.error||"Waiting for the local process…";log.hidden=!job.log&&!job.error&&job.status!=="failed";
   if(job.status==="completed"||job.status==="failed"){
     state.jobId=null;
@@ -1141,12 +1323,23 @@ document.addEventListener("DOMContentLoaded",async()=>{
   window.addEventListener("hashchange",()=>goToPage(location.hash.slice(1),false));
   $("#refresh-button").addEventListener("click",refreshAll);
   $("#generate-estimates-button").addEventListener("click",toggleProjectionMode);
+  $("#run-all-models-button").addEventListener("click",startComparisonPreview);
+  $("#comparison-budget").addEventListener("change",renderComparisonPreview);
+  $("#comparison-legend").addEventListener("click",(event)=>{
+    const button=event.target.closest("[data-comparison-model]");if(!button||!state.comparisonPreview)return;
+    const modelId=button.dataset.comparisonModel;
+    state.comparisonVisibleModels=state.comparisonVisibleModels.includes(modelId)?state.comparisonVisibleModels.filter((id)=>id!==modelId):[...state.comparisonVisibleModels,modelId];
+    renderComparisonPreview();
+  });
   $("#run-form").addEventListener("submit",startRun);
   $("#legacy-suite-button").addEventListener("click",startLegacySuite);
   $$('input[name="mode"]').forEach((input)=>input.addEventListener("change",setRunMode));
   $("#results-scope").addEventListener("change",renderResults);
   $("#focus-model").addEventListener("change",()=>refreshModelProjection("focus"));
-  $("#run-model").addEventListener("change",()=>refreshModelProjection("runner"));
+  $("#run-model").addEventListener("change",()=>{
+    refreshModelProjection("runner");
+    if(state.comparisonPreview){state.comparisonPreview.focusModel=$("#run-model").value;renderComparisonPreview();}
+  });
   $("#results-model-filter").addEventListener("change",()=>state.projectionMode?refreshModelProjection("results"):renderResults());
   $("#results-metric").addEventListener("change",renderResults);
   $("#export-csv").addEventListener("click",exportCsv);

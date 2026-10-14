@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0b0b0b">
   <meta name="description" content="A local research workspace for auditable brain MRI foundation-model evaluation.">
   <title>Seen It Before — Research workspace</title>
-  <link rel="stylesheet" href="styles.css?v=single-hero-responsive-20261014">
-  <script src="app.js?v=projection-clear-and-scale-20261014" defer></script>
+  <link rel="stylesheet" href="styles.css?v=runner-comparison-final-v3-20261014">
+  <script src="app.js?v=instant-model-sweep-final-v2-20261014" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -149,7 +149,7 @@
         </section>
 
         <section class="page" id="page-benchmark" data-page="benchmark" aria-labelledby="benchmark-title" hidden>
-          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span>02 / execution</div><h1 id="benchmark-title">Benchmark runner</h1><p>Launch one configured T1 cell or a separate fast synthetic legacy suite. Every job shows its status and output location.</p></div><span class="local-only-pill"><span class="status-square"></span>LOCAL ONLY</span></div>
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span>02 / execution</div><h1 id="benchmark-title">Benchmark runner</h1><p>Compare all six model profiles instantly, or submit one configured T1 cell to the local runner. Synthetic previews are separate from saved results.</p></div><span class="local-only-pill"><span class="status-square"></span>LOCAL ONLY</span></div>
           <div class="runner-grid">
             <section class="panel run-panel" aria-labelledby="run-form-title">
               <div class="panel-head"><div><div class="panel-kicker">T1 · AOMIC brain age</div><h2 id="run-form-title">Configure one evaluation cell</h2></div><span class="source-tag">run_cell.py</span></div>
@@ -166,10 +166,11 @@
                   <label class="field-full">Tuning trials<select id="run-trials" name="trials"><option value="2">2 · smoke</option><option value="5">5 · low</option><option value="20">20 · medium</option><option value="50">50 · high</option></select></label>
                 </div>
                 <p class="run-note" id="run-mode-note">Synthetic output checks the harness only; it is excluded from every scientific analysis.</p>
-                <button class="button button-primary run-submit" id="run-submit" type="submit">Start synthetic smoke run <span aria-hidden="true">→</span></button>
+                <button class="button button-primary run-submit" id="run-all-models-button" type="button">Run instant synthetic comparison <span aria-hidden="true">→</span></button>
+                <button class="button button-secondary run-submit run-submit-single" id="run-submit" type="submit">Run one synthetic harness cell <span aria-hidden="true">↗</span></button>
                 <div class="run-error" id="run-error" role="alert" hidden></div>
               </form>
-              <div class="job-card" id="job-card" hidden><div class="job-card-head"><span class="job-state-dot" id="job-state-dot"></span><strong id="job-state-label">Queued</strong><span class="job-id" id="job-id"></span></div><p id="job-description"></p><pre class="job-log" id="job-log" hidden></pre></div>
+              <div class="job-card" id="job-card" hidden><div class="job-card-head"><span class="job-state-dot" id="job-state-dot"></span><strong id="job-state-label">Queued</strong><span class="job-id" id="job-id"></span></div><div class="job-progress" aria-hidden="true"><span class="job-progress-fill" id="job-progress-fill"></span></div><p id="job-description"></p><p class="job-progress-hint" id="job-progress-hint">Local runner status</p><pre class="job-log" id="job-log" hidden></pre></div>
               <div class="required-inputs"><h3>Observed-data requirements</h3><ul id="run-readiness-list"><li>Checking local inputs…</li></ul></div>
             </section>
             <aside class="runner-side">
@@ -179,6 +180,32 @@
               <article class="panel dark-panel"><div class="panel-kicker">Interpretation</div><h3>Synthetic runs check the pipeline</h3><p>Generated metrics help check that the software runs. They never count as participant results and are not used for DiD, label equivalence or Pareto summaries.</p></article>
             </aside>
           </div>
+          <section class="panel comparison-workspace" aria-labelledby="comparison-title">
+            <div class="comparison-heading">
+              <div><div class="panel-kicker">INSTANT · IN-MEMORY · SYNTHETIC</div><h2 id="comparison-title">Compare every configured model</h2><p>Build all six model-profile curves in under a second. Missing checkpoints and study inputs are represented by scenario values; no trained weights or participant data are loaded.</p></div>
+              <span class="comparison-live-badge"><i></i>READY TO RUN</span>
+            </div>
+            <div class="comparison-progress" id="comparison-progress" hidden aria-live="polite">
+              <div class="comparison-progress-head"><strong id="comparison-progress-title">Preparing comparison</strong><span id="comparison-progress-step">1 / 3</span></div>
+              <div class="comparison-progress-track"><span id="comparison-progress-fill"></span></div>
+              <p id="comparison-progress-copy">Reading the configured model profiles…</p>
+            </div>
+            <div class="comparison-output" id="comparison-output" hidden>
+              <div class="comparison-stats" id="comparison-stats"></div>
+              <div class="comparison-controls">
+                <div><div class="panel-kicker">MODEL TRACES</div><div class="comparison-legend" id="comparison-legend"></div></div>
+                <label class="comparison-budget-control"><span>COMPARE AT</span><strong>Label budget</strong><select id="comparison-budget"><option value="25">25 labels</option><option value="50" selected>50 labels</option><option value="100">100 labels</option><option value="250">250 labels</option><option value="500">500 labels</option></select></label>
+              </div>
+              <div class="comparison-chart-grid">
+                <article class="panel chart-panel comparison-chart-panel"><div class="panel-head"><div><div class="panel-kicker">SYNTHETIC PROFILE SWEEP</div><h3>Seen-cohort learning curves</h3></div><span class="source-tag">MAE · years</span></div><div class="chart-box comparison-chart-box" id="comparison-seen-chart"></div><p class="chart-caption">One shared vertical scale across every model. Label budgets use a log₂ horizontal scale.</p></article>
+                <article class="panel chart-panel comparison-chart-panel"><div class="panel-head"><div><div class="panel-kicker">SYNTHETIC PROFILE SWEEP</div><h3>Unseen-cohort learning curves</h3></div><span class="source-tag">MAE · years</span></div><div class="chart-box comparison-chart-box" id="comparison-unseen-chart"></div><p class="chart-caption">These assumption profiles illustrate comparisons; they are not measured validation results.</p></article>
+                <article class="panel chart-panel comparison-chart-panel comparison-gap-panel"><div class="panel-head"><div><div class="panel-kicker">SELECTED LABEL BUDGET</div><h3>Unseen-cohort error gap</h3></div><span class="source-tag" id="comparison-gap-budget">N = 50</span></div><div class="chart-box comparison-gap-chart-box" id="comparison-gap-chart"></div><p class="chart-caption">Unseen MAE minus seen MAE for each model profile at the selected budget.</p></article>
+                <article class="panel comparison-table-panel"><div class="panel-kicker">MODEL-BY-MODEL DETAILS</div><h3>Profile values at selected budget</h3><div class="table-wrap"><table><thead><tr><th>Model</th><th>Local status</th><th>Seen MAE</th><th>Unseen MAE</th><th>Gap</th></tr></thead><tbody id="comparison-table-body"><tr><td colspan="5" class="empty-cell">Run the instant comparison to fill this table.</td></tr></tbody></table></div></article>
+              </div>
+            </div>
+            <div class="comparison-empty" id="comparison-empty"><span class="comparison-empty-orbit" aria-hidden="true"></span><div><strong>Three comparison windows are ready</strong><p>The run is local, takes less than a second, and stays separate from saved results.</p></div><span class="comparison-empty-index">06 × 05</span></div>
+            <p class="comparison-provenance"><span>SIMULATION ONLY</span> This is an interface preview generated from explicit assumptions. It does not execute model weights, read study inputs, or create result files.</p>
+          </section>
         </section>
 
         <section class="page" id="page-results" data-page="results" aria-labelledby="results-title" hidden>
