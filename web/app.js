@@ -7,6 +7,9 @@ const state = {
   results: [],
   filteredResults: [],
   legacy: [],
+  archive: null,
+  archiveGroup: "all",
+  archiveSearch: "",
   correlation: null,
   preprocessing: null,
   qc: null,
@@ -908,6 +911,120 @@ function renderResults() {
   $("#results-table-body").innerHTML = cellTable.length ? cellTable.map((row)=>`<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td>${esc(taskLabels[row.task_id]||row.task_id||"—")}</td><td><strong>${esc(modelLabel(row.model_id))}</strong></td><td>${esc(row.n_labels ?? "—")}</td><td>${esc(row.seed ?? "—")}</td><td>${esc(row.trial_budget ?? row.trials ?? "—")}</td><td>${fmt(row.seen_mae,3)}</td><td>${fmt(row.unseen_mae,3)}</td><td>${fmt(numeric(row.total_gpu_seconds) === null ? (numeric(row.total_gpu_hours)===null?null:Number(row.total_gpu_hours)*3600) : row.total_gpu_seconds,1)} s</td></tr>`).join("") : `<tr><td colspan="9" class="empty-cell">No ${esc(statusLabel(scope).toLowerCase())} final evaluation rows found. A missing table is not a zero result.</td></tr>`;
   renderLegacyFolds();
   renderLegacyCV();
+  renderArchive(state.archive);
+}
+
+function archiveTimestamp(value) {
+  return value ? String(value).replace("T", " ").replace(/Z$/, " UTC") : "Timestamp not recorded";
+}
+
+function archiveTimeline(run) {
+  return (run.records || []).map((record) => {
+    const time = archiveTimestamp(record.timestamp);
+    if (record.record_type === "tuning_trial") {
+      const trial = numeric(record.trial_number);
+      const trialLabel = trial === null ? "Trial" : `Trial ${trial + 1}${record.trial_budget ? ` of ${record.trial_budget}` : ""}`;
+      const duration = numeric(record.sweep_seconds);
+      const params = record.best_hyperparams ? `\n  Parameters: ${record.best_hyperparams}` : "";
+      return `${time}  ${trialLabel} · ${record.primary_metric_name || "validation metric"} ${fmt(record.primary_metric_val, 3)}${duration === null ? "" : ` · ${fmt(duration, 2)} s`}${params}`;
+    }
+    if (record.record_type === "final_evaluation") {
+      const compute = numeric(record.total_gpu_seconds);
+      return `${time}  Final evaluation · seen MAE ${fmt(record.seen_mae, 3)} y · unseen MAE ${fmt(record.unseen_mae, 3)} y${compute === null ? "" : ` · ${fmt(compute, 2)} GPU s`}`;
+    }
+    return `${time}  ${record.record_type || "Saved record"}`;
+  }).join("\n");
+}
+
+function renderArchiveHistory(archive) {
+  const target = $("#archive-history-list");
+  const jobs = archive.jobs || [];
+  const runs = (archive.runs || []).filter((run) => run.records?.length);
+  const jobCards = jobs.map((job) => {
+    const title = job.mode === "mock-suite" ? "Synthetic pipeline analysis" : `${modelLabel(job.modelId)} · ${taskLabels[job.taskId] || job.taskId || "Research run"}`;
+    const status = job.status || "saved";
+    const note = job.logCoverage ? `\n${job.logCoverage}` : "";
+    const log = job.log || "No saved process output is available for this run.";
+    const logLink = job.logPath ? `<a class="archive-file-link" href="/api/artifact?path=${encodeURIComponent(job.logPath)}" target="_blank" rel="noopener">Open saved log file ↗</a>` : "";
+    return `<details class="archive-history-card"><summary><span class="archive-history-title"><strong>${esc(title)}</strong><small>${esc(archiveTimestamp(job.createdAt))}</small></span><span class="status-pill">${esc(statusLabel(status))}</span></summary><div class="archive-history-body"><div class="archive-history-meta">${esc(job.mode === "mock" || job.mode === "mock-suite" ? "Synthetic run" : job.mode === "observed" ? "Observed run" : "Analysis job")} · ${esc(status)} · ${esc(job.id || "Saved job")}</div>${logLink}<pre class="archive-log-output">${esc(log + note)}</pre></div></details>`;
+  });
+  const ledgerCards = runs.map((run) => {
+    const final = [...run.records].reverse().find((record) => record.record_type === "final_evaluation");
+    const type = run.dataStatus === "mock" ? "Synthetic ledger records" : run.dataStatus === "observed" ? "Observed ledger records" : "Unverified ledger records";
+    const result = final ? `Seen ${fmt(final.seen_mae, 3)} y · unseen ${fmt(final.unseen_mae, 3)} y` : "Final evaluation not recorded";
+    return `<details class="archive-history-card"><summary><span class="archive-history-title"><strong>${esc(run.label)} · ${esc(modelLabel(run.modelId))}</strong><small>${esc(archiveTimestamp(run.startedAt))} · ${esc(type)}</small></span><span class="status-pill">${esc(run.complete ? "Evaluation saved" : "Incomplete")}</span></summary><div class="archive-history-body"><div class="archive-history-meta">${esc(taskLabels[run.taskId] || run.taskId || "Task not recorded")} · N=${esc(run.nLabels ?? "—")} · seed ${esc(run.seed ?? "—")} · ${esc(result)}</div><div class="archive-history-meta">Source rows ${esc(run.firstRow ?? "—")}–${esc(run.lastRow ?? "—")} in ${esc(run.source)}. These legacy run groups are reconstructed from matching task, model, budget, seed, and ledger order; their original job IDs were not saved.</div><pre class="archive-log-output">${esc(archiveTimeline(run))}</pre>${run.records.map((record) => record.best_hyperparams ? `<details class="archive-params"><summary>Trial parameters · ${esc(record.trial_number ?? "trial")}</summary><pre>${esc(record.best_hyperparams)}</pre></details>` : "").join("")}</div></details>`;
+  });
+  target.innerHTML = jobCards.concat(ledgerCards).join("") || `<div class="empty-state"><strong>No saved execution log or ledger rows</strong><p>Run history will appear here as the project records new outputs.</p></div>`;
+}
+
+function renderArchiveRecords(archive) {
+  const rows = archive.records || [];
+  const target = $("#archive-record-table-body");
+  $("#archive-record-status").textContent = `${rows.length} ledger rows · every saved field available`;
+  target.innerHTML = rows.length ? rows.map((row) => {
+    const trialNumber = numeric(row.trial_number);
+    const trialLabel = row.record_type === "tuning_trial" && trialNumber !== null ? `${trialNumber + 1} / ${row.trial_budget ?? "—"}` : row.trial_budget ?? row.trials ?? "—";
+    const compute = numeric(row.total_gpu_seconds);
+    const value = numeric(row.primary_metric_val);
+    return `<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td>${esc(humanize(row.record_type || "record"))}</td><td>${esc(taskLabels[row.task_id] || row.task_id || "—")}</td><td><strong>${esc(modelLabel(row.model_id))}</strong></td><td>${esc(row.n_labels ?? "—")}</td><td>${esc(row.seed ?? "—")}</td><td>${esc(trialLabel)}</td><td>${esc(row.primary_metric_name || "—")}</td><td>${value === null ? "—" : fmt(value, 4)}</td><td>${fmt(row.seen_mae, 3)}</td><td>${fmt(row.unseen_mae, 3)}</td><td>${compute === null ? "—" : `${fmt(compute, 2)} s`}</td><td>${esc(row.timestamp || "—")}</td><td><details class="record-json"><summary>Full row</summary><pre>${esc(JSON.stringify(row, null, 2))}</pre></details></td></tr>`;
+  }).join("") : `<tr><td colspan="14" class="empty-cell">No persisted ledger rows are available. A missing row is not a zero result.</td></tr>`;
+}
+
+function renderArchiveFiles(archive) {
+  const search = state.archiveSearch.trim().toLowerCase();
+  const group = state.archiveGroup;
+  const files = (archive.artifacts || []).filter((item) => {
+    if (group !== "all" && item.collection !== group) return false;
+    return !search || `${item.name} ${item.kind} ${item.bundle} ${item.dataStatus}`.toLowerCase().includes(search);
+  });
+  $("#archive-file-status").textContent = `${files.length} of ${(archive.artifacts || []).length} files`;
+  const target = $("#archive-file-grid");
+  if (!files.length) {
+    target.innerHTML = `<div class="empty-state"><strong>No saved files match</strong><p>Change the file group or search text.</p></div>`;
+    return;
+  }
+  target.innerHTML = files.map((item) => {
+    const size = item.sizeBytes >= 1_000_000 ? `${(item.sizeBytes / 1_000_000).toFixed(1)} MB` : item.sizeBytes >= 1_000 ? `${(item.sizeBytes / 1_000).toFixed(1)} KB` : `${item.sizeBytes} B`;
+    const arrayInfo = item.arrayShape ? ` · ${item.arrayShape.join(" × ")} · ${esc(item.dtype || "array")}` : "";
+    const image = item.kind === "figure" && /\.(png|jpe?g|svg)$/i.test(item.name) ? `<a class="archive-image-preview" href="${esc(item.url)}" target="_blank" rel="noopener"><img src="${esc(item.url)}" alt="Saved research figure ${esc(item.name)}" loading="lazy"></a>` : "";
+    const previewRows = item.previewRows || [];
+    const csvPreview = previewRows.length ? `<details class="archive-file-preview"><summary>Preview first ${previewRows.length} of ${item.rowCount} rows</summary><div class="table-wrap"><table><thead><tr>${Object.keys(previewRows[0]).map((key) => `<th>${esc(key)}</th>`).join("")}</tr></thead><tbody>${previewRows.map((row) => `<tr>${Object.keys(previewRows[0]).map((key) => `<td>${esc(row[key] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div></details>` : "";
+    const textPreview = item.textPreview ? `<details class="archive-file-preview"><summary>Read saved contents</summary><pre class="archive-log-output">${esc(item.textPreview)}</pre></details>` : "";
+    const linkLabel = item.kind === "figure" && item.name.toLowerCase().endsWith(".pdf") ? "Open PDF" : item.kind === "raw array" || item.kind === "ledger" ? "Download full data" : "Open or download";
+    return `<article class="archive-file-card"><div class="archive-file-card-top"><span class="source-tag">${esc(item.kind)}</span><span class="status-pill">${esc(item.collection === "verification" ? "Verification" : statusLabel(item.dataStatus))}</span></div><h3>${esc(item.name)}</h3><p class="archive-file-bundle">${esc(item.bundle)}</p><div class="archive-file-meta">${size}${esc(arrayInfo)} · ${esc(archiveTimestamp(item.modifiedAt))}</div>${image}<div class="archive-file-actions"><a class="archive-file-link" href="${esc(item.url)}" ${item.kind === "figure" ? 'target="_blank" rel="noopener"' : 'download'}>${linkLabel} ↗</a></div>${csvPreview}${textPreview}</article>`;
+  }).join("");
+}
+
+function renderArchive(archive) {
+  if (!archive) return;
+  const records = archive.records || [];
+  const finalCount = records.filter((row) => row.record_type === "final_evaluation" && row.data_status === "mock").length;
+  const tuningCount = records.filter((row) => row.record_type === "tuning_trial").length;
+  const figureCount = (archive.artifacts || []).filter((item) => item.kind === "figure").length;
+  const observedCount = archive.statusCounts?.observed || 0;
+  const syntheticCount = archive.statusCounts?.mock || 0;
+  const stats = [
+    ["Observed ledger rows", observedCount, observedCount ? "Observed source status" : "No observed study results saved"],
+    ["Synthetic evaluations", finalCount, `${syntheticCount} total synthetic ledger rows`],
+    ["Tuning trial rows", tuningCount, "Validation values and saved parameters"],
+    ["Saved files", (archive.artifacts || []).length, `${figureCount} figures · raw files included`]
+  ];
+  $("#archive-stats").innerHTML = stats.map(([label, value, caption], index) => `<article class="archive-stat-card"><span class="archive-stat-index">0${index + 1}</span><span class="archive-stat-label">${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(caption)}</small></article>`).join("");
+  $("#archive-refresh-status").textContent = `${records.length} rows · ${(archive.artifacts || []).length} saved files`;
+  const tuningByRun = (archive.runs || []).map((run, index) => ({
+    name: `Run ${String(index + 1).padStart(2, "0")}`,
+    values: run.records.filter((row) => row.record_type === "tuning_trial").map((row) => ({ x: (numeric(row.trial_number) ?? 0) + 1, value: numeric(row.primary_metric_val) }))
+  })).filter((series) => series.values.length);
+  const tuningPoints = tuningByRun.reduce((sum, series) => sum + series.values.length, 0);
+  $("#archive-trace-status").textContent = tuningPoints ? `${tuningPoints} saved trial values` : "No tuning rows";
+  if (tuningByRun.length) makeLineChart("#archive-trial-chart", tuningByRun, [], "validation loss");
+  else emptyChart("#archive-trial-chart", "T", "No tuning-trial history", "A tuning curve appears when the ledger contains saved trial values.");
+  const rawLogs = (archive.jobs || []).filter((job) => job.log || job.logPath).length;
+  $("#archive-log-status").textContent = `${rawLogs} process logs · ${(archive.runs || []).length} ledger segments`;
+  $("#archive-log-note").textContent = archive.logNote || "Run details come from files recorded in the project.";
+  renderArchiveHistory(archive);
+  renderArchiveRecords(archive);
+  renderArchiveFiles(archive);
 }
 
 function legacyRows(kind) {
@@ -1202,13 +1319,17 @@ function downloadBlob(filename,content,type){
 
 function exportCsv(){
   if(state.projectionMode)return showToast("Model projections cannot be exported as study results.");
-  const rows=state.filteredResults;if(!rows.length)return;
-  const columns=["data_status","task_id","model_id","n_labels","seed","trial_budget","seen_mae","unseen_mae","contamination_gap","total_gpu_seconds"];
+  const rows=state.archive?.records||[];if(!rows.length)return showToast("No saved ledger rows are available to export.");
+  const columns=[...new Set(rows.flatMap((row)=>Object.keys(row)))];
   const quote=(value)=>`"${String(value??"").replaceAll('"','""')}"`;
-  downloadBlob(`seen-it-before-${state.scope}-results.csv`,[columns.join(","),...rows.map(row=>columns.map(key=>quote(row[key])).join(","))].join("\r\n"),"text/csv;charset=utf-8");
+  downloadBlob("seen-it-before-complete-ledger.csv",[columns.join(","),...rows.map(row=>columns.map(key=>quote(row[key])).join(","))].join("\r\n"),"text/csv;charset=utf-8");
 }
 
-function exportJson(){if(state.projectionMode)return showToast("Model projections cannot be exported as study results.");if(state.filteredResults.length)downloadBlob(`seen-it-before-${state.scope}-results.json`,JSON.stringify(state.filteredResults,null,2),"application/json");}
+function exportJson(){
+  if(state.projectionMode)return showToast("Model projections cannot be exported as study results.");
+  if(!state.archive)return showToast("The saved research archive is still loading.");
+  downloadBlob("seen-it-before-research-archive.json",JSON.stringify(state.archive,null,2),"application/json");
+}
 
 async function copyText(text,button){
   try{await navigator.clipboard.writeText(text);const label=button.textContent;button.textContent="Copied";setTimeout(()=>button.textContent=label,1300);}
@@ -1237,7 +1358,7 @@ async function refreshAll(){
   const button=$("#refresh-button");button.classList.add("is-loading");
   const tasks=[
     ["summary",api("/api/summary")],["config",api("/api/config")],["audit",api("/api/audit")],
-    ["results",api("/api/results?scope=all")],["legacy",api("/api/legacy-results")],["correlation",api("/api/correlation")],
+    ["results",api("/api/results?scope=all")],["archive",api("/api/archive")],["legacy",api("/api/legacy-results")],["correlation",api("/api/correlation")],
     ["preprocessing",api("/api/preprocessing")],["qc",api("/api/qc")],["did",api("/api/analysis/did")],["pareto",api("/api/analysis/pareto")]
   ];
   try{
@@ -1248,6 +1369,7 @@ async function refreshAll(){
     if(values.config)updateConfig(values.config);
     if(values.audit)renderAudit(values.audit);
     if(values.results){state.results=values.results.rows||[];renderResults();}
+    if(values.archive){state.archive=values.archive;renderArchive(values.archive);}
     if(values.legacy)state.legacy=values.legacy.artifacts||[];
     if(values.correlation)renderCorrelation(values.correlation);
     if(values.preprocessing)renderPreprocessing(values.preprocessing);
@@ -1335,6 +1457,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   $("#legacy-suite-button").addEventListener("click",startLegacySuite);
   $$('input[name="mode"]').forEach((input)=>input.addEventListener("change",setRunMode));
   $("#results-scope").addEventListener("change",renderResults);
+  $("#archive-group-filter").addEventListener("change",(event)=>{state.archiveGroup=event.currentTarget.value;renderArchiveFiles(state.archive||{});});
+  $("#archive-file-search").addEventListener("input",(event)=>{state.archiveSearch=event.currentTarget.value;renderArchiveFiles(state.archive||{});});
   $("#focus-model").addEventListener("change",()=>refreshModelProjection("focus"));
   $("#run-model").addEventListener("change",()=>{
     refreshModelProjection("runner");

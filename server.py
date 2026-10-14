@@ -11,7 +11,9 @@ import argparse
 import csv
 import json
 import math
+import mimetypes
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -21,12 +23,13 @@ from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 WEB_ROOT = PROJECT_ROOT / "web"
 DATA_ROOT = PROJECT_ROOT / "data"
 RESULTS_ROOT = PROJECT_ROOT / "results"
+RESULTS_TEST_ROOT = PROJECT_ROOT / "results_test"
 DEFAULT_TASK = "t1_aomic_age"
 DEFAULT_SPLITS = PROJECT_ROOT / "data" / "splits" / "t1_aomic_age_splits.json"
 DEFAULT_METADATA = PROJECT_ROOT / "data" / "metadata" / "aomic_scans.csv"
@@ -96,6 +99,225 @@ def _ledger_rows() -> list[dict[str, Any]]:
         except Exception:
             pass
     return [_json_safe(row) for row in rows]
+
+
+def _archive_records() -> list[dict[str, Any]]:
+    """Return every persisted ledger row, including tuning trials."""
+    records: list[dict[str, Any]] = []
+    csv_paths = sorted(RESULTS_ROOT.rglob("results.csv")) if RESULTS_ROOT.is_dir() else []
+    csv_set = set(csv_paths)
+    for path in csv_paths:
+        source = path.relative_to(PROJECT_ROOT).as_posix()
+        status_from_path = "mock" if "mock" in path.relative_to(RESULTS_ROOT).parts else "unverified"
+        for source_row, row in enumerate(_read_csv(path), start=2):
+            status = str(row.get("data_status") or status_from_path).strip().lower()
+            row["data_status"] = status if status in {"observed", "mock"} else "unverified"
+            row["ledger"] = source
+            row["source_row"] = source_row
+            records.append(_json_safe(row))
+
+    # Read a parquet-only ledger if its CSV counterpart is absent. When both
+    # exist, CSV is authoritative and avoids counting the same rows twice.
+    parquet_paths = sorted(RESULTS_ROOT.rglob("results.parquet")) if RESULTS_ROOT.is_dir() else []
+    for path in parquet_paths:
+        if path.with_suffix(".csv") in csv_set:
+            continue
+        try:
+            import pandas as pd
+
+            frame = pd.read_parquet(path)
+        except Exception:
+            continue
+        source = path.relative_to(PROJECT_ROOT).as_posix()
+        for source_row, row in enumerate(frame.to_dict(orient="records"), start=1):
+            status = str(row.get("data_status") or ("mock" if "mock" in path.parts else "unverified")).strip().lower()
+            row["data_status"] = status if status in {"observed", "mock"} else "unverified"
+            row["ledger"] = source
+            row["source_row"] = source_row
+            records.append(_json_safe(row))
+    return records
+
+
+def _archive_run_segments(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Reconstruct ledger runs from row order and their recorded settings."""
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for record in records:
+        grouped.setdefault(str(record.get("ledger") or "unknown ledger"), []).append(record)
+
+    runs: list[dict[str, Any]] = []
+    for source, source_records in grouped.items():
+        pending: list[dict[str, Any]] = []
+        pending_key: tuple[str, ...] | None = None
+        for record in source_records:
+            key = tuple(str(record.get(field) or "") for field in ("task_id", "model_id", "n_labels", "seed", "trial_budget"))
+            if pending and key != pending_key:
+                runs.append(_make_archive_segment(source, pending, complete=False, number=len(runs) + 1))
+                pending = []
+            pending_key = key
+            pending.append(record)
+            if record.get("record_type") == "final_evaluation":
+                runs.append(_make_archive_segment(source, pending, complete=True, number=len(runs) + 1))
+                pending = []
+                pending_key = None
+        if pending:
+            runs.append(_make_archive_segment(source, pending, complete=False, number=len(runs) + 1))
+    return runs
+
+
+def _make_archive_segment(source: str, records: list[dict[str, Any]], *, complete: bool, number: int) -> dict[str, Any]:
+    final = next((row for row in reversed(records) if row.get("record_type") == "final_evaluation"), records[-1])
+    first = records[0]
+    return {
+        "id": f"ledger-segment-{number:03d}",
+        "label": f"Ledger segment {number:02d}",
+        "dataStatus": final.get("data_status", "unverified"),
+        "taskId": final.get("task_id"),
+        "modelId": final.get("model_id"),
+        "nLabels": final.get("n_labels"),
+        "seed": final.get("seed"),
+        "trials": final.get("trial_budget"),
+        "startedAt": first.get("timestamp"),
+        "finishedAt": final.get("timestamp") if complete else None,
+        "source": source,
+        "firstRow": first.get("source_row"),
+        "lastRow": records[-1].get("source_row"),
+        "complete": complete,
+        "records": records,
+    }
+
+
+def _artifact_kind(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix in {".png", ".jpg", ".jpeg", ".svg", ".pdf"}:
+        return "figure"
+    if suffix in {".csv", ".tsv"}:
+        return "table"
+    if suffix in {".npy", ".npz"}:
+        return "raw array"
+    if suffix in {".parquet", ".feather"}:
+        return "ledger"
+    if suffix in {".log", ".txt", ".jsonl"}:
+        return "run log"
+    if suffix in {".json", ".yaml", ".yml"}:
+        return "run metadata"
+    return "file"
+
+
+def _results_archive() -> dict[str, Any]:
+    records = _archive_records()
+    artifacts: list[dict[str, Any]] = []
+    for root, collection in ((RESULTS_ROOT, "research"), (RESULTS_TEST_ROOT, "verification")):
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("*")):
+            if not path.is_file() or path.name == ".gitkeep" or path.suffix.lower() == ".tmp":
+                continue
+            relative = path.relative_to(PROJECT_ROOT).as_posix()
+            parts = path.relative_to(root).parts
+            data_status = "verification" if collection == "verification" else "mock" if "mock" in parts else "unverified"
+            if collection == "verification":
+                bundle = "Verification output"
+            elif "mock" in parts and any(part.startswith("benchmark-") for part in parts):
+                run_dir = next(part for part in parts if part.startswith("benchmark-"))
+                bundle = f"Synthetic pipeline run · {run_dir[-12:]}"
+            elif "mock" in parts:
+                bundle = "Synthetic cell results"
+            else:
+                bundle = "Research results"
+            stat = path.stat()
+            item: dict[str, Any] = {
+                "name": path.name,
+                "path": relative,
+                "kind": _artifact_kind(path),
+                "collection": collection,
+                "dataStatus": data_status,
+                "bundle": bundle,
+                "sizeBytes": stat.st_size,
+                "modifiedAt": datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+                "url": f"/api/artifact?path={quote(relative, safe='/')}",
+            }
+            if path.suffix.lower() == ".npy":
+                try:
+                    import numpy as np
+
+                    array = np.load(path, mmap_mode="r", allow_pickle=False)
+                    item["arrayShape"] = list(array.shape)
+                    item["dtype"] = str(array.dtype)
+                except (ImportError, OSError, ValueError):
+                    pass
+            if path.suffix.lower() == ".csv" and stat.st_size <= 512_000:
+                csv_rows = _read_csv(path)
+                item["previewRows"] = csv_rows[:50]
+                item["rowCount"] = len(csv_rows)
+            elif path.suffix.lower() in {".log", ".txt", ".json", ".jsonl"} and stat.st_size <= 100_000:
+                try:
+                    item["textPreview"] = path.read_text(encoding="utf-8-sig")
+                except (OSError, UnicodeDecodeError):
+                    pass
+            artifacts.append(item)
+
+    with _JOB_LOCK:
+        jobs = [dict(job) for job in _JOBS.values()]
+    known_ids = {str(job.get("id")) for job in jobs}
+    for history_path in sorted(RESULTS_ROOT.rglob("run_history/*.json")) if RESULTS_ROOT.is_dir() else []:
+        try:
+            saved = json.loads(history_path.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if str(saved.get("id")) not in known_ids:
+            log_path = PROJECT_ROOT / str(saved.get("logPath") or "")
+            if log_path.is_file():
+                try:
+                    saved["log"] = log_path.read_text(encoding="utf-8", errors="replace")[-500_000:]
+                except OSError:
+                    pass
+            jobs.append(saved)
+            known_ids.add(str(saved.get("id")))
+
+    type_counts: dict[str, int] = {}
+    status_counts: dict[str, int] = {}
+    for record in records:
+        record_type = str(record.get("record_type") or "untyped")
+        status = str(record.get("data_status") or "unverified")
+        type_counts[record_type] = type_counts.get(record_type, 0) + 1
+        status_counts[status] = status_counts.get(status, 0) + 1
+    return _json_safe({
+        "recordCount": len(records),
+        "artifactCount": len(artifacts),
+        "runCount": sum(run["complete"] for run in _archive_run_segments(records)),
+        "typeCounts": type_counts,
+        "statusCounts": status_counts,
+        "records": records,
+        "runs": _archive_run_segments(records),
+        "artifacts": artifacts,
+        "jobs": sorted(jobs, key=lambda job: str(job.get("createdAt") or ""), reverse=True),
+        "logNote": "Existing ledger rows are durable. Original console logs were not persisted before run-log archiving was added; older run timelines are reconstructed from their saved trial and evaluation rows.",
+    })
+
+
+def _job_storage_paths(job: dict[str, Any]) -> tuple[Path, Path]:
+    mode = str(job.get("mode") or "")
+    output_root = RESULTS_ROOT / "mock" if mode in {"mock", "mock-suite"} else RESULTS_ROOT
+    job_id = re.sub(r"[^a-f0-9]", "", str(job.get("id") or ""))
+    return output_root / "run_logs" / f"{job_id}.log", output_root / "run_history" / f"{job_id}.json"
+
+
+def _persist_job_manifest(job_id: str) -> None:
+    job = _get_job(job_id)
+    if not job:
+        return
+    log_path, manifest_path = _job_storage_paths(job)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    job["logPath"] = log_path.relative_to(PROJECT_ROOT).as_posix()
+    job["historyPath"] = manifest_path.relative_to(PROJECT_ROOT).as_posix()
+    with _JOB_LOCK:
+        if job_id in _JOBS:
+            _JOBS[job_id].update({"logPath": job["logPath"], "historyPath": job["historyPath"]})
+            job = dict(_JOBS[job_id])
+    job.pop("log", None)
+    temporary_path = manifest_path.with_suffix(".json.tmp")
+    temporary_path.write_text(json.dumps(_json_safe(job), indent=2), encoding="utf-8")
+    temporary_path.replace(manifest_path)
 
 
 def _legacy_artifacts() -> dict[str, Any]:
@@ -497,42 +719,72 @@ def _configuration() -> dict[str, Any]:
 def _get_job(job_id: str) -> dict[str, Any] | None:
     with _JOB_LOCK:
         job = _JOBS.get(job_id)
-        return dict(job) if job else None
+        if job:
+            return dict(job)
+    if not re.fullmatch(r"[a-f0-9]{12}", job_id):
+        return None
+    for manifest_path in (RESULTS_ROOT / "mock" / "run_history" / f"{job_id}.json", RESULTS_ROOT / "run_history" / f"{job_id}.json"):
+        try:
+            saved = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        log_path = PROJECT_ROOT / str(saved.get("logPath") or "")
+        if log_path.is_file():
+            try:
+                saved["log"] = log_path.read_text(encoding="utf-8", errors="replace")[-500_000:]
+            except OSError:
+                saved["log"] = ""
+        return saved
+    return None
 
 
 def _run_job(job_id: str, command: list[str]) -> None:
     with _JOB_LOCK:
         _JOBS[job_id]["status"] = "running"
         _JOBS[job_id]["startedAt"] = _utc_now()
+        job = dict(_JOBS[job_id])
+    log_path, _ = _job_storage_paths(job)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    _persist_job_manifest(job_id)
     try:
-        process = subprocess.Popen(
-            command,
-            cwd=PROJECT_ROOT,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            bufsize=1,
-        )
         log_tail = ""
-        assert process.stdout is not None
-        for line in process.stdout:
-            log_tail = (log_tail + line)[-12_000:]
+        with log_path.open("w", encoding="utf-8", newline="") as log_file:
+            process = subprocess.Popen(
+                command,
+                cwd=PROJECT_ROOT,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                bufsize=1,
+            )
+            assert process.stdout is not None
+            for line in process.stdout:
+                log_file.write(line)
+                log_file.flush()
+                log_tail = (log_tail + line)[-12_000:]
+                with _JOB_LOCK:
+                    _JOBS[job_id]["log"] = log_tail
+            return_code = process.wait()
+            status = "completed" if return_code == 0 else "failed"
             with _JOB_LOCK:
-                _JOBS[job_id]["log"] = log_tail
-        return_code = process.wait()
-        status = "completed" if return_code == 0 else "failed"
-        with _JOB_LOCK:
-            _JOBS[job_id].update({
-                "status": status,
-                "exitCode": return_code,
-                "log": log_tail,
-                "finishedAt": _utc_now(),
-            })
+                _JOBS[job_id].update({
+                    "status": status,
+                    "exitCode": return_code,
+                    "log": log_tail,
+                    "finishedAt": _utc_now(),
+                })
     except OSError as exc:
         with _JOB_LOCK:
-            _JOBS[job_id].update({"status": "failed", "error": str(exc), "finishedAt": _utc_now()})
+            _JOBS[job_id].update({"status": "failed", "error": str(exc), "log": f"{type(exc).__name__}: {exc}\n", "finishedAt": _utc_now()})
+        try:
+            with log_path.open("a", encoding="utf-8") as log_file:
+                log_file.write(f"{type(exc).__name__}: {exc}\n")
+        except OSError:
+            pass
+    finally:
+        _persist_job_manifest(job_id)
 
 
 def _start_run(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
@@ -598,6 +850,7 @@ def _start_run(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
             "createdAt": _utc_now(),
             "log": "",
         }
+    _persist_job_manifest(job_id)
     worker = threading.Thread(target=_run_job, args=(job_id, command), daemon=True)
     worker.start()
     return 202, _get_job(job_id) or {"id": job_id, "status": "queued"}
@@ -670,6 +923,7 @@ def _start_did(payload: dict[str, Any]) -> tuple[int, dict[str, Any]]:
             "nLabels": "—", "seed": "—", "trials": bootstrap,
             "status": "queued", "createdAt": _utc_now(), "log": "",
         }
+    _persist_job_manifest(job_id)
     threading.Thread(target=_run_job, args=(job_id, command), daemon=True).start()
     return 202, _get_job(job_id) or {"id": job_id, "status": "queued"}
 
@@ -702,6 +956,7 @@ def _start_legacy_demo() -> tuple[int, dict[str, Any]]:
             "log": "",
             "outputDir": output_dir.relative_to(PROJECT_ROOT).as_posix(),
         }
+    _persist_job_manifest(job_id)
     threading.Thread(target=_run_job, args=(job_id, command), daemon=True).start()
     return 202, _get_job(job_id) or {"id": job_id, "status": "queued"}
 
@@ -718,6 +973,22 @@ class ResearchRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_artifact(self, query: dict[str, list[str]]) -> None:
+        requested = query.get("path", [""])[0]
+        candidate = (PROJECT_ROOT / requested).resolve()
+        allowed_roots = [root.resolve() for root in (RESULTS_ROOT, RESULTS_TEST_ROOT) if root.exists()]
+        if not candidate.is_file() or not any(candidate.is_relative_to(root) for root in allowed_roots):
+            return self._send_json({"error": "Saved artifact not found."}, 404)
+        content_type, _ = mimetypes.guess_type(candidate.name)
+        self.send_response(200)
+        self.send_header("Content-Type", content_type or "application/octet-stream")
+        self.send_header("Content-Length", str(candidate.stat().st_size))
+        self.send_header("Content-Disposition", f"inline; filename*=UTF-8''{quote(candidate.name)}")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        with candidate.open("rb") as handle:
+            shutil.copyfileobj(handle, self.wfile)
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -751,6 +1022,10 @@ class ResearchRequestHandler(SimpleHTTPRequestHandler):
             if scope != "all":
                 rows = [row for row in rows if row.get("data_status") == scope]
             return self._send_json({"scope": scope, "count": len(rows), "rows": rows})
+        if parsed.path == "/api/archive":
+            return self._send_json(_results_archive())
+        if parsed.path == "/api/artifact":
+            return self._send_artifact(parse_qs(parsed.query))
         if parsed.path.startswith("/api/jobs/"):
             job_id = parsed.path.rsplit("/", 1)[-1]
             if not re.fullmatch(r"[a-f0-9]{12}", job_id):
