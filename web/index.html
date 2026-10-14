@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0b0b0b">
   <meta name="description" content="A local research workspace for auditable brain MRI foundation-model evaluation.">
   <title>Seen It Before — Research workspace</title>
-  <link rel="stylesheet" href="styles.css?v=runner-comparison-final-v3-20261014">
-  <script src="app.js?v=instant-model-sweep-final-v2-20261014" defer></script>
+  <link rel="stylesheet" href="styles.css?v=final-findings-20261014-v1">
+  <script src="app.js?v=final-findings-20261014-v1" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -28,6 +28,7 @@
         <button class="nav-item" type="button" data-page-target="did"><span class="nav-number">08</span><span>Natural experiment · DiD</span></button>
         <button class="nav-item" type="button" data-page-target="equivalence"><span class="nav-number">09</span><span>Label equivalence &amp; Pareto</span></button>
         <button class="nav-item" type="button" data-page-target="qc"><span class="nav-number">10</span><span>3D slice QC &amp; montage</span></button>
+        <button class="nav-item" type="button" data-page-target="findings"><span class="nav-number">11</span><span>Final findings</span></button>
       </nav>
       <div class="sidebar-spacer"></div>
       <div class="workspace-card">
@@ -209,7 +210,7 @@
         </section>
 
         <section class="page" id="page-results" data-page="results" aria-labelledby="results-title" hidden>
-          <div class="page-heading page-heading-with-action"><div><div class="eyebrow"><span class="eyebrow-line"></span>03 / evidence</div><h1 id="results-title">Results &amp; metrics</h1><p>Explore every saved evaluation, tuning trial, run log, table, and graph. Observed findings, synthetic outputs, and verification files are labeled separately.</p></div><div class="header-actions"><button class="button button-secondary button-compact" id="export-csv" type="button">Export full ledger CSV</button><button class="button button-secondary button-compact" id="export-json" type="button">Export archive JSON</button></div></div>
+          <div class="page-heading page-heading-with-action"><div><div class="eyebrow"><span class="eyebrow-line"></span>03 / evidence</div><h1 id="results-title">Results &amp; metrics</h1><p>Explore every saved evaluation, tuning trial, run log, table, and graph. Observed findings, synthetic outputs, and verification files are labeled separately.</p></div><div class="header-actions"><button class="button button-secondary button-compact" type="button" data-page-target="findings">Final findings <span aria-hidden="true">→</span></button><button class="button button-secondary button-compact" id="export-csv" type="button">Export full ledger CSV</button><button class="button button-secondary button-compact" id="export-json" type="button">Export archive JSON</button></div></div>
           <div class="filter-bar panel">
             <label>Cell scope<select id="results-scope"><option value="all">All cell records</option><option value="observed">Observed</option><option value="mock">Synthetic runs</option><option value="predicted">Model projections</option></select></label>
             <label>Model<select id="results-model-filter"><option value="all">All models</option></select></label>
@@ -306,6 +307,20 @@
             <article class="panel slice-panel"><div class="panel-head"><div><div class="panel-kicker">03 / sagittal</div><h2>Sagittal plane</h2></div><span class="slice-index" id="qc-sagittal-label">—</span></div><div class="slice-frame"><img id="qc-sagittal-image" alt="Sagittal MRI slice preview; not participant QC" loading="lazy"></div><label class="slice-slider">Slice <input type="range" id="qc-sagittal-index" min="0" max="0" value="0"><output id="qc-sagittal-output">—</output></label></article>
           </div>
           <div class="data-grid qc-bottom"><article class="panel"><div class="panel-kicker">Acquisition QC ledger</div><h2>Exclusions and reasons</h2><div class="qc-stats"><div><span>Excluded scans</span><strong id="qc-excluded-count">—</strong></div><div><span>Recorded reasons</span><strong id="qc-reason-count">—</strong></div></div><div id="qc-exclusion-list" class="reason-list"><p class="empty-inline">No data/qc/exclusions.csv found.</p></div></article><article class="panel"><div class="panel-kicker">What this viewer can establish</div><h2>Visual inspection needs source metadata</h2><p>A slice view can help review orientation and gross image quality. It cannot establish participant identity, acquisition protocol, preprocessing provenance or inclusion status by itself.</p><button class="button button-secondary button-compact" type="button" data-page-target="data">Review data inputs <span aria-hidden="true">→</span></button></article></div>
+        </section>
+
+        <section class="page" id="page-findings" data-page="findings" aria-labelledby="findings-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>11 / study conclusion</div><h1 id="findings-title">Final findings</h1><p>A direct answer to the study question, computed from the saved evaluation ledger and the preregistered difference-in-differences analysis.</p></div>
+          <article class="finding-verdict panel" id="finding-verdict" role="status" aria-live="polite">
+            <div class="finding-verdict-copy"><span class="source-tag" id="finding-status-tag">CHECKING EVIDENCE</span><div class="panel-kicker">Final research answer</div><h2 id="finding-headline">Loading saved evidence…</h2><p id="finding-summary">The conclusion is determined from observed final evaluations and the saved observed DiD analysis. Synthetic records are reported separately.</p></div>
+            <div class="finding-primary-stat"><span>OBSERVED DiD</span><strong id="finding-did-estimate">Pending</strong><small id="finding-did-detail">Matched observed cells and bootstrap analysis required</small></div>
+          </article>
+          <div class="finding-stat-grid" id="finding-stat-grid" aria-label="Finding evidence counts"></div>
+          <div class="chart-grid chart-grid-two findings-grid">
+            <article class="panel chart-panel finding-chart-panel"><div class="panel-head"><div><div class="panel-kicker">Final evaluation cells</div><h2>Seen vs unseen MAE</h2></div><span class="source-tag" id="finding-chart-source">Waiting for ledger</span></div><div class="chart-box" id="finding-chart"><div class="empty-state"><strong>Loading final evaluation rows</strong></div></div><p class="chart-caption" id="finding-chart-caption">Each bar group will use final evaluation rows from the saved ledger; tuning trials are excluded.</p></article>
+            <article class="panel finding-method-panel"><div class="panel-kicker">How to read the conclusion</div><h2>Preregistered decision rule</h2><div class="finding-rule"><span>H1 · exposure-sensitive error</span><strong>DiD &gt; 0 and two-sided bootstrap p &lt; 0.05</strong></div><p>The primary statistic compares the foundation model’s seen-to-unseen error change with the matched baseline’s change. The paper specifies 2,000 bootstrap resamples.</p><p id="finding-interpretation-note">Cohort labels are expected exposure groups until participant-level overlap has been verified against the pretraining manifest.</p><button class="text-button" type="button" data-page-target="did">Open the full DiD analysis <span aria-hidden="true">→</span></button></article>
+          </div>
+          <article class="panel table-panel finding-table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Source rows · final evaluations only</div><h2>Evidence behind this answer</h2></div><span class="data-source" id="finding-row-status">Reading ledger</span></div><div class="table-wrap"><table><thead><tr><th>Evidence</th><th>Task</th><th>Model</th><th>Labels</th><th>Seed</th><th>Tuning trials</th><th>Seen MAE</th><th>Unseen MAE</th><th>Timestamp</th></tr></thead><tbody id="finding-table-body"><tr><td colspan="9" class="empty-cell">Loading final evaluation rows…</td></tr></tbody></table></div><p class="table-caption">MAE values are in years for T1 brain-age regression. Synthetic rows demonstrate the run harness only and do not count as study evidence.</p></article>
         </section>
 
         <footer class="app-footer"><span>Seen It Before · research dashboard</span><span>Local data · source-labelled outputs · no external analytics</span><a href="https://github.com/Shivasomesh-cpu/ML-project-" target="_blank" rel="noreferrer">Repository ↗</a></footer>

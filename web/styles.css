@@ -707,6 +707,47 @@ input[type="range"] { width: 100%; accent-color: #111; }
 .archive-file-preview td { font-size: 7px; }
 .archive-file-preview .archive-log-output { max-height: 220px; }
 
+.finding-verdict { display: grid; grid-template-columns: minmax(0,1fr) minmax(190px,.34fr); align-items: stretch; gap: 22px; padding: clamp(20px,3vw,32px); overflow: hidden; border-color: #171717; background: radial-gradient(circle at 92% 5%,#3b3b3b 0,transparent 32%),linear-gradient(125deg,#111,#202020 70%,#111); color: #fff; }
+.finding-verdict-copy { min-width: 0; }
+.finding-verdict .source-tag { display: inline-flex; margin-bottom: 19px; border-color: #666; background: #272727; color: #f2f2f2; }
+.finding-verdict .panel-kicker { color: #aaa; }
+.finding-verdict h2 { max-width: 26ch; margin: 7px 0 9px; color: #fff; font-family: var(--font-display); font-size: clamp(24px,3.2vw,38px); letter-spacing: -.045em; line-height: 1.12; }
+.finding-verdict p { max-width: 78ch; margin: 0; color: #d0d0d0; font-size: 11px; line-height: 1.7; }
+.finding-primary-stat { display: flex; flex-direction: column; justify-content: center; gap: 8px; min-height: 128px; padding: 17px; border: 1px solid #4a4a4a; border-radius: 6px; background: rgba(255,255,255,.055); }
+.finding-primary-stat span { color: #aaa; font-family: var(--font-mono); font-size: 8px; letter-spacing: .12em; }
+.finding-primary-stat strong { color: #fff; font-family: var(--font-display); font-size: clamp(21px,2.5vw,30px); letter-spacing: -.035em; }
+.finding-primary-stat small { color: #bbb; font-size: 9px; line-height: 1.55; }
+.finding-stat-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+.finding-stat-card { position: relative; display: grid; gap: 5px; min-height: 105px; padding: 13px 15px; border: 1px solid #dfdfdf; border-radius: 6px; background: linear-gradient(145deg,#fff,#f5f5f5); }
+.finding-stat-card > span:nth-child(2) { max-width: 25ch; color: #666; font-size: 9px; }
+.finding-stat-card strong { color: #141414; font-family: var(--font-display); font-size: 27px; font-weight: 600; letter-spacing: -.045em; line-height: 1.05; }
+.finding-stat-card small { color: #858585; font-size: 8px; }
+.finding-stat-index { position: absolute; top: 10px; right: 12px; color: #c9c9c9; font-family: var(--font-mono); font-size: 8px; }
+.findings-grid { align-items: stretch; }
+.finding-chart-panel, .finding-method-panel { min-width: 0; margin-top: 0; }
+.finding-chart-panel .chart-box { overflow-x: auto; }
+.finding-method-panel { padding: 19px; }
+.finding-method-panel h2 { margin: 6px 0 12px; font-family: var(--font-display); font-size: 22px; letter-spacing: -.035em; }
+.finding-method-panel > p { margin: 11px 0; color: #6d6d6d; font-size: 9px; line-height: 1.7; }
+.finding-rule { display: grid; gap: 8px; padding: 12px; border-left: 2px solid #171717; background: #f3f3f3; }
+.finding-rule span { color: #666; font-family: var(--font-mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+.finding-rule strong { color: #171717; font-family: "Cambria Math", "STIX Two Math", serif; font-size: 17px; font-weight: 500; line-height: 1.4; }
+.finding-table-panel { margin-top: 0; }
+.finding-table-panel .table-wrap { max-height: 520px; }
+.finding-table-panel td { vertical-align: top; }
+
+@media (max-width: 920px) {
+  .finding-stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .finding-verdict { grid-template-columns: minmax(0,1fr) minmax(170px,.55fr); }
+}
+@media (max-width: 640px) {
+  .finding-verdict { grid-template-columns: 1fr; gap: 15px; }
+  .finding-primary-stat { min-height: 0; }
+  .finding-stat-grid { grid-template-columns: 1fr 1fr; }
+  .finding-stat-card { min-height: 96px; padding: 11px; }
+  .finding-table-panel { padding: 12px; }
+}
+
 @media (max-width: 920px) {
   .archive-stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }

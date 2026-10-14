@@ -34,7 +34,8 @@ const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selec
 const pageLabels = {
   overview: "Overview & architecture", benchmark: "Benchmark runner", results: "Results & metrics",
   correlation: "Correlation & clustering", preprocessing: "Preprocessing sensitivity", data: "Data & configuration",
-  audit: "Contamination audit", did: "Natural experiment · DiD", equivalence: "Label equivalence & Pareto", qc: "3D slice QC & montage"
+  audit: "Contamination audit", did: "Natural experiment · DiD", equivalence: "Label equivalence & Pareto", qc: "3D slice QC & montage",
+  findings: "Final findings"
 };
 const modelLabels = {
   brainiac: "BrainIAC", densenet121_scratch: "DenseNet-121 (scratch)", fomo_unet_b: "FOMO U-Net B",
@@ -419,6 +420,7 @@ function goToPage(page, updateHash = true) {
   if (updateHash && location.hash !== `#${page}`) history.replaceState(null, "", `#${page}`);
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (page === "results") renderResults();
+  if (page === "findings" && state.archive) renderFinalFindings(state.archive);
   if (page === "audit" && state.audit) renderAudit(state.audit);
   if (page === "correlation" && state.correlation) renderCorrelation(state.correlation);
   if (page === "preprocessing" && state.preprocessing) renderPreprocessing(state.preprocessing);
@@ -1027,6 +1029,118 @@ function renderArchive(archive) {
   renderArchiveFiles(archive);
 }
 
+function renderFinalFindings(archive = state.archive) {
+  if (!$("#finding-headline")) return;
+  const records = archive?.records || [];
+  const finals = records.filter((row) => row.record_type === "final_evaluation");
+  const observed = finals.filter((row) => String(row.data_status || "").toLowerCase() === "observed");
+  const synthetic = finals.filter((row) => String(row.data_status || "").toLowerCase() === "mock");
+  const other = finals.filter((row) => !["observed", "mock"].includes(String(row.data_status || "").toLowerCase()));
+  const models = new Set(finals.map((row) => row.model_id).filter(Boolean));
+  const did = state.did || {};
+  const result = did.result;
+  const resultStatus = String(did.dataStatus || result?.data_status || did.status || "missing").toLowerCase();
+  const point = numeric(result?.did_point_estimate);
+  const pValue = numeric(result?.p_value_bootstrap_two_sided);
+  const observedDid = did.status === "observed" && resultStatus === "observed" && result && point !== null && pValue !== null;
+  const ciLow = numeric(result?.ci_95_lower);
+  const ciHigh = numeric(result?.ci_95_upper);
+  const h1Met = observedDid && point > 0 && pValue < 0.05;
+  const verdict = $("#finding-verdict");
+  const tag = $("#finding-status-tag");
+  const headline = $("#finding-headline");
+  const summary = $("#finding-summary");
+  const estimate = $("#finding-did-estimate");
+  const detail = $("#finding-did-detail");
+
+  if (observedDid) {
+    verdict.dataset.evidence = "observed";
+    tag.textContent = h1Met ? "OBSERVED · H1 RULE MET" : "OBSERVED · H1 RULE NOT MET";
+    headline.textContent = h1Met ? "The observed DiD meets the preregistered H1 rule." : "The observed DiD does not meet the preregistered H1 rule.";
+    summary.textContent = h1Met
+      ? `Matched observed cells estimate ΔΔ = ${point > 0 ? "+" : ""}${fmt(point, 3)} years (two-sided bootstrap p = ${fmt(pValue, 4)}). This supports the preregistered exposure-sensitive error pattern under the planned cohort assignment; participant-level pretraining overlap still needs verification.`
+      : `The observed estimate is ΔΔ = ${point > 0 ? "+" : ""}${fmt(point, 3)} years (two-sided bootstrap p = ${fmt(pValue, 4)}). It does not satisfy both parts of H1; this alone does not establish that contamination has no effect.`;
+    estimate.textContent = `${point > 0 ? "+" : ""}${fmt(point, 3)} y`;
+    detail.textContent = `${ciLow === null || ciHigh === null ? "95% interval unavailable" : `95% CI [${fmt(ciLow, 3)}, ${fmt(ciHigh, 3)}] y`} · ${result.n_paired_cells ?? "—"} matched cells`;
+  } else if (observed.length) {
+    verdict.dataset.evidence = "pending";
+    tag.textContent = "PRIMARY RESULT PENDING";
+    headline.textContent = "Observed evaluations exist, but the primary result is not computed.";
+    summary.textContent = `${observed.length} observed final evaluation${observed.length === 1 ? " is" : "s are"} saved, but no complete observed matched-cell DiD estimate and bootstrap p-value are available. The study question remains unanswered until the preregistered analysis can be computed.`;
+    estimate.textContent = "Pending";
+    detail.textContent = "Observed matched cells and bootstrap analysis required";
+  } else if (synthetic.length) {
+    verdict.dataset.evidence = "synthetic-only";
+    tag.textContent = "SYNTHETIC OUTPUT ONLY";
+    headline.textContent = "No observed study conclusion yet.";
+    const meanMetric = (field) => {
+      const values = synthetic.map((row) => numeric(row[field])).filter((value) => value !== null);
+      return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+    };
+    const seenMean = meanMetric("seen_mae"), unseenMean = meanMetric("unseen_mae");
+    const syntheticMetrics = seenMean === null && unseenMean === null ? "" : ` The synthetic rows average ${seenMean === null ? "—" : `${fmt(seenMean, 2)} y`} seen MAE and ${unseenMean === null ? "—" : `${fmt(unseenMean, 2)} y`} unseen MAE.`;
+    summary.textContent = `The saved ledger contains ${synthetic.length} synthetic final evaluation${synthetic.length === 1 ? "" : "s"} and no observed final evaluations or observed DiD result.${syntheticMetrics} These harness values are shown below for inspection, but they cannot answer whether pretraining exposure changed generalization.`;
+    estimate.textContent = "Not available";
+    detail.textContent = "No observed matched-cell analysis saved";
+  } else {
+    verdict.dataset.evidence = "empty";
+    tag.textContent = "NO FINAL EVALUATIONS";
+    headline.textContent = "No empirical final result is available.";
+    summary.textContent = "No final-evaluation rows are saved in the ledger. The research conclusion will remain pending until observed model evaluations and the matched DiD analysis are recorded.";
+    estimate.textContent = "Not available";
+    detail.textContent = "No final evaluation or observed DiD result saved";
+  }
+
+  const didCount = observedDid ? (result.n_paired_cells ?? "1+") : "—";
+  const stats = [
+    ["Observed final evaluations", observed.length, "Measured study cells"],
+    ["Synthetic final evaluations", synthetic.length, "Harness checks · not evidence"],
+    ["Models represented", models.size, "Across final-evaluation rows"],
+    ["Observed matched cells", didCount, observedDid ? "Included in saved DiD" : "No observed DiD available"]
+  ];
+  $("#finding-stat-grid").innerHTML = stats.map(([label, value, caption], index) => `<article class="finding-stat-card"><span class="finding-stat-index">0${index + 1}</span><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(caption)}</small></article>`).join("");
+
+  const grouped = new Map();
+  finals.filter((row) => !["predicted"].includes(String(row.data_status || "").toLowerCase())).forEach((row) => {
+    const status = String(row.data_status || "unverified").toLowerCase();
+    const key = [row.task_id || "", row.model_id || "", row.n_labels ?? "", status].join("|");
+    const group = grouped.get(key) || { row, seen: [], unseen: [] };
+    const seen = numeric(row.seen_mae), unseen = numeric(row.unseen_mae);
+    if (seen !== null) group.seen.push(seen);
+    if (unseen !== null) group.unseen.push(unseen);
+    grouped.set(key, group);
+  });
+  const chartGroups = [...grouped.values()].filter((group) => group.seen.length || group.unseen.length).sort((a, b) => {
+    const statusOrder = (row) => row.data_status === "observed" ? 0 : row.data_status === "mock" ? 1 : 2;
+    return statusOrder(a.row) - statusOrder(b.row) || modelLabel(a.row.model_id).localeCompare(modelLabel(b.row.model_id)) || Number(a.row.n_labels) - Number(b.row.n_labels);
+  });
+  const chartLabels = chartGroups.map(({ row }) => {
+    const shortModel = modelLabel(row.model_id).replace(/\s*\(scratch\)/i, "").replace(/^Volumetric \+ /, "");
+    const status = String(row.data_status || "unverified").toLowerCase();
+    const statusShort = status === "observed" ? "OBS" : status === "mock" ? "SYN" : "UNV";
+    return `${shortModel} · N${row.n_labels ?? "?"} · ${statusShort}`;
+  });
+  const means = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  const chartValues = chartGroups.map((group, index) => ({
+    label: chartLabels[index],
+    values: [means(group.seen), means(group.unseen)]
+  }));
+  const chartStatus = $("#finding-chart-source");
+  if (chartGroups.length) {
+    makeBarChart("#finding-chart", chartValues, chartLabels, ["Seen MAE", "Unseen MAE"], " y");
+    chartStatus.textContent = `${observed.length ? `${observed.length} observed` : "0 observed"} · ${synthetic.length} synthetic`;
+    $("#finding-chart-caption").textContent = "Each group is one task, model, label budget and evidence status. Bars average repeated final cells within that group; see the table for every individual run.";
+  } else {
+    emptyChart("#finding-chart", "MAE", "No final evaluation metrics", "The ledger contains no final-evaluation MAE values to plot.");
+    chartStatus.textContent = "No final MAE values";
+    $("#finding-chart-caption").textContent = "Tuning trials and projections are excluded from this results chart.";
+  }
+
+  const rows = [...finals].sort((a, b) => (Date.parse(b.timestamp || "") || 0) - (Date.parse(a.timestamp || "") || 0));
+  $("#finding-row-status").textContent = `${rows.length} final evaluation${rows.length === 1 ? "" : "s"} · ${other.length} unverified`;
+  $("#finding-table-body").innerHTML = rows.length ? rows.map((row) => `<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td>${esc(taskLabels[row.task_id] || row.task_id || "—")}</td><td><strong>${esc(modelLabel(row.model_id))}</strong></td><td>${esc(row.n_labels ?? "—")}</td><td>${esc(row.seed ?? "—")}</td><td>${esc(row.trial_budget ?? row.trials ?? "—")}</td><td>${fmt(row.seen_mae, 3)}</td><td>${fmt(row.unseen_mae, 3)}</td><td>${esc(row.timestamp || "—")}</td></tr>`).join("") : `<tr><td colspan="9" class="empty-cell">No saved final-evaluation rows. This is an evidence gap, not a zero result.</td></tr>`;
+}
+
 function legacyRows(kind) {
   const artifacts = state.projectionMode ? state.projectionData?.legacy || [] : state.legacy;
   return artifacts.flatMap((artifact)=>artifact.kind===kind ? artifact.rows.map((row)=>({...row,_source:artifact.source,_status:row.data_status||artifact.dataStatus})) : []);
@@ -1159,6 +1273,7 @@ function renderDid(payload) {
     $("#did-analysis-state").textContent=message|| (ready?"Matched observed cells are ready for the DiD analysis.":"Waiting for matched observed cells at the same task, N, seed and tuning-trial budget.");
     emptyChart("#did-chart","ΔΔ","Analysis not computed",ready?"Press Compute ΔΔ to run the preregistered bootstrap analysis.":"Synthetic cells are excluded; observed paired cells are required.");
   }
+  if (state.currentPage === "findings" && state.archive) renderFinalFindings(state.archive);
 }
 
 function drawDidInterval(result,isIllustrative=false) {
@@ -1376,6 +1491,7 @@ async function refreshAll(){
     if(values.qc)renderQC(values.qc);
     if(values.did)renderDid(values.did);
     if(values.pareto)renderPareto(values.pareto);
+    if(state.archive)renderFinalFindings(state.archive);
     if(values.correlation)renderCorrelation(values.correlation);
     if(values.preprocessing)renderPreprocessing(values.preprocessing);
     if(values.legacy)renderResults();
