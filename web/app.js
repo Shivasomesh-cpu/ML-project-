@@ -235,6 +235,18 @@ function renderProjectionWorkspace() {
   renderProjectionSummary();
 }
 
+function projectionMetricDomain(metric = "mae") {
+  const fields = metric === "r2" ? ["seen_r2", "unseen_r2"] : ["seen_mae", "unseen_mae"];
+  const values = (state.projectionData?.rows || [])
+    .flatMap((row) => fields.map((field) => numeric(row[field])))
+    .filter((value) => value !== null && Number.isFinite(value));
+  if (!values.length) return null;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const padding = (max - min || Math.max(Math.abs(max), 1)) * .08;
+  return { min: min - padding, max: max + padding, barMax: max * 1.06 };
+}
+
 function toggleProjectionMode() {
   if (!state.projectionMode) {
     state.projectionSnapshot = {
@@ -272,6 +284,7 @@ function toggleProjectionMode() {
   state.projectionSnapshot = null;
   state.projectionFilters = null;
   syncProjectionChrome();
+  clearProjectionSummary();
   renderResults();
   renderAudit(state.audit || { dataStatus: "missing", rows: [] });
   renderCorrelation(state.correlation || { status: "missing", matrices: [] });
@@ -296,7 +309,10 @@ function renderProjectionSummary() {
       return { x: n, value: average(atBudget.map((row) => row[`${cohort}_mae`])) };
     })
   }));
-  ["#overview-projection-chart", "#runner-projection-chart", "#data-projection-chart"].forEach((selector) => makeLineChart(selector, series, budgets));
+  const sharedDomain = projectionMetricDomain("mae");
+  ["#overview-projection-chart", "#runner-projection-chart", "#data-projection-chart"].forEach((selector) => makeLineChart(selector, series, budgets, "MAE · years", sharedDomain));
+  const overviewCaption = $("#overview-projection-caption");
+  if (overviewCaption) overviewCaption.textContent = "Predictions use one shared MAE scale across all six models. Values are formula-generated assumptions, not measurements from a trained checkpoint.";
   ["#overview-projection-status", "#runner-projection-status", "#data-projection-status"].forEach((selector) => {
     const tag = $(selector);
     if (tag) tag.textContent = `MODEL PROJECTION · ${modelLabel(focus).toUpperCase()}`;
@@ -306,6 +322,21 @@ function renderProjectionSummary() {
   $("#projection-base-stat").textContent = `${fmt(profile.base, 2)} y at 25 labels`;
   $("#projection-slope-stat").textContent = `${fmt(profile.slope, 2)} y lower per doubling`;
   $("#projection-gap-stat").textContent = `${fmt(profile.gap, 2)} y at 25 labels`;
+}
+
+function clearProjectionSummary() {
+  ["#overview-projection-chart", "#runner-projection-chart", "#data-projection-chart"].forEach((selector) => illustrativeChart($(selector), "line"));
+  ["#overview-projection-status", "#runner-projection-status", "#data-projection-status"].forEach((selector) => {
+    const tag = $(selector);
+    if (tag) tag.textContent = "Generate estimates to explore";
+  });
+  const caption = $("#overview-projection-caption");
+  if (caption) caption.textContent = "Generate estimates to compare model-specific curves on a shared MAE scale. Values are assumptions, not model results.";
+  $("#projection-explainer-title").textContent = "Model-specific assumptions";
+  $("#projection-explainer-copy").textContent = "Generate estimates to see a transparent assumption set for each configured model. No fitted weights or observed outcomes are implied.";
+  $("#projection-base-stat").textContent = "—";
+  $("#projection-slope-stat").textContent = "—";
+  $("#projection-gap-stat").textContent = "—";
 }
 
 function refreshModelProjection(source = "focus") {
@@ -574,12 +605,12 @@ function illustrativeChart(target, type) {
   target.innerHTML = `${badge}<svg class="svg-chart preview-chart" viewBox="0 0 720 205" role="img" aria-label="Illustrative two-series trend diagram with no study values">${grid}<line class="chart-axis" x1="75" x2="660" y1="160" y2="160"/><text class="chart-label" x="68" y="41" text-anchor="end">HIGH</text><text class="chart-label" x="68" y="158" text-anchor="end">LOW</text><path class="chart-line preview-line" d="${toPath(pointsA)}"/><path class="chart-line-secondary preview-line preview-line-late" d="${toPath(pointsB)}"/>${dots(pointsA, "chart-point preview-dot")}${dots(pointsB, "chart-point-secondary preview-dot preview-dot-late")}<text class="chart-label-strong" x="85" y="181" text-anchor="middle">START</text><text class="chart-label-strong" x="610" y="181" text-anchor="middle">END</text><g transform="translate(250,199)"><line class="chart-line" x1="0" x2="12" y1="4" y2="4"/><text class="chart-label" x="17" y="8">Series A</text><line class="chart-line-secondary" x1="110" x2="122" y1="4" y2="4"/><text class="chart-label" x="127" y="8">Series B</text></g></svg>`;
 }
 
-function makeBarChart(selector, values, labels, seriesNames, unit = "") {
+function makeBarChart(selector, values, labels, seriesNames, unit = "", sharedMax = null) {
   const target = $(selector);
   if (!values.length) return illustrativeChart(target, "bars");
   const width = 560, height = 320, left = 50, right = 12, top = 18, bottom = 48;
   const chartW = width - left - right, chartH = height - top - bottom;
-  const maxValue = Math.max(1e-9, ...values.flatMap((item) => item.values.filter((v) => v !== null)));
+  const maxValue = Math.max(1e-9, Number.isFinite(sharedMax) ? sharedMax : 0, ...values.flatMap((item) => item.values.filter((v) => v !== null)));
   const step = chartW / values.length;
   const groupW = Math.min(step * .68, 76);
   const barsPer = Math.max(1, seriesNames.length);
@@ -604,16 +635,18 @@ function makeBarChart(selector, values, labels, seriesNames, unit = "") {
   target.innerHTML = `<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(seriesNames.join(" versus "))} chart">${grid}<line class="chart-axis" x1="${left}" x2="${width-right}" y1="${top+chartH}" y2="${top+chartH}"/>${bars}${legends}</svg>`;
 }
 
-function makeLineChart(selector, series, xValues, yLabel = "MAE") {
+function makeLineChart(selector, series, xValues, yLabel = "MAE", sharedDomain = null) {
   const target = $(selector);
   const usable = series.filter((item) => item.values.some((point) => point.value !== null));
   if (!usable.length) return illustrativeChart(target, "line");
   const pointsAll = usable.flatMap((item) => item.values.filter((point) => point.value !== null));
   const minX = Math.min(...pointsAll.map((point) => point.x));
   const maxX = Math.max(...pointsAll.map((point) => point.x));
-  const minY = Math.min(...pointsAll.map((point) => point.value));
-  const maxY = Math.max(...pointsAll.map((point) => point.value));
-  const yPad = (maxY - minY || Math.max(Math.abs(maxY),1)) * .15;
+  const localMinY = Math.min(...pointsAll.map((point) => point.value));
+  const localMaxY = Math.max(...pointsAll.map((point) => point.value));
+  const minY = Number.isFinite(sharedDomain?.min) ? sharedDomain.min : localMinY;
+  const maxY = Number.isFinite(sharedDomain?.max) ? sharedDomain.max : localMaxY;
+  const yPad = sharedDomain ? 0 : (maxY - minY || Math.max(Math.abs(maxY),1)) * .15;
   const width = 560, height = 320, left = 54, right = 16, top = 18, bottom = 52;
   const plotW = width-left-right, plotH = height-top-bottom;
   const x = (value) => left + (maxX === minX ? .5 : (value-minX)/(maxX-minX)) * plotW;
@@ -647,7 +680,7 @@ function renderResults() {
   const isLowerBetter = metric === "mae";
   $("#metric-chart-title").textContent = `Seen vs unseen ${metric === "mae" ? "error" : metricName}`;
   $("#metric-chart-caption").textContent = state.projectionMode
-    ? `Scenario ${metricName} projection for ${modelLabel($("#focus-model").value)}. ${isLowerBetter ? "Lower is better." : "Higher is better."} This is not a study result.`
+    ? `Scenario ${metricName} projection for ${modelLabel($("#focus-model").value)}. Bars use a shared scale across model profiles; this is not a study result.`
     : `Bars show mean ${metricName} across visible cells. ${isLowerBetter ? "Lower is better." : "Higher is better."} Values retain the source status shown above.`;
   state.scope = scope;
   let rows = (state.projectionMode ? state.projectionData?.rows || [] : state.results).filter((row) => scope === "all" || row.data_status === scope);
@@ -669,7 +702,8 @@ function renderResults() {
     label,
     values: [values.seen.length ? values.seen.reduce((a,b)=>a+b,0)/values.seen.length : null, values.unseen.length ? values.unseen.reduce((a,b)=>a+b,0)/values.unseen.length : null]
   })).filter((item) => item.values.some((value) => value !== null)).slice(0, 8);
-  makeBarChart("#metric-chart", entries, entries.map((item)=>{const [id,status]=item.label.split(" · ");return `${modelLabel(id)} · ${status==="predicted"?"P":status==="mock"?"S":"O"}`;}), ["Seen", "Unseen"], metric === "mae" ? " y" : "");
+  const sharedDomain = state.projectionMode ? projectionMetricDomain(metric) : null;
+  makeBarChart("#metric-chart", entries, entries.map((item)=>{const [id,status]=item.label.split(" · ");return `${modelLabel(id)} · ${status==="predicted"?"P":status==="mock"?"S":"O"}`;}), ["Seen", "Unseen"], metric === "mae" ? " y" : "", sharedDomain?.barMax ?? null);
   if (entries.length) {
     const selectedModel = modelFilter === "all" ? entries[0].label.split(" · ")[0] : modelFilter;
     const curveRows = rows.filter((row)=>row.model_id===selectedModel);
@@ -685,7 +719,11 @@ function renderResults() {
     const budgets=[...byBudget.keys()].sort((a,b)=>a-b);
     const seen=budgets.map(n=>({x:n,value:byBudget.get(n).seen.length?byBudget.get(n).seen.reduce((a,b)=>a+b,0)/byBudget.get(n).seen.length:null}));
     const unseen=budgets.map(n=>({x:n,value:byBudget.get(n).unseen.length?byBudget.get(n).unseen.reduce((a,b)=>a+b,0)/byBudget.get(n).unseen.length:null}));
-    makeLineChart("#learning-chart",[{name:`${modelLabel(selectedModel)} · seen`,values:seen},{name:"Unseen",values:unseen}],budgets,metric === "mae" ? "MAE · years" : metric.toUpperCase());
+    const learningCaption = $("#learning-chart-caption");
+    if (learningCaption) learningCaption.textContent = state.projectionMode
+      ? "This curve uses the same y-axis across all six models, so level and slope differences remain visible. Values are assumptions, not measured outcomes."
+      : "Saved cell means replace the preview when available. No learning-curve values are implied by this diagram.";
+    makeLineChart("#learning-chart",[{name:`${modelLabel(selectedModel)} · seen`,values:seen},{name:"Unseen",values:unseen}],budgets,metric === "mae" ? "MAE · years" : metric.toUpperCase(),sharedDomain);
   } else illustrativeChart($("#learning-chart"),"line");
   const cellTable = rows.slice(0,250);
   $("#results-table-body").innerHTML = cellTable.length ? cellTable.map((row)=>`<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td>${esc(taskLabels[row.task_id]||row.task_id||"—")}</td><td><strong>${esc(modelLabel(row.model_id))}</strong></td><td>${esc(row.n_labels ?? "—")}</td><td>${esc(row.seed ?? "—")}</td><td>${esc(row.trial_budget ?? row.trials ?? "—")}</td><td>${fmt(row.seen_mae,3)}</td><td>${fmt(row.unseen_mae,3)}</td><td>${fmt(numeric(row.total_gpu_seconds) === null ? (numeric(row.total_gpu_hours)===null?null:Number(row.total_gpu_hours)*3600) : row.total_gpu_seconds,1)} s</td></tr>`).join("") : `<tr><td colspan="9" class="empty-cell">No ${esc(statusLabel(scope).toLowerCase())} final evaluation rows found. A missing table is not a zero result.</td></tr>`;
@@ -1070,12 +1108,16 @@ document.addEventListener("DOMContentLoaded",async()=>{
         const bounds = landingHero.getBoundingClientRect();
         const x = pointerX - bounds.left;
         const y = pointerY - bounds.top;
-        const shiftX = ((x / Math.max(bounds.width, 1)) - .5) * 9;
-        const shiftY = ((y / Math.max(bounds.height, 1)) - .5) * 6;
+        const normalizedX = (x / Math.max(bounds.width, 1)) - .5;
+        const normalizedY = (y / Math.max(bounds.height, 1)) - .5;
+        const shiftX = normalizedX * 12;
+        const shiftY = normalizedY * 8;
         landingHero.style.setProperty("--cursor-x",`${x}px`);
         landingHero.style.setProperty("--cursor-y",`${y}px`);
         landingHero.style.setProperty("--brain-shift-x",`${shiftX.toFixed(1)}px`);
         landingHero.style.setProperty("--brain-shift-y",`${shiftY.toFixed(1)}px`);
+        landingHero.style.setProperty("--brain-tilt-x",`${(normalizedX * 10).toFixed(1)}deg`);
+        landingHero.style.setProperty("--brain-tilt-y",`${(normalizedY * -8).toFixed(1)}deg`);
         landingHero.classList.add("has-pointer");
         pointerFrame = 0;
       });
@@ -1084,8 +1126,12 @@ document.addEventListener("DOMContentLoaded",async()=>{
       if (pointerFrame) cancelAnimationFrame(pointerFrame);
       pointerFrame = 0;
       landingHero.classList.remove("has-pointer");
+      landingHero.style.removeProperty("--cursor-x");
+      landingHero.style.removeProperty("--cursor-y");
       landingHero.style.removeProperty("--brain-shift-x");
       landingHero.style.removeProperty("--brain-shift-y");
+      landingHero.style.removeProperty("--brain-tilt-x");
+      landingHero.style.removeProperty("--brain-tilt-y");
     });
   }
   document.addEventListener("click",(event)=>{

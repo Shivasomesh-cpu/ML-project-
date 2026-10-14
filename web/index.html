@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0b0b0b">
   <meta name="description" content="A local research workspace for auditable brain MRI foundation-model evaluation.">
   <title>Seen It Before — Research workspace</title>
-  <link rel="stylesheet" href="styles.css?v=sidebar-20261014">
-  <script src="app.js?v=brain-cursor-20261014" defer></script>
+  <link rel="stylesheet" href="styles.css?v=single-hero-responsive-20261014">
+  <script src="app.js?v=projection-clear-and-scale-20261014" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -61,9 +61,13 @@
                 <button class="button button-primary" type="button" data-page-target="benchmark">Open benchmark runner <span aria-hidden="true">→</span></button>
                 <button class="button button-secondary" type="button" data-page-target="data">Check study readiness <span aria-hidden="true">↗</span></button>
               </div>
+              <div class="hero-question">
+                <span class="hero-question-kicker">PRIMARY QUESTION <span>SIB / 01</span></span>
+                <p>When a foundation model performs well, how much of that advantage remains on people absent from its pretraining data?</p>
+              </div>
+              <div class="status-line hero-status-line"><span class="status-square" id="study-status-square"></span><span id="study-status">Checking project data…</span></div>
             </div>
-            <aside class="hero-note">
-              <div class="hero-note-top"><span>PRIMARY QUESTION</span><span class="hero-note-index">SIB / 01</span></div>
+            <div class="hero-visual" aria-hidden="true">
               <div class="hero-brain-scene" aria-hidden="true">
                 <span class="brain-orbit brain-orbit-wide"></span>
                 <span class="brain-orbit brain-orbit-tight"></span>
@@ -92,10 +96,8 @@
                 <span class="brain-signal brain-signal-a"></span>
                 <span class="brain-signal brain-signal-b"></span>
               </div>
-              <p>When a foundation model performs well, how much of that advantage remains on people absent from its pretraining data?</p>
-              <div class="hero-note-rule"></div>
-              <div class="status-line"><span class="status-square" id="study-status-square"></span><span id="study-status">Checking project data…</span></div>
-            </aside>
+              <span class="hero-visual-coordinates">MNI152 · T1w<br>RAS / 2 MM</span>
+            </div>
           </div>
 
           <div class="metric-grid" aria-label="Workspace status">
@@ -134,7 +136,7 @@
           </div>
 
           <div class="chart-grid chart-grid-two projection-grid">
-            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Selected model · scenario projection</div><h2>Estimated error by label budget</h2></div><span class="source-tag" id="overview-projection-status">Generate estimates to explore</span></div><div class="chart-box" id="overview-projection-chart"></div><p class="chart-caption">Switch the focus model above to recalculate. Every point is formula-generated, not a recorded model evaluation.</p></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Selected model · scenario projection</div><h2>Estimated error by label budget</h2></div><span class="source-tag" id="overview-projection-status">Generate estimates to explore</span></div><div class="chart-box" id="overview-projection-chart"></div><p class="chart-caption" id="overview-projection-caption">Generate estimates to compare a model-specific curve on the shared MAE scale. Values are assumptions, not model results.</p></article>
             <article class="panel projection-explainer-panel"><div class="panel-kicker">How the projection changes</div><h2 id="projection-explainer-title">Model-specific assumptions</h2><p id="projection-explainer-copy">Generate estimates to see a transparent assumption set for each configured model. No fitted weights or observed outcomes are implied.</p><div class="projection-stats" id="projection-stats"><div><span>Starting MAE assumption</span><strong id="projection-base-stat">—</strong></div><div><span>Label scaling assumption</span><strong id="projection-slope-stat">—</strong></div><div><span>Unseen gap assumption</span><strong id="projection-gap-stat">—</strong></div></div></article>
           </div>
           <div class="section-heading-row section-heading-tight"><div><div class="eyebrow eyebrow-muted">Protocol at a glance</div><h2>Study design and interpretation guardrails</h2></div><button class="text-button" type="button" data-page-target="data">Read data requirements →</button></div>
@@ -189,7 +191,7 @@
           </div>
           <div class="chart-grid chart-grid-two">
             <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">T1 cell ledger</div><h2 id="metric-chart-title">Seen vs unseen error</h2></div><span class="source-tag" id="result-source-status">Waiting for ledger</span></div><div class="chart-box" id="metric-chart"></div><p class="chart-caption" id="metric-chart-caption">With results, bars show mean error across visible cells. Synthetic runs stay clearly labeled.</p></article>
-            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Label access</div><h2>Learning curve</h2></div><span class="source-tag">By model · by cohort</span></div><div class="chart-box" id="learning-chart"></div><p class="chart-caption">Saved cell means replace the preview when available. No learning-curve values are implied by this diagram.</p></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Label access</div><h2>Learning curve</h2></div><span class="source-tag">By model · by cohort</span></div><div class="chart-box" id="learning-chart"></div><p class="chart-caption" id="learning-chart-caption">Saved cell means replace the preview when available. No learning-curve values are implied by this diagram.</p></article>
           </div>
           <article class="panel chart-panel fold-panel"><div class="panel-head"><div><div class="panel-kicker">Legacy pipeline · fold-level export</div><h2>Fold variability</h2></div><span class="source-tag" id="fold-source-status">No fold file</span></div><div class="chart-box chart-box-short" id="fold-chart"></div><div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Task</th><th>Model</th><th>Fold</th><th>Metric</th><th>Value</th><th>Source</th></tr></thead><tbody id="fold-table-body"><tr><td colspan="7" class="empty-cell">No fold-level export found in results/ yet.</td></tr></tbody></table></div></article>
           <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Legacy cross-validation outputs</div><h2>Learning curves from saved CV files</h2></div><span class="data-source" id="legacy-cv-status">No CV output found</span></div><div class="chart-box chart-box-short" id="legacy-learning-chart"></div><div class="table-wrap"><table><thead><tr><th>Data status</th><th>Dataset</th><th>Task</th><th>Model</th><th>Train N</th><th>Validation MAE</th><th>Validation R²</th><th>Validation accuracy</th><th>Source</th></tr></thead><tbody id="legacy-cv-table-body"><tr><td colspan="9" class="empty-cell">No all_cv_results.csv or dataset CV export found in results/ yet.</td></tr></tbody></table></div><div class="table-caption">Legacy pipeline files lack complete provenance by default and are shown as unverified. Synthetic-run artifacts remain tagged synthetic.</div></article>
