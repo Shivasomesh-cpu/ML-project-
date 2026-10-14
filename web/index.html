@@ -1,533 +1,277 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ULTIMA // BRAIN-FM — NEUROIMAGING WORKSTATION</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="description" content="A local research workspace for auditable brain MRI foundation-model evaluation.">
+  <title>Seen It Before — Research workspace</title>
+  <link rel="stylesheet" href="styles.css?v=sidebar-20261014">
+  <script src="app.js?v=brain-cursor-20261014" defer></script>
 </head>
 <body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#overview" aria-label="Seen It Before overview">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>Seen It Before</strong><small>Research workspace</small></span>
+      </a>
+      <div class="sidebar-label">Study workspace</div>
+      <nav class="primary-nav" aria-label="Research modules">
+        <button class="nav-item is-active" type="button" data-page-target="overview" aria-current="page"><span class="nav-number">01</span><span>Overview &amp; architecture</span></button>
+        <button class="nav-item" type="button" data-page-target="benchmark"><span class="nav-number">02</span><span>Benchmark runner</span></button>
+        <button class="nav-item" type="button" data-page-target="results"><span class="nav-number">03</span><span>Results &amp; metrics</span></button>
+        <button class="nav-item" type="button" data-page-target="correlation"><span class="nav-number">04</span><span>Correlation &amp; clustering</span></button>
+        <button class="nav-item" type="button" data-page-target="preprocessing"><span class="nav-number">05</span><span>Preprocessing sensitivity</span></button>
+        <button class="nav-item" type="button" data-page-target="data"><span class="nav-number">06</span><span>Data &amp; configuration</span></button>
+        <button class="nav-item" type="button" data-page-target="audit"><span class="nav-number">07</span><span>Contamination audit</span><span class="nav-count" id="nav-audit-count">—</span></button>
+        <button class="nav-item" type="button" data-page-target="did"><span class="nav-number">08</span><span>Natural experiment · DiD</span></button>
+        <button class="nav-item" type="button" data-page-target="equivalence"><span class="nav-number">09</span><span>Label equivalence &amp; Pareto</span></button>
+        <button class="nav-item" type="button" data-page-target="qc"><span class="nav-number">10</span><span>3D slice QC &amp; montage</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="workspace-card">
+        <div class="workspace-card-top"><span class="status-dot" id="sidebar-status-dot"></span><span id="sidebar-status-label">Connecting to workspace</span></div>
+        <p>Local files and run records stay on this machine.</p>
+      </div>
+      <div class="sidebar-footer"><span class="brand-mini">SIB</span><span>Black &amp; white edition</span><span class="sidebar-version">v2</span></div>
+    </aside>
 
-  <!-- =====================================================================
-       GLOBAL NAVIGATION BAR & COCKPIT CONTROLS
-       ===================================================================== -->
-  <header class="global-nav">
-    <div class="nav-brand">
-      <div class="brand-symbol">U</div>
-      <div class="brand-text-block">
-        <span class="brand-main">BRAIN — FM</span>
-        <span class="brand-sub">ULTIMA NEUROIMAGING WORKSTATION // v3.0</span>
-      </div>
-    </div>
-
-    <div class="nav-telemetry">
-      <div class="telemetry-item">
-        <span class="telemetry-dot"></span>
-        <span>COCKPIT: LIVE</span>
-      </div>
-      <div class="telemetry-item">
-        <span>SCANNER: PHILIPS 3T</span>
-      </div>
-      <div class="telemetry-item">
-        <span>ATLAS: MNI152 T1w</span>
-      </div>
-      <div class="telemetry-item">
-        <span>PALETTE: STRICT B&W</span>
-      </div>
-    </div>
-
-    <div class="nav-layout-controls">
-      <button class="layout-btn active" onclick="setLayout('tiled')">3-WINDOW TILED VIEW</button>
-      <button class="layout-btn" onclick="setLayout('focus-pacs')">FOCUS: 3D PACS</button>
-      <button class="layout-btn" onclick="setLayout('focus-bench')">FOCUS: BENCHMARKS</button>
-      <button class="layout-btn" onclick="setLayout('focus-causal')">FOCUS: CAUSAL</button>
-    </div>
-  </header>
-
-  <!-- =====================================================================
-       EXECUTIVE TELEMETRY BANNER
-       ===================================================================== -->
-  <section class="hero-banner">
-    <div>
-      <span class="badge badge-outline" style="margin-bottom: 8px;">RESEARCH REPORT // BIORXIV 2026.05.15.725427</span>
-      <h1 class="hero-main-title">B R A I N — F M</h1>
-      <p class="hero-tagline">
-        A unified neuroimaging cockpit synchronizing <strong>real MNI152 human brain slice PACS reconstruction</strong>, 
-        <strong>multi-model foundation benchmarking</strong>, and <strong>cryptographic test leakage causal identification</strong>.
-      </p>
-    </div>
-
-    <div class="hero-kpis">
-      <div class="hero-kpi-pill">
-        <div class="hero-kpi-num">291</div>
-        <div class="hero-kpi-lbl">Real MNI Slices</div>
-      </div>
-      <div class="hero-kpi-pill">
-        <div class="hero-kpi-num">6 Arms</div>
-        <div class="hero-kpi-lbl">SSL & Baseline</div>
-      </div>
-      <div class="hero-kpi-pill">
-        <div class="hero-kpi-num">+1.32y</div>
-        <div class="hero-kpi-lbl">Causal DiD Gap</div>
-      </div>
-      <div class="hero-kpi-pill">
-        <div class="hero-kpi-num">9,999</div>
-        <div class="hero-kpi-lbl">Permutations</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =====================================================================
-       THE 3-WINDOW DASHBOARD COCKPIT (SIMULTANEOUS 3-WINDOW TILED WORKSTATION)
-       ===================================================================== -->
-  <main class="cockpit-section">
-    <div class="cockpit-title-row">
-      <div class="cockpit-label">SIMULTANEOUS MULTI-PANEL COCKPIT (ALL 3 DECKS ACTIVE)</div>
-      <span style="font-family: var(--font-mono); font-size: 0.72rem; color: #777;">SYNCHRONIZED REAL-TIME TELEMETRY</span>
-    </div>
-
-    <div id="cockpit-grid" class="cockpit-grid">
-
-      <!-- =================================================================
-           WINDOW 01: REAL 3D PACS BRAIN SLICE WORKSTATION
-           ================================================================= -->
-      <section class="deck-window" id="win-pacs">
-        <div class="window-header">
-          <div class="window-title-block">
-            <span class="window-indicator"></span>
-            <span class="window-title">WIN 01 // 3D PACS VOLUMETRIC SLICE WORKSTATION</span>
-          </div>
-          <div class="window-tools">
-            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-pacs')">&square;</button>
-            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
-          </div>
+    <main class="main-area" id="main-content">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>Seen It Before</span><span class="crumb-separator">/</span><strong id="current-page-label">Overview</strong></div>
+        <div class="topbar-actions">
+          <span class="api-status" id="api-status"><span class="status-dot"></span><span>Connecting</span></span>
+          <label class="focus-model-control">Focus model<select id="focus-model" aria-label="Model projection focus" disabled><option value="brainiac">BrainIAC</option></select></label>
+          <span class="projection-mode-indicator" id="projection-mode-indicator" hidden>PROJECTION</span>
+          <button class="button button-secondary button-compact estimate-toggle" id="generate-estimates-button" type="button" aria-pressed="false">Generate estimates</button>
+          <button class="icon-button" id="refresh-button" type="button" title="Refresh workspace data" aria-label="Refresh workspace data"><span aria-hidden="true">↻</span></button>
         </div>
+      </header>
+      <div class="projection-banner" id="projection-banner" role="status" hidden><span class="projection-banner-mark">PROJECTION</span><span>Model-specific scenario estimates use transparent assumptions. No trained checkpoint was run; these are not measured study results and are not saved.</span></div>
 
-        <div class="window-body">
-          <div class="pacs-container">
-            <!-- Plane Selectors -->
-            <div class="plane-selector-bar">
-              <button id="pacs-btn-axial" class="pacs-plane-btn active" onclick="changeSlicePlane('axial')">AXIAL (Z)</button>
-              <button id="pacs-btn-coronal" class="pacs-plane-btn" onclick="changeSlicePlane('coronal')">CORONAL (Y)</button>
-              <button id="pacs-btn-sagittal" class="pacs-plane-btn" onclick="changeSlicePlane('sagittal')">SAGITTAL (X)</button>
-            </div>
-
-            <!-- Real Canvas Viewport -->
-            <div class="pacs-viewport">
-              <canvas id="real-slice-canvas" width="220" height="220"></canvas>
-              <div class="pacs-crosshair-x"></div>
-              <div class="pacs-crosshair-y"></div>
-              
-              <div class="pacs-hud-top">
-                PLANE: <span id="pacs-hud-plane">AXIAL</span><br>
-                SLICE: <span id="pacs-hud-idx">45 / 91</span>
-              </div>
-              <div class="pacs-hud-bottom">
-                MNI: <span id="pacs-hud-coords">[-0.2, 12.4, 45.0] mm</span><br>
-                FOV: 240x240 mm | 1mm ISO
-              </div>
-              <div id="pacs-hud-region" class="pacs-hud-region">VENTRICLES & BASAL GANGLIA</div>
-            </div>
-
-            <!-- Scrubber & Action Controls -->
-            <div class="pacs-controls">
-              <div class="scrubber-row">
-                <label for="pacs-slider">SLICING DEPTH SCRUBBER</label>
-                <span id="pacs-slice-readout">Slice 45 / 91</span>
-              </div>
-              <input type="range" id="pacs-slider" min="0" max="90" value="45" oninput="onScrubberInput(this.value)" />
-
-              <div class="action-button-row">
-                <button id="btn-auto-cine" class="btn btn-secondary" onclick="toggleCinePlay()" style="flex: 1; font-size: 0.68rem; padding: 8px;">AUTO-CINE: OFF</button>
-                <button class="btn btn-secondary" onclick="toggleNegativeMode()" style="flex: 1; font-size: 0.68rem; padding: 8px;">INVERT T1w</button>
+      <div class="page-container">
+        <section class="page is-active" id="page-overview" data-page="overview" aria-labelledby="overview-title">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="eyebrow-line"></span>Brain MRI · exposure-aware evaluation</div>
+              <h1 id="overview-title">Has this model<br><em>seen the test set?</em></h1>
+              <p class="hero-lede">A controlled, contamination-audited study of whether pretraining exposure changes how foundation models generalize across AOMIC cohorts.</p>
+              <div class="hero-actions">
+                <button class="button button-primary" type="button" data-page-target="benchmark">Open benchmark runner <span aria-hidden="true">→</span></button>
+                <button class="button button-secondary" type="button" data-page-target="data">Check study readiness <span aria-hidden="true">↗</span></button>
               </div>
             </div>
-
-            <!-- Acquisition QC Telemetry Box -->
-            <div style="width: 100%; margin-top: 18px; border-top: 1px solid var(--border-hairline); padding-top: 12px;">
-              <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 8px;">ACQUISITION QC TELEMETRY</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--font-mono); font-size: 0.72rem;">
-                <div>SNR: <strong style="color: #FFF;">24.8 dB</strong></div>
-                <div>CNR: <strong style="color: #FFF;">3.42</strong></div>
-                <div>EFC: <strong style="color: #FFF;">0.418</strong></div>
-                <div>MNI RESIDUAL: <strong style="color: #FFF;">&lt; 1.18 mm</strong></div>
+            <aside class="hero-note">
+              <div class="hero-note-top"><span>PRIMARY QUESTION</span><span class="hero-note-index">SIB / 01</span></div>
+              <div class="hero-brain-scene" aria-hidden="true">
+                <span class="brain-orbit brain-orbit-wide"></span>
+                <span class="brain-orbit brain-orbit-tight"></span>
+                <svg class="hero-brain-art" viewBox="0 0 180 140" role="presentation">
+                  <defs>
+                    <linearGradient id="brain-silver" x1="0" x2="1" y1="0" y2="1">
+                      <stop offset="0" stop-color="#fff" stop-opacity=".25" />
+                      <stop offset="1" stop-color="#fff" stop-opacity=".04" />
+                    </linearGradient>
+                  </defs>
+                  <path class="brain-shell" d="M89 25C81 12 64 12 53 24 39 19 25 28 24 42 9 49 10 67 20 76 10 89 17 103 31 107 35 120 50 125 63 117 72 127 85 124 91 115 103 123 118 117 121 104 136 100 142 85 135 73 145 60 138 45 127 41 126 27 113 18 99 22 96 15 86 16 81 22Z" />
+                  <path class="brain-midline" d="M89 25C83 39 96 48 89 62 84 76 96 86 89 99 85 106 89 111 91 115" />
+                  <g class="brain-folds">
+                    <path d="M52 25c10 7 8 15 2 20-6 5-14 1-18 8-3 6 2 12 8 12" />
+                    <path d="M30 47c9-4 18 2 17 10-1 8-9 10-8 17 1 7 9 9 16 7" />
+                    <path d="M25 80c8-5 16-2 18 5 2 7-4 12-2 18" />
+                    <path d="M59 67c-5 7-3 14 3 17 7 3 12-2 16 3 3 4 1 9-2 13" />
+                    <path d="M100 25c-5 8-2 15 5 18 7 3 13-1 18 4 4 5 1 11-5 14" />
+                    <path d="M134 48c-9-4-18 2-17 10 1 8 9 10 8 17-1 7-9 9-16 7" />
+                    <path d="M135 80c-8-5-16-2-18 5-2 7 4 12 2 18" />
+                    <path d="M107 67c5 7 3 14-3 17-7 3-12-2-16 3-3 4-1 9 2 13" />
+                  </g>
+                  <circle class="brain-highlight" cx="54" cy="38" r="2.4" />
+                  <circle class="brain-highlight" cx="124" cy="92" r="2.4" />
+                </svg>
+                <span class="brain-signal brain-signal-a"></span>
+                <span class="brain-signal brain-signal-b"></span>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- =================================================================
-           WINDOW 02: FOUNDATION BENCHMARK SUITE
-           ================================================================= -->
-      <section class="deck-window" id="win-bench">
-        <div class="window-header">
-          <div class="window-title-block">
-            <span class="window-indicator"></span>
-            <span class="window-title">WIN 02 // FOUNDATION BENCHMARK SUITE</span>
-          </div>
-          <div class="window-tools">
-            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-bench')">&square;</button>
-            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
-          </div>
-        </div>
-
-        <div class="window-body">
-          <!-- Selection Controls -->
-          <div class="bench-form-grid">
-            <div class="bench-field">
-              <label for="bm-dataset">Cohort Dataset</label>
-              <select id="bm-dataset" onchange="onBenchDatasetChange(this.value)">
-                <option value="PPMI">PPMI (Parkinson's Progression)</option>
-                <option value="HBN">HBN (Healthy Brain Network)</option>
-                <option value="NKI">NKI (Rockland Lifespan)</option>
-              </select>
-            </div>
-            <div class="bench-field">
-              <label for="bm-task">Downstream Task</label>
-              <select id="bm-task" onchange="onBenchTaskChange(this.value)">
-                <option value="Sex Classification">Sex Classification</option>
-                <option value="Parkinson Classification">Parkinson Classification</option>
-                <option value="Male Age Regression">Male Age Regression</option>
-                <option value="Female Age Regression">Female Age Regression</option>
-              </select>
-            </div>
+              <p>When a foundation model performs well, how much of that advantage remains on people absent from its pretraining data?</p>
+              <div class="hero-note-rule"></div>
+              <div class="status-line"><span class="status-square" id="study-status-square"></span><span id="study-status">Checking project data…</span></div>
+            </aside>
           </div>
 
-          <!-- Model Arm Checkbox Pills -->
-          <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase;">ACTIVE EVALUATION ARMS</div>
-          <div class="model-arm-pills">
-            <label class="arm-pill"><input type="checkbox" checked /> BrainIAC (ViT-B)</label>
-            <label class="arm-pill"><input type="checkbox" checked /> SwinBrain (UNETR)</label>
-            <label class="arm-pill"><input type="checkbox" checked /> FreeSurfer Gold</label>
-            <label class="arm-pill"><input type="checkbox" checked /> AnatCL ResNet-18</label>
-            <label class="arm-pill"><input type="checkbox" checked /> SimCLR 3D</label>
-            <label class="arm-pill"><input type="checkbox" checked /> CNN3D Random</label>
+          <div class="metric-grid" aria-label="Workspace status">
+            <article class="metric-card"><div class="metric-top"><span>Observed cells</span><span class="metric-index">01</span></div><strong id="metric-observed">—</strong><small>Final evaluation records</small></article>
+            <article class="metric-card"><div class="metric-top"><span>Synthetic runs</span><span class="metric-index">02</span></div><strong id="metric-mock">—</strong><small>Isolated from scientific results</small></article>
+            <article class="metric-card"><div class="metric-top"><span>Audit status</span><span class="metric-index">03</span></div><strong class="metric-text" id="metric-audit">Checking</strong><small>Manifest and cohort provenance</small></article>
+            <article class="metric-card"><div class="metric-top"><span>Required inputs</span><span class="metric-index">04</span></div><strong class="metric-text" id="metric-ready">—</strong><small>Frozen split · metadata · cache</small></article>
           </div>
 
-          <!-- Execution Action Button -->
-          <button id="btn-run-benchmark" class="btn-execute" onclick="executeProbeSimulation()">EXECUTE PROBE SUITE</button>
-
-          <!-- Streaming Telemetry Console -->
-          <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase;">PROBE LOG TELEMETRY</div>
-          <div id="terminal-logs" class="bench-terminal">[READY] Benchmark engine primed. Ready for execution.</div>
-
-          <!-- Mini Results Table -->
-          <div style="margin-top: 14px;">
-            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 6px;">EVALUATION METRICS SUMMARY</div>
-            <table class="results-mini-table" id="win-bench-table">
-              <thead>
-                <tr>
-                  <th>Model</th>
-                  <th>Primary Metric</th>
-                  <th>ROC-AUC / R²</th>
-                  <th>Gap</th>
-                  <th>Perm p</th>
-                  <th>Sig</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+          <div class="section-heading-row"><div><div class="eyebrow eyebrow-muted">01 / study architecture</div><h2>One exposure contrast, four controlled stages</h2></div><span class="section-aside">T1 · AOMIC brain-age regression</span></div>
+          <div class="architecture-flow" aria-label="Study pipeline">
+            <article class="architecture-step"><span class="step-index">A</span><div class="panel-kicker">Cohort exposure</div><h3>Seen vs unseen</h3><p>ID1000 is expected seen; PIOP1 + PIOP2 are expected unseen. Labels remain provisional pending audit.</p><button class="text-button" type="button" data-page-target="audit">Review overlap <span aria-hidden="true">→</span></button></article>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <article class="architecture-step"><span class="step-index">B</span><div class="panel-kicker">Shared pipeline</div><h3>One input standard</h3><p>RAS · MNI152 · 2 mm · 128³ · in-mask Z-score · float16.</p><button class="text-button" type="button" data-page-target="preprocessing">View preprocessing <span aria-hidden="true">→</span></button></article>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <article class="architecture-step"><span class="step-index">C</span><div class="panel-kicker">Matched model arms</div><h3>Foundation vs baseline</h3><p>BrainIAC and FOMO families versus scratch-trained 3D baselines and regional-volume LightGBM.</p><button class="text-button" type="button" data-page-target="data">Inspect configurations <span aria-hidden="true">→</span></button></article>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <article class="architecture-step architecture-step-ink"><span class="step-index">D</span><div class="panel-kicker">Primary outcome</div><h3>Difference-in-differences</h3><p>Estimate excess unseen error after subtracting the baseline’s own seen-to-unseen gap.</p><button class="text-button" type="button" data-page-target="did">Open DiD analysis <span aria-hidden="true">→</span></button></article>
           </div>
-        </div>
-      </section>
 
-      <!-- =================================================================
-           WINDOW 03: CAUSAL AUDIT & LEAKAGE LEDGER
-           ================================================================= -->
-      <section class="deck-window" id="win-causal">
-        <div class="window-header">
-          <div class="window-title-block">
-            <span class="window-indicator"></span>
-            <span class="window-title">WIN 03 // CAUSAL AUDIT & LEAKAGE LEDGER</span>
-          </div>
-          <div class="window-tools">
-            <button class="win-btn" title="Toggle Fullscreen Focus" onclick="setLayout('focus-causal')">&square;</button>
-            <button class="win-btn" title="Reset Tiled View" onclick="setLayout('tiled')">&boxbox;</button>
-          </div>
-        </div>
-
-        <div class="window-body">
-          <!-- Amsterdam Natural Experiment -->
-          <div class="did-callout-box">
-            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; text-transform: uppercase; margin-bottom: 4px;">
-              AMSTERDAM NATURAL EXPERIMENT // PHILIPS ACHIEVA 3T
-            </div>
-            <p style="font-size: 0.8rem; color: #888; line-height: 1.45;">
-              Comparing AOMIC ID1000 (pretraining seen) vs PIOP1/2 (unseen) on the exact same scanner hardware at Spinoza Centre.
-            </p>
-
-            <!-- 2x2 Causal Matrix -->
-            <div class="did-2x2-matrix">
-              <div class="did-cell">
-                <div class="did-cell-lbl">BRAINIAC (FOUNDATION)</div>
-                <div class="did-cell-val" id="did-win-fm-gap">+1.41 yrs</div>
-                <div class="did-cell-gap">Seen: 3.41y &rarr; Unseen: 4.82y</div>
+          <div class="overview-two-column">
+            <article class="panel panel-cohorts">
+              <div class="panel-head"><div><div class="panel-kicker">Natural experiment · cohort labels are pre-registered expectations</div><h2>Same scanner. Different expected exposure.</h2></div><span class="source-tag">Paper protocol</span></div>
+              <div class="cohort-comparison">
+                <div class="cohort-card"><div class="cohort-top"><span class="cohort-index">A</span><span class="status-pill">EXPECTED SEEN</span></div><h3>AOMIC ID1000</h3><p>Exposure group expected to overlap with foundation-model pretraining.</p><div class="cohort-foot"><span>Reported before age/QC restriction</span><strong>928 participants</strong></div></div>
+                <div class="comparison-mark" aria-label="compared with">vs</div>
+                <div class="cohort-card"><div class="cohort-top"><span class="cohort-index">B</span><span class="status-pill">EXPECTED UNSEEN</span></div><h3>AOMIC PIOP1 + PIOP2</h3><p>Evaluation group expected to be absent from the pretraining manifest.</p><div class="cohort-foot"><span>Reported before age/QC restriction</span><strong>442 participants</strong></div></div>
               </div>
-              <div class="did-cell">
-                <div class="did-cell-lbl">RESNET-18 (SUPERVISED)</div>
-                <div class="did-cell-val" id="did-win-base-gap">+0.09 yrs</div>
-                <div class="did-cell-gap">Seen: 4.79y &rarr; Unseen: 4.88y</div>
-              </div>
-            </div>
-
-            <div class="did-result-banner">
-              <div style="font-family: var(--font-mono); font-size: 0.65rem; color: #888; text-transform: uppercase; margin-bottom: 2px;">
-                CAUSAL CONTAMINATION ADVANTAGE (&Delta;&Delta;)
-              </div>
-              <div class="did-result-val">+1.32 YEARS</div>
-              <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; margin-top: 2px;">
-                95% CI: [+0.84, +1.79] yrs // p = 0.002 (Significant)
-              </div>
-            </div>
+              <p class="quiet-note">The scanner/acquisition match is a manuscript claim that still needs verification in source cohort records. Cohort counts are not final analysis sample sizes.</p>
+            </article>
+            <article class="panel budget-panel">
+              <div class="panel-head"><div><div class="panel-kicker">Protocol schedule · not model results</div><h2>Matched label budgets</h2></div><span class="source-tag">6 budgets</span></div>
+              <div id="budget-visual" class="budget-visual" role="img" aria-label="Study label-budget schedule"></div>
+              <div class="budget-footer"><span>Seeds <strong>42 · 1337 · 2026 · 7 · 99</strong></span><span>Tuning trials <strong>5 · 20 · 50</strong></span></div>
+            </article>
           </div>
 
-          <!-- Dynamic Label Equivalence Slider -->
-          <div style="margin-top: 14px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: #AAA; text-transform: uppercase;">LABEL EQUIVALENCE BUDGET (N_eq)</span>
-              <span id="win-neq-readout" class="badge badge-solid">N = 50 scans</span>
-            </div>
-            <input type="range" id="win-neq-slider" min="10" max="250" value="50" step="5" oninput="onNeqSliderInput(this.value)" />
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-              <div class="did-cell">
-                <div class="did-cell-lbl">ON SEEN (ID1000)</div>
-                <div id="win-neq-seen" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #FFF;">+68 Scans</div>
-                <div style="font-size: 0.65rem; color: #777;">Multiplier: 2.36x</div>
-              </div>
-              <div class="did-cell">
-                <div class="did-cell-lbl">ON UNSEEN (PIOP)</div>
-                <div id="win-neq-unseen" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: #FFF;">+14 Scans</div>
-                <div style="font-size: 0.65rem; color: #777;">Multiplier: 1.28x</div>
-              </div>
-            </div>
+          <div class="chart-grid chart-grid-two projection-grid">
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Selected model · scenario projection</div><h2>Estimated error by label budget</h2></div><span class="source-tag" id="overview-projection-status">Generate estimates to explore</span></div><div class="chart-box" id="overview-projection-chart"></div><p class="chart-caption">Switch the focus model above to recalculate. Every point is formula-generated, not a recorded model evaluation.</p></article>
+            <article class="panel projection-explainer-panel"><div class="panel-kicker">How the projection changes</div><h2 id="projection-explainer-title">Model-specific assumptions</h2><p id="projection-explainer-copy">Generate estimates to see a transparent assumption set for each configured model. No fitted weights or observed outcomes are implied.</p><div class="projection-stats" id="projection-stats"><div><span>Starting MAE assumption</span><strong id="projection-base-stat">—</strong></div><div><span>Label scaling assumption</span><strong id="projection-slope-stat">—</strong></div><div><span>Unseen gap assumption</span><strong id="projection-gap-stat">—</strong></div></div></article>
           </div>
-
-          <!-- Manifest Contamination Table -->
-          <div style="margin-top: 16px;">
-            <div style="font-family: var(--font-mono); font-size: 0.68rem; color: #888; text-transform: uppercase; margin-bottom: 6px;">
-              TABLE 1 // MANIFEST OVERLAP AUDIT
-            </div>
-            <table class="results-mini-table">
-              <thead>
-                <tr>
-                  <th>Cohort</th>
-                  <th>Scans</th>
-                  <th>Leakage %</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td><strong>AOMIC ID1000</strong></td><td>928</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
-                <tr><td><strong>OASIS-1</strong></td><td>416</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
-                <tr><td><strong>OASIS-2</strong></td><td>150</td><td>100.0%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
-                <tr><td><strong>IXI London</strong></td><td>568</td><td>97.4%</td><td><span class="badge badge-seen">SEEN</span></td></tr>
-                <tr><td><strong>AOMIC PIOP1</strong></td><td>216</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
-                <tr><td><strong>AOMIC PIOP2</strong></td><td>226</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
-                <tr><td><strong>ABIDE I & II</strong></td><td>1112</td><td>0.0%</td><td><span class="badge badge-unseen">UNSEEN</span></td></tr>
-              </tbody>
-            </table>
+          <div class="section-heading-row section-heading-tight"><div><div class="eyebrow eyebrow-muted">Protocol at a glance</div><h2>Study design and interpretation guardrails</h2></div><button class="text-button" type="button" data-page-target="data">Read data requirements →</button></div>
+          <div class="protocol-strip">
+            <article><span>01</span><strong>Audit exposure</strong><small>Versioned manifest + participant IDs</small></article>
+            <article><span>02</span><strong>Freeze cohorts</strong><small>Age 19–26 · sex and age stratified</small></article>
+            <article><span>03</span><strong>Match budgets</strong><small>Equal labels, trials and seeds</small></article>
+            <article><span>04</span><strong>Quantify uncertainty</strong><small>Paired cells · bootstrap inference</small></article>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </div>
-  </main>
-
-  <!-- =====================================================================
-       DEEP SCROLLABLE RESEARCH & GRAPH NARRATIVE (7 SCIENTIFIC GRAPHS)
-       ===================================================================== -->
-  <section class="narrative-wrapper">
-
-    <!-- ===================================================================
-         SECTION 01: SAMPLE EFFICIENCY & MULTI-MODEL LEARNING CURVES
-         =================================================================== -->
-    <div class="narrative-section">
-      <span class="section-tag">ANALYTICS 01 // SAMPLE EFFICIENCY TRAJECTORIES</span>
-      <h2 class="section-heading">MONOCHROME LEARNING CURVES & ERROR RESIDUALS</h2>
-      <p class="section-desc">
-        Investigating sample efficiency as training data fraction &alpha; increases from 1% to 100%. Shaded bands denote 
-        95% bootstrap confidence intervals across 25 stratified folds. Hover over any point to inspect exact scores.
-      </p>
-
-      <div class="grid-2">
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">SAMPLE EFFICIENCY LEARNING CURVE (&alpha; &isin; [1%, 100%])</span>
-            <span class="badge badge-outline">HOVER CROSSHAIR ENABLED</span>
+        <section class="page" id="page-benchmark" data-page="benchmark" aria-labelledby="benchmark-title" hidden>
+          <div class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span>02 / execution</div><h1 id="benchmark-title">Benchmark runner</h1><p>Launch one configured T1 cell or a separate fast synthetic legacy suite. Every job shows its status and output location.</p></div><span class="local-only-pill"><span class="status-square"></span>LOCAL ONLY</span></div>
+          <div class="runner-grid">
+            <section class="panel run-panel" aria-labelledby="run-form-title">
+              <div class="panel-head"><div><div class="panel-kicker">T1 · AOMIC brain age</div><h2 id="run-form-title">Configure one evaluation cell</h2></div><span class="source-tag">run_cell.py</span></div>
+              <form id="run-form">
+                <fieldset class="mode-fieldset"><legend>Data mode</legend>
+                  <label class="mode-choice"><input type="radio" name="mode" value="mock" checked><span><strong>Synthetic smoke run</strong><small>Generated volumes · isolated ledger</small></span></label>
+                  <label class="mode-choice" id="observed-mode-choice"><input type="radio" name="mode" value="observed" disabled><span><strong>Observed data</strong><small id="observed-mode-help">Requires frozen splits, scan metadata and cached volumes</small></span></label>
+                </fieldset>
+                <div class="form-grid">
+                  <label>Task<select id="run-task" name="taskId"></select></label>
+                  <label>Model<select id="run-model" name="modelId"></select></label>
+                  <label>Label budget<select id="run-budget" name="nLabels"><option value="25">25 labels</option><option value="50">50 labels</option><option value="100">100 labels</option><option value="250">250 labels</option><option value="500">500 labels</option><option value="-1">All available</option></select></label>
+                  <label>Seed<select id="run-seed" name="seed"></select></label>
+                  <label class="field-full">Tuning trials<select id="run-trials" name="trials"><option value="2">2 · smoke</option><option value="5">5 · low</option><option value="20">20 · medium</option><option value="50">50 · high</option></select></label>
+                </div>
+                <p class="run-note" id="run-mode-note">Synthetic output checks the harness only; it is excluded from every scientific analysis.</p>
+                <button class="button button-primary run-submit" id="run-submit" type="submit">Start synthetic smoke run <span aria-hidden="true">→</span></button>
+                <div class="run-error" id="run-error" role="alert" hidden></div>
+              </form>
+              <div class="job-card" id="job-card" hidden><div class="job-card-head"><span class="job-state-dot" id="job-state-dot"></span><strong id="job-state-label">Queued</strong><span class="job-id" id="job-id"></span></div><p id="job-description"></p><pre class="job-log" id="job-log" hidden></pre></div>
+              <div class="required-inputs"><h3>Observed-data requirements</h3><ul id="run-readiness-list"><li>Checking local inputs…</li></ul></div>
+            </section>
+            <aside class="runner-side">
+              <article class="panel suite-panel"><div class="panel-kicker">Legacy suite · synthetic</div><h2>Explore the full analysis flow</h2><p>Run the repository’s fast PPMI/HBN/NKI pipeline against generated cohorts. Outputs stay under <code>results/mock/</code> and are marked as synthetic.</p><div class="suite-details"><span>Device <strong>CPU</strong></span><span>Mode <strong>Fast</strong></span><span>Inputs <strong>Synthetic</strong></span></div><button class="button button-secondary button-block" id="legacy-suite-button" type="button">Run fast suite <span aria-hidden="true">→</span></button><p class="small-print" id="legacy-suite-status">This optional run can take several minutes and is not scientific evidence.</p></article>
+              <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Selected model projection</div><h2>Expected error trend</h2></div><span class="source-tag" id="runner-projection-status">Awaiting estimates</span></div><div class="chart-box" id="runner-projection-chart"></div><p class="chart-caption">Scenario estimate only. A real benchmark run is required for measured performance.</p></article>
+              <article class="panel"><div class="panel-kicker">Run lifecycle</div><h2>What the runner records</h2><ol class="compact-steps"><li><span>01</span>Task, model and label budget</li><li><span>02</span>Seed and tuning-trial budget</li><li><span>03</span>Per-cohort error and compute time</li><li><span>04</span>Data mode and result provenance</li></ol></article>
+              <article class="panel dark-panel"><div class="panel-kicker">Interpretation</div><h3>Synthetic runs check the pipeline</h3><p>Generated metrics help check that the software runs. They never count as participant results and are not used for DiD, label equivalence or Pareto summaries.</p></article>
+            </aside>
           </div>
-          <div id="chart-learning-curve-container" style="position: relative; width: 100%; min-height: 340px;"></div>
-          <div id="tooltip-learning-curve" class="interactive-tooltip"></div>
-        </div>
+        </section>
 
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">FOLD-LEVEL ERROR RESIDUAL DISTRIBUTION</span>
-            <span class="badge badge-outline">25 STRATIFIED FOLDS</span>
+        <section class="page" id="page-results" data-page="results" aria-labelledby="results-title" hidden>
+          <div class="page-heading page-heading-with-action"><div><div class="eyebrow"><span class="eyebrow-line"></span>03 / evidence</div><h1 id="results-title">Results &amp; metrics</h1><p>Inspect cell-level seen/unseen error, label-budget trends, and fold-level legacy outputs. Source and data status stay visible beside every chart.</p></div><div class="header-actions"><button class="button button-secondary button-compact" id="export-csv" type="button">Export CSV</button><button class="button button-secondary button-compact" id="export-json" type="button">Export JSON</button></div></div>
+          <div class="filter-bar panel">
+            <label>Cell scope<select id="results-scope"><option value="observed">Observed</option><option value="mock">Synthetic runs</option><option value="predicted">Model projections</option><option value="all">All cell records</option></select></label>
+            <label>Model<select id="results-model-filter"><option value="all">All models</option></select></label>
+            <label>Metric<select id="results-metric"><option value="mae">MAE · years</option><option value="r2">R²</option><option value="accuracy">Accuracy</option><option value="auc">AUC</option></select></label>
+            <div class="result-count-block"><span class="panel-kicker">VISIBLE RECORDS</span><strong id="result-count">—</strong></div>
           </div>
-          <div id="chart-error-distribution-container" style="position: relative; width: 100%; min-height: 340px;"></div>
-        </div>
+          <div class="chart-grid chart-grid-two">
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">T1 cell ledger</div><h2 id="metric-chart-title">Seen vs unseen error</h2></div><span class="source-tag" id="result-source-status">Waiting for ledger</span></div><div class="chart-box" id="metric-chart"></div><p class="chart-caption" id="metric-chart-caption">With results, bars show mean error across visible cells. Synthetic runs stay clearly labeled.</p></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Label access</div><h2>Learning curve</h2></div><span class="source-tag">By model · by cohort</span></div><div class="chart-box" id="learning-chart"></div><p class="chart-caption">Saved cell means replace the preview when available. No learning-curve values are implied by this diagram.</p></article>
+          </div>
+          <article class="panel chart-panel fold-panel"><div class="panel-head"><div><div class="panel-kicker">Legacy pipeline · fold-level export</div><h2>Fold variability</h2></div><span class="source-tag" id="fold-source-status">No fold file</span></div><div class="chart-box chart-box-short" id="fold-chart"></div><div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Task</th><th>Model</th><th>Fold</th><th>Metric</th><th>Value</th><th>Source</th></tr></thead><tbody id="fold-table-body"><tr><td colspan="7" class="empty-cell">No fold-level export found in results/ yet.</td></tr></tbody></table></div></article>
+          <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Legacy cross-validation outputs</div><h2>Learning curves from saved CV files</h2></div><span class="data-source" id="legacy-cv-status">No CV output found</span></div><div class="chart-box chart-box-short" id="legacy-learning-chart"></div><div class="table-wrap"><table><thead><tr><th>Data status</th><th>Dataset</th><th>Task</th><th>Model</th><th>Train N</th><th>Validation MAE</th><th>Validation R²</th><th>Validation accuracy</th><th>Source</th></tr></thead><tbody id="legacy-cv-table-body"><tr><td colspan="9" class="empty-cell">No all_cv_results.csv or dataset CV export found in results/ yet.</td></tr></tbody></table></div><div class="table-caption">Legacy pipeline files lack complete provenance by default and are shown as unverified. Synthetic-run artifacts remain tagged synthetic.</div></article>
+          <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Append-only evaluation ledger</div><h2>Cell records</h2></div><span class="data-source" id="cell-source-status">Reading results/results.csv</span></div><div class="table-wrap"><table><thead><tr><th>Status</th><th>Task</th><th>Model</th><th>N labels</th><th>Seed</th><th>Trials</th><th>Seen MAE</th><th>Unseen MAE</th><th>Compute</th></tr></thead><tbody id="results-table-body"><tr><td colspan="9" class="empty-cell">Loading cell ledger…</td></tr></tbody></table></div></article>
+        </section>
+
+        <section class="page" id="page-correlation" data-page="correlation" aria-labelledby="correlation-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>04 / representation</div><h1 id="correlation-title">Correlation &amp; clustering</h1><p>Inspect saved cross-model feature-correlation matrices from the legacy analysis pipeline. The heatmap is loaded from an actual result artifact when present.</p></div>
+          <div class="filter-bar panel"><label>Matrix<select id="correlation-matrix-select"><option value="">No matrix artifact</option></select></label><span class="source-tag" id="correlation-status">Checking saved matrices</span><span class="filter-spacer"></span><span class="heatmap-legend"><i></i> −1 <span></span> 0 <b></b> +1</span></div>
+          <div class="panel heatmap-panel"><div class="panel-head"><div><div class="panel-kicker">Pairwise correlation</div><h2 id="correlation-heading">Cross-model feature space</h2></div><span class="source-tag" id="correlation-source">No source loaded</span></div><div class="heatmap-wrap" id="correlation-map"><div class="empty-state"><span class="empty-state-index">04</span><strong>No correlation matrix found</strong><p>Run the legacy pipeline or place its *_corr_matrix.npy and *_corr_metadata.csv outputs in results/. This panel will render the saved matrix.</p></div></div><div class="table-caption" id="correlation-caption">The viewer samples large matrices to a readable grid; values are read from disk without generating synthetic correlations.</div></div>
+          <div class="insight-grid"><article class="panel"><div class="panel-kicker">How to read it</div><h2>Shared patterns vs divergence</h2><p>Values near +1 indicate similar feature variation, values near −1 indicate inverse variation, and values near 0 indicate weak linear association. Clustering groups related features before display.</p></article><article class="panel"><div class="panel-kicker">Evidence label</div><h2 id="correlation-provenance-title">Waiting for artifact</h2><p id="correlation-provenance-copy">Saved legacy matrices do not carry full cohort provenance by default. Synthetic outputs will be identified as such.</p></article></div>
+        </section>
+
+        <section class="page" id="page-preprocessing" data-page="preprocessing" aria-labelledby="preprocessing-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>05 / sensitivity</div><h1 id="preprocessing-title">Preprocessing sensitivity</h1><p>Check the shared Pipeline B specification, cache metadata and any result rows tagged with a preprocessing variant.</p></div>
+          <div class="sensitivity-grid">
+            <article class="panel pipeline-card"><div class="panel-head"><div><div class="panel-kicker">Manuscript pipeline</div><h2>Common Pipeline B</h2></div><span class="source-tag">Specified</span></div><ol class="pipeline-list"><li><span>01</span><strong>Reorient to RAS</strong><small>Canonical image orientation</small></li><li><span>02</span><strong>Bias correction + brain mask</strong><small>N4 when available; mask recorded</small></li><li><span>03</span><strong>Resample and crop/pad</strong><small>2 mm · 128 × 128 × 128</small></li><li><span>04</span><strong>Normalize and cache</strong><small>In-mask Z-score · float16</small></li></ol><p class="method-note">Template registration is upstream. The preprocessing code does not register scans; supply registered inputs and record that source step.</p></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker" id="preprocess-kicker">Observed cache sidecars</div><h2>Processing time by pipeline</h2></div><span class="source-tag" id="preprocess-status">Checking cache</span></div><div class="chart-box" id="preprocess-chart"></div><p class="chart-caption" id="preprocess-caption">Timing bars use preprocessing_seconds from local JSON sidecars. No data means no bars.</p></article>
+          </div>
+          <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Performance comparison</div><h2>Metrics by preprocessing variant</h2></div><span class="data-source">Requires explicitly tagged result rows</span></div><div class="table-wrap"><table><thead><tr><th>Data status</th><th>Pipeline</th><th>Dataset</th><th>Model</th><th>Metric</th><th>Value</th><th>Source</th></tr></thead><tbody id="preprocess-table-body"><tr><td colspan="7" class="empty-cell">No result rows identify a preprocessing variant.</td></tr></tbody></table></div><div class="table-caption">This view does not infer a pipeline from model names or dataset names.</div></article>
+        </section>
+
+        <section class="page" id="page-data" data-page="data" aria-labelledby="data-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>06 / workspace</div><h1 id="data-title">Data &amp; configuration</h1><p>Review local inputs, model checkpoints, configured tasks and reproducible launch commands. The dashboard never searches outside this repository.</p></div>
+          <div class="readiness-banner panel"><div class="readiness-symbol" id="readiness-symbol">—</div><div><div class="panel-kicker">T1 observed-run readiness</div><h2 id="readiness-title">Checking required files…</h2><p id="readiness-copy">Required paths are read from the local project.</p></div><button class="button button-secondary button-compact" type="button" data-page-target="benchmark">Open runner</button></div>
+          <div class="data-grid">
+            <article class="panel"><div class="panel-head"><div><div class="panel-kicker">Dataset roots</div><h2>Local source availability</h2></div><span class="source-tag">No remote downloads</span></div><div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Workflow</th><th>Expected input</th><th>Status</th><th>Notes</th></tr></thead><tbody id="dataset-table-body"><tr><td colspan="5" class="empty-cell">Loading local data sources…</td></tr></tbody></table></div></article>
+            <article class="panel"><div class="panel-kicker">Readiness checklist</div><h2>Before an observed cell</h2><ul class="checklist" id="readiness-list"><li>Checking required inputs…</li></ul></article>
+          </div>
+          <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Configured model registry</div><h2>Model arms and checkpoint status</h2></div><span class="data-source" id="model-count">— models</span></div><div class="table-wrap"><table><thead><tr><th>Model</th><th>Family</th><th>Run availability</th><th>Checkpoint</th><th>Configured source</th></tr></thead><tbody id="model-table-body"><tr><td colspan="5" class="empty-cell">Loading model configs…</td></tr></tbody></table></div></article>
+          <div class="data-grid data-grid-bottom">
+            <article class="panel"><div class="panel-kicker">One-command launch</div><h2>Start the local dashboard</h2><div class="code-block"><code>python server.py</code><button type="button" class="copy-button" data-copy="python server.py">Copy</button></div><p class="small-print">Server default is 127.0.0.1; it selects the next available port if 5000 is busy.</p></article>
+            <article class="panel"><div class="panel-kicker">Observed single-cell CLI</div><h2>Reproduce one T1 cell</h2><div class="code-block code-block-tall"><code>python harness/run_cell.py --task t1_aomic_age --model resnet18_scratch --n_labels 25 --seed 42 --trials 5 --splits_json data/splits/t1_aomic_age_splits.json --metadata_csv data/metadata/aomic_scans.csv --cache_dir data/cache/aomic</code><button type="button" class="copy-button" data-copy="python harness/run_cell.py --task t1_aomic_age --model resnet18_scratch --n_labels 25 --seed 42 --trials 5 --splits_json data/splits/t1_aomic_age_splits.json --metadata_csv data/metadata/aomic_scans.csv --cache_dir data/cache/aomic">Copy</button></div></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker">Selected model projection</div><h2>Expected error trend</h2></div><span class="source-tag" id="data-projection-status">Awaiting estimates</span></div><div class="chart-box" id="data-projection-chart"></div><p class="chart-caption">Formula-based illustration. The selected model’s checkpoint and observed inputs are still required to measure performance.</p></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-audit" data-page="audit" aria-labelledby="audit-title" hidden>
+          <div class="page-heading page-heading-with-action"><div><div class="eyebrow"><span class="eyebrow-line"></span>07 / provenance</div><h1 id="audit-title">Contamination audit</h1><p>Compare participant IDs in evaluation cohorts with a versioned pretraining manifest. Audit percentages appear only when the local output includes source provenance.</p></div><span class="status-pill" id="audit-status-pill">Checking audit…</span></div>
+          <div class="audit-banner" id="audit-banner"><div class="audit-banner-icon" aria-hidden="true">i</div><div><strong id="audit-banner-title">No verified audit output found</strong><p id="audit-banner-copy">The manuscript leaves the overlap table TBD and does not provide numeric cutoffs. Set thresholds from the protocol before running this audit.</p></div></div>
+          <article class="panel chart-panel audit-chart-panel"><div class="panel-head"><div><div class="panel-kicker">Manifest overlap · percent</div><h2>Verified cohort overlap</h2></div><span class="source-tag" id="audit-chart-status">No audit rows</span></div><div class="chart-box chart-box-short" id="audit-chart"><div class="empty-state"><span class="empty-state-index">%</span><strong>No verified audit data</strong><p>A cohort manifest is needed to calculate participant overlap. The model projection does not invent these values.</p></div></div></article>
+          <article class="panel table-panel"><div class="table-panel-head"><div><div class="panel-kicker">Table 1 · source-backed rows only</div><h2>Manifest overlap by cohort</h2></div><span class="data-source" id="audit-source">Source not recorded</span></div><div class="table-wrap"><table><thead><tr><th>Evaluation cohort</th><th>Subjects</th><th>In manifest</th><th>Overlap</th><th>Audit label</th></tr></thead><tbody id="audit-table-body"><tr><td colspan="5" class="empty-cell">No audit rows yet.</td></tr></tbody></table></div><div class="table-caption">FOMO pretraining manifests do not establish BrainIAC exposure unless its source data are documented independently.</div></article>
+          <div class="audit-tools-grid">
+            <article class="panel"><div class="panel-kicker">Prepare a reproducible run</div><h2>Record the overlap cutoffs</h2><p>The overlap reporter requires high and low thresholds. This helper builds a command; it does not execute it or choose scientific cutoffs for you.</p><div class="threshold-form"><label>Seen threshold (%)<input id="audit-seen-threshold" type="number" min="0" max="100" step="0.1" placeholder="Set from protocol"></label><label>Unseen threshold (%)<input id="audit-unseen-threshold" type="number" min="0" max="100" step="0.1" placeholder="Set from protocol"></label></div><div class="code-block code-block-tall"><code id="audit-command">python audit/report_contamination.py --manifest_path data/manifests/mapping.tsv --cohorts_json path/to/verified_audit_cohorts.json --cohorts_status observed --seen_threshold SEEN_THRESHOLD --unseen_threshold UNSEEN_THRESHOLD --output_dir results</code><button type="button" class="copy-button" id="copy-audit-command">Copy</button></div></article>
+            <article class="panel"><div class="panel-kicker">Matching rule</div><h2>Participants, not scans</h2><p>Normalize participant identifiers before set intersection. Different scan sessions for the same participant still count as exposure.</p><div class="mini-formula">overlap % = |cohort IDs ∩ manifest IDs| ÷ |cohort IDs| × 100</div><p class="small-print">Record the manifest source/version and verify each dataset’s participant-ID mapping.</p></article>
+          </div>
+        </section>
+
+        <section class="page" id="page-did" data-page="did" aria-labelledby="did-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>08 / primary analysis</div><h1 id="did-title">Amsterdam natural experiment</h1><p>Difference-in-differences compares the unseen-minus-seen error gap for the selected model with a matched comparator.</p></div>
+          <div class="did-controls panel"><label>Focus model<select id="did-fm-model"></select></label><span class="did-vs">−</span><label>Comparison model<select id="did-base-model"></select></label><span class="filter-spacer"></span><button class="button button-primary" id="compute-did" type="button" disabled>Compute ΔΔ <span aria-hidden="true">→</span></button></div>
+          <div class="did-layout">
+            <article class="panel did-result-panel"><div class="panel-head"><div><div class="panel-kicker" id="did-kicker">Observed paired cells only</div><h2>Exposure effect estimate</h2></div><span class="source-tag" id="did-status-tag">Pending</span></div><p id="did-analysis-state" class="analysis-state">Waiting for matched observed cells at the same task, label budget, seed and tuning budget.</p><div class="did-values" id="did-values" hidden><div><span>ΔΔ estimate</span><strong id="did-estimate">—</strong></div><div><span>95% bootstrap interval</span><strong id="did-ci">—</strong></div><div><span>Two-sided bootstrap p</span><strong id="did-p">—</strong></div><div><span>Matched cells</span><strong id="did-pairs">—</strong></div></div><div id="did-chart" class="chart-box chart-box-short"><div class="empty-state"><span class="empty-state-index">ΔΔ</span><strong>Analysis not computed</strong><p>Compute after paired observed cells are available. Synthetic rows are excluded.</p></div></div></article>
+            <aside class="did-side"><article class="panel dark-panel"><div class="panel-kicker">Estimator</div><h2>Difference-in-differences</h2><div class="equation-card equation-card-large"><span>PAIRED CELL ESTIMATOR</span><div class="equation-display equation-math-stack"><math class="equation-math" display="block" aria-label="Model and cell cohort gap"><mrow><msub><mi>δ</mi><mrow><mi>m</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><msub><mi mathvariant="normal">MAE</mi><mrow><mi>m</mi><mo>,</mo><mi>i</mi><mo>,</mo><mi>U</mi></mrow></msub><mo>−</mo><msub><mi mathvariant="normal">MAE</mi><mrow><mi>m</mi><mo>,</mo><mi>i</mi><mo>,</mo><mi>S</mi></mrow></msub></mrow></math><math class="equation-math" display="block" aria-label="Mean paired difference in differences"><mrow><msub><mover><mi>Δ</mi><mo>^</mo></mover><mi>DiD</mi></msub><mo>=</mo><mfrac><mn>1</mn><mi>K</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mrow><mo>(</mo><msub><mi>δ</mi><mrow><mi>FM</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>−</mo><msub><mi>δ</mi><mrow><mi>base</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>)</mo></mrow></mrow></math></div><small>U = unseen · S = seen · i matches task, label budget, seed and trial budget.</small></div><div class="equation-card equation-card-large"><span>PAIRED BOOTSTRAP</span><div class="equation-display equation-math-stack"><math class="equation-math" display="block" aria-label="Ninety-five percent bootstrap confidence interval"><mrow><msub><mi mathvariant="normal">CI</mi><mn>95</mn></msub><mo>=</mo><mo>[</mo><msub><mi>Q</mi><mn>0.025</mn></msub><mo>(</mo><msup><mover><mi>D</mi><mo>¯</mo></mover><mo>*</mo></msup><mo>)</mo><mo>,</mo><msub><mi>Q</mi><mn>0.975</mn></msub><mo>(</mo><msup><mover><mi>D</mi><mo>¯</mo></mover><mo>*</mo></msup><mo>)</mo><mo>]</mo></mrow></math><math class="equation-math" display="block" aria-label="Centered two-sided bootstrap p value"><mrow><msub><mover><mi>p</mi><mo>^</mo></mover><mi>boot</mi></msub><mo>=</mo><mfrac><mrow><mn>1</mn><mo>+</mo><munderover><mo>∑</mo><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><mi>B</mi></munderover><mi mathvariant="double-struck">1</mi><mo>(</mo><mo>|</mo><msubsup><mover><mi>D</mi><mo>¯</mo></mover><mn>0</mn><mo>*</mo></msubsup><mo>|</mo><mo>≥</mo><mo>|</mo><msub><mover><mi>Δ</mi><mo>^</mo></mover><mi>DiD</mi></msub><mo>|</mo><mo>)</mo></mrow><mrow><mi>B</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mrow></math></div><small>The interval resamples K matched cells; the p-value uses centered null replicates.</small></div><p>Positive Δ̂<sub>DiD</sub> means the foundation arm has a larger unseen-minus-seen error gap in the matched comparison.</p></article><article class="panel"><div class="panel-kicker">Pairing rule</div><h2>Compare like with like</h2><p>Pairs must match task, label budget, seed and tuning-trial budget. The primary p-value is the centered two-sided bootstrap test; sign-flip inference is a separately reported sensitivity check.</p></article></aside>
+          </div>
+        </section>
+
+        <section class="page" id="page-equivalence" data-page="equivalence" aria-labelledby="equivalence-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>09 / efficiency</div><h1 id="equivalence-title">Label equivalence &amp; Pareto</h1><p>Estimate comparison-model labels required to match the selected model’s error, and compare unseen MAE with compute.</p></div>
+          <div class="analysis-controls panel"><label>Focus model<select id="eq-fm-model"></select></label><label>Comparison model<select id="eq-base-model"></select></label><label>Target N<input id="eq-n" type="number" min="1" step="1" value="50"></label><button class="button button-primary" id="compute-equivalence" type="button">Fit N<sub>eq</sub> <span aria-hidden="true">→</span></button></div>
+          <div class="chart-grid chart-grid-two">
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker" id="eq-kicker">Observed budget curves</div><h2>How many labels to match?</h2></div><span class="source-tag" id="eq-status">Awaiting observed data</span></div><div class="chart-box" id="eq-chart"><div class="empty-state"><span class="empty-state-index">N<sub>eq</sub></span><strong>Two shared budgets are needed</strong><p>At least two label budgets per model and cohort must be present in the observed ledger.</p></div></div><div class="neq-cards" id="neq-cards" hidden><div><span>Seen cohort N<sub>eq</sub></span><strong id="eq-seen">—</strong></div><div><span>Unseen cohort N<sub>eq</sub></span><strong id="eq-unseen">—</strong></div></div><p class="chart-caption">N<sub>eq</sub> is the estimated baseline label count needed to match the foundation model at the selected target N, minus that target N. It is model- and cohort-specific.</p></article>
+            <article class="panel chart-panel"><div class="panel-head"><div><div class="panel-kicker" id="pareto-kicker">Observed efficiency</div><h2>Compute–error Pareto frontier</h2></div><span class="source-tag" id="pareto-status">Awaiting observed data</span></div><div class="chart-box" id="pareto-chart"><div class="empty-state"><span class="empty-state-index">P</span><strong>No comparable compute records</strong><p>Observed cells need unseen MAE and positive GPU time before the frontier can be drawn.</p></div></div><p class="chart-caption">Lower-left points are preferred: fewer recorded GPU-hours and lower unseen MAE. Synthetic runs are excluded.</p></article>
+          </div>
+          <div class="equation-grid"><article class="panel equation-panel"><div class="panel-kicker">Log-linear learning model</div><div class="equation-display equation-math-stack"><math class="equation-math" display="block" aria-label="Mean absolute error is modeled as a linear function of log label budget"><mrow><msub><mi mathvariant="normal">MAE</mi><mrow><mi>m</mi><mo>,</mo><mi>c</mi></mrow></msub><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><msub><mi>a</mi><mrow><mi>m</mi><mo>,</mo><mi>c</mi></mrow></msub><mi mathvariant="normal">ln</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>+</mo><msub><mi>b</mi><mrow><mi>m</mi><mo>,</mo><mi>c</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>n</mi></msub></mrow></math></div><p>For each model m and cohort c, ordinary least squares fits MAE against ln(label budget) using shared observed budgets.</p></article><article class="panel equation-panel"><div class="panel-kicker">Equivalent baseline labels</div><div class="equation-display equation-math-stack"><math class="equation-math" display="block" aria-label="Equivalent baseline label count at target budget"><mrow><msub><mi>N</mi><mi>eq</mi></msub><mo>(</mo><msub><mi>N</mi><mn>0</mn></msub><mo>)</mo><mo>=</mo><mi mathvariant="normal">exp</mi><mo>(</mo><mfrac><mrow><msub><mover><mi mathvariant="normal">MAE</mi><mo>^</mo></mover><mrow><mi>FM</mi><mo>,</mo><mi>c</mi></mrow></msub><mo>(</mo><msub><mi>N</mi><mn>0</mn></msub><mo>)</mo><mo>−</mo><msub><mi>b</mi><mrow><mi>base</mi><mo>,</mo><mi>c</mi></mrow></msub></mrow><msub><mi>a</mi><mrow><mi>base</mi><mo>,</mo><mi>c</mi></mrow></msub></mfrac><mo>)</mo><mo>−</mo><msub><mi>N</mi><mn>0</mn></msub></mrow></math><div class="equation-condition"><span class="equation-condition-symbol"><i>a</i><sub>base,c</sub> &lt; 0</span><span>decreasing baseline curve</span></div></div><p>This inverts the fitted baseline curve to estimate its labels required minus the target N<sub>0</sub>; a negative value means the baseline reaches that error earlier.</p></article><article class="panel equation-panel"><div class="panel-kicker">Compute–error Pareto dominance</div><div class="equation-display equation-math-stack"><math class="equation-math" display="block" aria-label="Pareto dominance condition"><mrow><mi>j</mi><mo>≺</mo><mi>i</mi><mo>⇔</mo><msub><mi>h</mi><mi>j</mi></msub><mo>≤</mo><msub><mi>h</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.35em"/><msub><mi>e</mi><mi>j</mi></msub><mo>≤</mo><msub><mi>e</mi><mi>i</mi></msub></mrow></math><math class="equation-math" display="block" aria-label="At least one Pareto metric is strictly better"><mrow><msub><mi>h</mi><mi>j</mi></msub><mo>&lt;</mo><msub><mi>h</mi><mi>i</mi></msub><mo>∨</mo><msub><mi>e</mi><mi>j</mi></msub><mo>&lt;</mo><msub><mi>e</mi><mi>i</mi></msub></mrow></math></div><p>Both compute hours h and unseen MAE e are minimized. A point stays on the frontier if no other model dominates it.</p></article></div>
+        </section>
+
+        <section class="page" id="page-qc" data-page="qc" aria-labelledby="qc-title" hidden>
+          <div class="page-heading"><div class="eyebrow"><span class="eyebrow-line"></span>10 / image quality</div><h1 id="qc-title">3D slice QC &amp; montage</h1><p>Browse orthogonal slice previews and inspect the exclusion ledger. Bundled preview images are not participant-level QC records.</p></div>
+          <div class="qc-banner panel"><span class="qc-banner-mark">!</span><div><strong id="qc-viewer-status">Checking slice assets…</strong><p id="qc-viewer-note">No participant-level QC values will be inferred from preview images.</p></div><span class="source-tag" id="qc-slice-count">— slices</span></div>
+          <div class="viewer-grid">
+            <article class="panel slice-panel"><div class="panel-head"><div><div class="panel-kicker">01 / axial</div><h2>Axial plane</h2></div><span class="slice-index" id="qc-axial-label">—</span></div><div class="slice-frame"><img id="qc-axial-image" alt="Axial MRI slice preview; not participant QC" loading="lazy"></div><label class="slice-slider">Slice <input type="range" id="qc-axial-index" min="0" max="0" value="0"><output id="qc-axial-output">—</output></label></article>
+            <article class="panel slice-panel"><div class="panel-head"><div><div class="panel-kicker">02 / coronal</div><h2>Coronal plane</h2></div><span class="slice-index" id="qc-coronal-label">—</span></div><div class="slice-frame"><img id="qc-coronal-image" alt="Coronal MRI slice preview; not participant QC" loading="lazy"></div><label class="slice-slider">Slice <input type="range" id="qc-coronal-index" min="0" max="0" value="0"><output id="qc-coronal-output">—</output></label></article>
+            <article class="panel slice-panel"><div class="panel-head"><div><div class="panel-kicker">03 / sagittal</div><h2>Sagittal plane</h2></div><span class="slice-index" id="qc-sagittal-label">—</span></div><div class="slice-frame"><img id="qc-sagittal-image" alt="Sagittal MRI slice preview; not participant QC" loading="lazy"></div><label class="slice-slider">Slice <input type="range" id="qc-sagittal-index" min="0" max="0" value="0"><output id="qc-sagittal-output">—</output></label></article>
+          </div>
+          <div class="data-grid qc-bottom"><article class="panel"><div class="panel-kicker">Acquisition QC ledger</div><h2>Exclusions and reasons</h2><div class="qc-stats"><div><span>Excluded scans</span><strong id="qc-excluded-count">—</strong></div><div><span>Recorded reasons</span><strong id="qc-reason-count">—</strong></div></div><div id="qc-exclusion-list" class="reason-list"><p class="empty-inline">No data/qc/exclusions.csv found.</p></div></article><article class="panel"><div class="panel-kicker">What this viewer can establish</div><h2>Visual inspection needs source metadata</h2><p>A slice view can help review orientation and gross image quality. It cannot establish participant identity, acquisition protocol, preprocessing provenance or inclusion status by itself.</p><button class="button button-secondary button-compact" type="button" data-page-target="data">Review data inputs <span aria-hidden="true">→</span></button></article></div>
+        </section>
+
+        <footer class="app-footer"><span>Seen It Before · research dashboard</span><span>Local data · source-labelled outputs · no external analytics</span><a href="https://github.com/Shivasomesh-cpu/ML-project-" target="_blank" rel="noreferrer">Repository ↗</a></footer>
       </div>
-    </div>
-
-    <!-- ===================================================================
-         SECTION 02: MULTI-MODEL ROC-AUC & RADAR TOPOLOGY
-         =================================================================== -->
-    <div class="narrative-section">
-      <span class="section-tag">ANALYTICS 02 // MULTI-DIMENSIONAL BENCHMARK TOPOLOGY</span>
-      <h2 class="section-heading">MULTI-MODEL ROC-AUC & 6-AXIS RADAR EVALUATION</h2>
-      <p class="section-desc">
-        Full receiver operating characteristic curves measuring true positive rates against false positive rates, 
-        and a 6-axis spider evaluation measuring robustness, parameter efficiency, calibration, and inference speed.
-      </p>
-
-      <div class="grid-2">
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">RECEIVER OPERATING CHARACTERISTIC (ROC-AUC)</span>
-            <span class="badge badge-outline">MULTI-MODEL DISCRIMINATION</span>
-          </div>
-          <div id="chart-roc-container" style="position: relative; width: 100%; min-height: 340px;"></div>
-        </div>
-
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">6-AXIS MODEL TOPOLOGY RADAR</span>
-            <span class="badge badge-outline">SYSTEM PROFILE</span>
-          </div>
-          <div id="chart-radar-container" style="position: relative; width: 100%; min-height: 340px; display: flex; justify-content: center;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================
-         SECTION 03: THE CAUSAL PROOF & DiD SLOPE ANALYSIS
-         =================================================================== -->
-    <div class="narrative-section">
-      <span class="section-tag">ANALYTICS 03 // CAUSAL IDENTIFICATION PROOF</span>
-      <h2 class="section-heading">THE AMSTERDAM NATURAL EXPERIMENT & DiD SLOPE</h2>
-      <p class="section-desc">
-        Standard benchmarks confound scanner domain shift with test set leakage. By evaluating on matched subjects 
-        acquired on the identical Philips Achieva 3T scanner in Amsterdam, scanner variance is cancelled out.
-      </p>
-
-      <div class="grid-2">
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">CAUSAL DEGRADATION SLOPE: SEEN &rarr; UNSEEN</span>
-            <span class="badge badge-solid">&Delta;&Delta; = +1.32 YRS (p = 0.002)</span>
-          </div>
-          <div id="chart-did-slope-container" style="position: relative; width: 100%; min-height: 340px;"></div>
-        </div>
-
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">COMPUTE VS. LABEL SAVINGS PARETO FRONTIER</span>
-            <span class="badge badge-outline">GPU HOURS VS N_eq</span>
-          </div>
-          <div id="chart-pareto-container" style="position: relative; width: 100%; min-height: 340px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================
-         SECTION 04: LATENT SPACE CORRELATION & PREPROCESSING SENSITIVITY
-         =================================================================== -->
-    <div class="narrative-section">
-      <span class="section-tag">ANALYTICS 04 // LATENT SPACE AUDIT & PIPELINE ABLATION</span>
-      <h2 class="section-heading">CROSS-MODEL CORRELATION HEATMAP & PREPROCESSING ABLATION</h2>
-      <p class="section-desc">
-        Examining pairwise latent representation alignment between foundation models and classical FreeSurfer morphometry, 
-        and isolating template confounds (TurboPrep vs Native T1 vs Native T2).
-      </p>
-
-      <div class="grid-2">
-        <div class="graph-card">
-          <div class="graph-card-header">
-            <span class="graph-title">PAIRWISE ABSOLUTE CORRELATION HEATMAP (|r|)</span>
-            <span class="badge badge-outline">HOVER CELL INSPECTOR</span>
-          </div>
-          <div id="chart-heatmap-container" style="position: relative; width: 100%; min-height: 360px; display: flex; justify-content: center;"></div>
-        </div>
-
-        <div>
-          <div class="graph-card" style="margin-bottom: 20px;">
-            <div class="graph-card-header">
-              <span class="graph-title">PREPROCESSING SENSITIVITY ANALYSIS</span>
-              <span class="badge badge-outline">TEMPLATE SHIFT</span>
-            </div>
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr><th>Model</th><th>Pipeline</th><th>Balanced Acc</th><th>MAE</th><th>Stability</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td><strong>BrainIAC</strong></td><td>TurboPrep (Standard)</td><td>0.828</td><td>4.18</td><td>Baseline (1.00)</td></tr>
-                  <tr><td><strong>BrainIAC</strong></td><td>Native T1 Pipeline</td><td>0.834</td><td>4.12</td><td>High (0.94)</td></tr>
-                  <tr><td><strong>BrainIAC</strong></td><td>Native T2 Pipeline</td><td>0.806</td><td>4.39</td><td>Moderate (0.83)</td></tr>
-                  <tr><td><strong>SwinBrain</strong></td><td>TurboPrep (Standard)</td><td>0.821</td><td>4.31</td><td>Baseline (1.00)</td></tr>
-                  <tr><td><strong>SwinBrain</strong></td><td>Native T1 Pipeline</td><td>0.825</td><td>4.25</td><td>High (0.92)</td></tr>
-                  <tr><td><strong>SwinBrain</strong></td><td>Native T2 Pipeline</td><td>0.792</td><td>4.58</td><td>Moderate (0.79)</td></tr>
-                  <tr><td><strong>CNN3D</strong></td><td>TurboPrep (Standard)</td><td>0.774</td><td>5.15</td><td>Baseline (1.00)</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================
-         SECTION 05: FOUNDATION MODEL CARDS
-         =================================================================== -->
-    <div class="narrative-section">
-      <span class="section-tag">ANALYTICS 05 // SYSTEM CARDS & REPRODUCIBILITY</span>
-      <h2 class="section-heading">FOUNDATION MODEL ARCHITECTURES & ARTIFACT EXPORTS</h2>
-      <p class="section-desc">
-        Technical architectural parameters and pretraining objectives across all evaluated foundation models and baselines.
-      </p>
-
-      <div class="grid-3" style="margin-bottom: 28px;">
-        <div class="graph-card">
-          <div class="graph-card-header"><span class="graph-title">BRAINIAC (ViT-B)</span><span class="badge badge-solid">VISION TRANSFORMER</span></div>
-          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
-            Architecture: ViT-B (12 Layers, 12 Heads)<br>
-            Input: 96x96x96 Voxel Volume<br>
-            Objective: Contrastive SimCLR (48.9k Scans)<br>
-            Feature: CLS Token (768 Dimensions)
-          </div>
-        </div>
-
-        <div class="graph-card">
-          <div class="graph-card-header"><span class="graph-title">SWINBRAIN (SWIN UNETR)</span><span class="badge badge-solid">HIERARCHICAL ATTENTION</span></div>
-          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
-            Architecture: Swin UNETR (Shifted Windows)<br>
-            Input: 128x128x64 3-Channel Repeated<br>
-            Objective: Self-Supervised Masked Volume<br>
-            Feature: Encoder10 Global Pooling (384-d)
-          </div>
-        </div>
-
-        <div class="graph-card">
-          <div class="graph-card-header"><span class="graph-title">FREESURFER (GOLD STANDARD)</span><span class="badge badge-outline">REGIONAL MORPHOMETRY</span></div>
-          <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #AAA; line-height: 1.8;">
-            Pipeline: FreeSurfer 7.x Desikan-Killiany<br>
-            Input: Raw T1-weighted DICOM / NIfTI<br>
-            Features: Cortical Thickness & Surface Area<br>
-            Dimensions: 68 Bilateral Anatomical ROIs
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 14px;">
-        <button class="btn btn-secondary" onclick="downloadCSV()">DOWNLOAD SUMMARY RESULTS CSV</button>
-        <button class="btn btn-secondary" onclick="downloadJSON()">DOWNLOAD FULL JSON REPORT</button>
-      </div>
-    </div>
-
-  </section>
-
-  <script src="app.js"></script>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

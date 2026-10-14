@@ -1,114 +1,150 @@
-# Seen It Before: Do Brain-MRI Foundation Models Generalize, or Have They Already Met Your Test Set?
+# Seen It Before
 
-[![Pre-registered](https://img.shields.io/badge/Pre--registered-HYPOTHESIS.md-blue.svg)](./HYPOTHESIS.md)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-green.svg)](LICENSE)
+**Auditing pretraining contamination in 3D brain-MRI foundation models.**
 
-A contamination-audited, label-budget-matched evaluation harness for 3D brain-MRI foundation models (BrainIAC, FOMO25) against well-tuned supervised baselines (MONAI ResNet-18, DenseNet-121, Volumetric + LightGBM).
+This repository contains a research evaluation harness and a local dashboard for a pre-registered study of whether prior exposure to evaluation participants affects brain-age prediction. The study compares AOMIC ID1000 (pre-registered as seen) with PIOP1 and PIOP2 (pre-registered as unseen), then measures each model's unseen-minus-seen error gap against supervised baselines.
 
----
+> **Study status:** the attached manuscript specifies the design and hypotheses; it does not report completed contamination or benchmark results. Result tables in the dashboard are populated only from local, provenance-marked audit outputs and the evaluation ledger. A mock run is labelled as mock and is excluded from analysis.
 
-## Key Features
+## Start the dashboard
 
-1. **Contamination Audit Suite (`audit/`)**:
-   - Subject-level set intersection against FOMO50K/FOMO60K pretraining manifests (`mapping.tsv`, `participants.tsv`).
-   - Automatically generates Table 1 quantifying contamination percentages across standard benchmarks.
+The web interface uses only Python's standard library and local static files.
 
-2. **The Amsterdam Natural Experiment (`configs/tasks/t1_aomic_age.yaml`)**:
-   - Compares **AOMIC ID1000** (pretraining seen) vs **AOMIC PIOP1 & PIOP2** (unseen) on the exact same scanner (Philips Achieva 3T at UvA) and acquisition protocol.
-   - Enforces strict age matching (19–26 years) and sex stratification.
-   - Estimates Difference-in-Differences ($\text{DiD}$) with 2,000 bootstrap resamples.
-
-3. **Standardized Adaptation Ladder (`models/foundation/`)**:
-   - Evaluates foundation models across a 4-tier adaptation ladder:
-     1. Frozen encoder + Linear Probe
-     2. Frozen encoder + 2-layer MLP head
-     3. Last-block fine-tuning + head
-     4. Full fine-tuning
-
-4. **Rigorous Experimental Hygiene**:
-   - Matched label budgets: $N \in \{25, 50, 100, 250, 500, \text{all}\}$.
-   - Matched Optuna tuning budgets with exact GPU-second accounting.
-   - Common Pipeline B preprocessing (2mm isotropic, $128^3$, in-mask Z-score, float16 `.npy` caching). Template registration must be completed and documented upstream; the preprocessing script no longer implies it has registered scans.
-   - Append-only results ledger (`results.parquet`).
-
----
-
-## Directory Layout
-
-```
-seen-it-before/
-├── HYPOTHESIS.md              # Pre-registered predictions and statistical protocol
-├── env/
-│   └── requirements.txt       # Core dependencies
-├── configs/
-│   ├── tasks/                 # Task specs (T1: AOMIC age, T2: IXI->PIOP, T3: OASIS dementia)
-│   ├── models/                # Model hyperparameters and search spaces
-│   └── budgets.yaml           # Label budgets, seeds, Optuna search budgets
-├── audit/
-│   ├── fetch_manifests.py     # Download FOMO50K metadata manifests
-│   ├── overlap.py             # Match subject IDs across cohorts
-│   └── report_contamination.py# Generate Table 1 and contamination figures
-├── data/
-│   ├── download/              # Per-dataset fetchers (OpenNeuro, IXI, OASIS)
-│   ├── preprocess/            # Pipeline A & Pipeline B implementations
-│   ├── qc/                    # Slice montage generator & exclusion logging
-│   └── splits/                # Frozen, age/sex stratified subject-level splits
-├── models/
-│   ├── registry.py            # Unified ModelArm ABC: fit(loader, budget) / predict(loader)
-│   ├── baselines/             # MONAI ResNet-18, DenseNet-121, Volumetric+GBM
-│   └── foundation/            # BrainIAC and FOMO25 adapters
-├── harness/
-│   ├── run_cell.py            # CLI to run a single (task, model, N, seed, budget) cell
-│   ├── sweep.py               # Optuna hyperparameter optimization engine
-│   └── ledger.py              # Thread-safe append-only results.parquet logger
-├── analysis/
-│   ├── did.py                 # Difference-in-Differences + bootstrap CIs
-│   ├── label_equivalence.py   # Curve fitting for N_eq
-│   └── pareto.py              # Performance vs GPU-hours Pareto plots
-└── results/
-    └── results.parquet        # Source-of-truth results store
-```
-
----
-
-## Quickstart
-
-### 1. Launch the Black & White Web UI
-Start the zero-latency, pure monochromatic web platform:
 ```bash
 python server.py
 ```
-Open **`http://localhost:5000`** in your browser to inspect:
-- **01 // Overview & Architecture**: 3D foundation models vs classical FreeSurfer morphometry.
-- **02 // Benchmark Runner**: Real-time evaluation console across PPMI, HBN, and NKI.
-- **03 // Results & Metrics**: Fold-level balanced accuracy, MAE, learning curves, and non-parametric permutation tests.
-- **04 // Correlation & Clustering**: Cross-model latent space correlation heatmap.
-- **05 // Preprocessing Sensitivity**: TurboPrep vs. Native T1/T2 template ablation.
-- **06 // Data & Configuration**: Checkpoints and BIDS dataset paths.
-- **07 // Contamination Audit**: Table 1 replication (OASIS-1, OASIS-2, IXI, AOMIC).
-- **08 // Amsterdam Natural Experiment**: Difference-in-Differences ($\text{DiD} = +1.32\text{ yrs}$, $p=0.002$).
-- **09 // Label Equivalence ($N_{\text{eq}}$) & Pareto**: Downstream labeling budget slider and compute Pareto frontier.
-- **10 // 3D Slice QC & Montage**: Procedural axial, coronal, and sagittal crosshair viewer with acquisition QC metrics.
 
-### 2. Run the Modular Python Benchmark Suite (Zero Notebooks)
+Open the local URL printed in the terminal. By default the server binds to `127.0.0.1`; if port 5000 is occupied, it selects the next available port. `python app.py` is also supported as a compatibility entry point. The monochrome dashboard brings the repository's analysis tools into ten connected modules:
+
+1. **Overview & architecture** — study question, exposure contrast, shared pipeline, model arms and matched-budget schedule.
+2. **Benchmark runner** — launch one T1 cell or an optional fast synthetic legacy-suite demo. Demo outputs stay below `results/mock/`.
+3. **Results & metrics** — filter cell records, compare seen/unseen MAE, inspect label-budget curves and browse fold/CV exports.
+4. **Correlation & clustering** — display saved cross-model correlation matrices from `*_corr_matrix.npy` artifacts.
+5. **Preprocessing sensitivity** — summarize cache-sidecar processing times and compare results only when rows name a preprocessing variant.
+6. **Data & configuration** — local input readiness, dataset roots, model/checkpoint availability and copyable commands.
+7. **Contamination audit** — provenance-aware display of the participant-overlap table.
+8. **Natural experiment · DiD** — compute the preregistered paired estimate from matched observed cells.
+9. **Label equivalence & Pareto** — fit observed label-budget curves and plot measured unseen error against recorded compute.
+10. **3D slice QC & montage** — browse orthogonal image assets and inspect an exclusion ledger when present. Bundled images are labeled as previews; they are not presented as participant-level QC.
+
+Views backed by files load directly from the local `results/`, `data/` and model configuration folders. Missing artifacts produce explicit empty states. Legacy outputs without recorded provenance are labeled unverified; generated demo results are labeled mock and excluded from scientific analyses.
+
+## Set up the research environment
+
+Create and activate a Python environment, then install the model and analysis dependencies:
+
 ```bash
-# Accelerated deterministic verification run on synthetic mock cohorts:
-python run_benchmark.py --fast --demo
-
-# Full multi-cohort evaluation:
-python run_benchmark.py --device cpu --output-dir results/
+python -m venv .venv
+# Activate .venv for your shell, then:
+python -m pip install -r env/requirements.txt
 ```
 
-### 3. Run the Contamination Audit & Causal DiD Analysis
+The static dashboard can start without those research dependencies. Running model cells requires the packages above. Foundation-model cells also require the checkpoint configured for the selected model.
+
+## Run a mock smoke cell
+
+A mock cell generates synthetic 3D inputs to check the harness flow. It does **not** provide evidence about model performance.
+
 ```bash
-# Pull manifests and generate Table 1 contamination report:
+python harness/run_cell.py \
+  --task t1_aomic_age \
+  --model resnet18_scratch \
+  --n_labels 25 \
+  --seed 42 \
+  --trials 2 \
+  --mock \
+  --results_dir results/mock
+```
+
+Mock records are written to `results/mock/` when using the command above (or the dashboard). They are kept separate from the observed ledger. Do not use mock audit or model values in a scientific report.
+
+## Prepare and run an observed T1 cell
+
+Observed runs require real, frozen inputs. The default paths used by the dashboard are:
+
+| Input | Default path |
+| --- | --- |
+| Frozen subject-level split | `data/splits/t1_aomic_age_splits.json` |
+| Scan metadata with `scan_id` and `age` | `data/metadata/aomic_scans.csv` |
+| Preprocessed 128³ arrays | `data/cache/aomic/<scan_id>.npy` |
+
+Volumes must follow Pipeline B's documented registration, orientation, resolution, mask normalization and caching contract. The harness rejects missing scans and arrays that are not 128×128×128. Generate and inspect the frozen splits with the inputs described by `data/splits/split_generator.py`; do not use mock metadata for an observed run.
+
+```bash
+python harness/run_cell.py \
+  --task t1_aomic_age \
+  --model resnet18_scratch \
+  --n_labels 25 \
+  --seed 42 \
+  --trials 5 \
+  --splits_json data/splits/t1_aomic_age_splits.json \
+  --metadata_csv data/metadata/aomic_scans.csv \
+  --cache_dir data/cache/aomic
+```
+
+Observed cells append to `results/results.csv` and, when Parquet support is available, `results/results.parquet`. The ledger is append-only. Keep data status, model ID, task, label budget, seed and trial budget with every reported result.
+
+## Run the contamination audit
+
+Download a manifest and record its provenance:
+
+```bash
 python audit/fetch_manifests.py
-python audit/report_contamination.py --cohorts_json configs/tasks/t1_aomic_age.yaml --output_dir results/
-
-# Run the Amsterdam same-scanner Difference-in-Differences estimator:
-python -m analysis.did --bootstrap 10000
-
-# Compute Label Equivalence (N_eq) Pareto frontier:
-python -m analysis.pareto
 ```
 
+The cohort input must be a JSON object that maps each cohort name to its **actual participant identifiers**. The audit does not infer participant lists from cohort labels. After preparing that file, run:
+
+```bash
+python audit/report_contamination.py \
+  --manifest_path data/manifests/mapping.tsv \
+  --cohorts_json path/to/verified_audit_cohorts.json \
+  --cohorts_status observed \
+  --seen_threshold "$SEEN_THRESHOLD" \
+  --unseen_threshold "$UNSEEN_THRESHOLD" \
+  --output_dir results
+```
+
+Set `SEEN_THRESHOLD` and `UNSEEN_THRESHOLD` to values fixed in the protocol before inspecting audit results. The manuscript defines high/low cutoffs but does not supply numeric values; the audit requires both explicitly and records them. It labels a cohort seen at or above the high cutoff, unseen at or below the low cutoff, and partial between them. `--cohorts_status` defaults to `unverified`; use `observed` only when the JSON contains real cohort participant IDs, and `mock` for synthetic identifiers. The dashboard reads `results/table1_contamination.csv` together with `results/table1_contamination_provenance.json`, and it labels a table observed only when both the manifest and cohort-ID provenance are marked observed. Review the recorded manifest source/version. FOMO manifests establish exposure only for the model families documented as using those manifests; they do not establish BrainIAC membership by themselves.
+
+The paper describes FOMO60K manifests, while the current fetch script tries FOMO50K first and has fallback repositories. Verify the actual fetched source and the checkpoint's documented pretraining collection before interpreting a cohort as seen or unseen.
+
+## Compute the preregistered DiD analysis
+
+Once the ledger contains matched **observed** final evaluations for BrainIAC and a baseline at the same task, label budget, seed and trial budget, compute the paired difference-in-differences. The script reports a two-tailed centered-bootstrap p-value and confidence interval as the primary test, and retains the exact sign-flip p-value as a secondary check:
+
+```bash
+python -m analysis.did \
+  --results_csv results/results.csv \
+  --output_dir results \
+  --fm_model brainiac \
+  --base_model resnet18_scratch \
+  --task t1_aomic_age \
+  --bootstrap 2000
+```
+
+Mock records are excluded by the analysis script. The dashboard enables its DiD action only when a matching observed pair is present. Recompute after adding ledger rows; the dashboard marks an older summary as stale.
+
+## What is configured in this checkout
+
+The current model configs are `brainiac`, `densenet121_scratch`, `fomo_unet_b`, `fomo_unet_xl`, `resnet18_scratch` and `volumetric_gbm`. The manuscript describes BrainIAC and FOMO25 each at four adaptation tiers. Those tiers and the manuscript's FOMO25 naming are not fully represented as separate model configurations in the current checkout; confirm the adapters and checkpoints before treating the paper's full model grid as runnable.
+
+The paper also describes ID1000, PIOP1 and PIOP2 as a same-scanner natural experiment. Its limitations section says to verify the scanner and acquisition-protocol match against AOMIC documentation. The dashboard therefore calls this a preregistered assumption until those source records are checked.
+
+## Repository map
+
+```text
+server.py                 Local dashboard server and JSON API
+web/                      Dashboard HTML, CSS and browser interactions
+audit/                    Manifest retrieval and participant overlap audit
+configs/                  Task, model and budget specifications
+data/                     Download, preprocessing, QC and frozen-split code
+models/                   Baseline and foundation-model adapters
+harness/                  Single-cell runs, tuning and append-only ledger
+analysis/                 DiD, label-equivalence and Pareto analyses
+HYPOTHESIS.md             Preregistered predictions and statistical protocol
+report/                   Research report and report-generation script
+```
+
+## Data handling
+
+MRI inputs, downloaded manifests, caches, splits and generated `results/` are git-ignored. The local dashboard binds to loopback by default and does not upload project files. Keep public cohort terms, model checkpoint licenses and any applicable institutional review conditions in force when preparing data.

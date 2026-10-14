@@ -1,1021 +1,1125 @@
-// =====================================================================
-// ULTIMA // LASTICA // BRAIN-FM — HIGH-DENSITY 3-WINDOW WORKSTATION ENGINE
-// Real MNI152 PACS Slices, 7 Interactive Scientific Graphs, Synchronized Cockpit
-// =====================================================================
+"use strict";
 
-// Empirical Benchmark Data Across PPMI, HBN, NKI
-const BENCHMARK_DATA = {
-  PPMI: {
-    "Sex Classification": {
-      isClassification: true,
-      models: [
-        { name: "BrainIAC", acc: "0.828", auc: "0.902", gap: "0.03", overfitting: "NO", pVal: "0.034", sig: "YES" },
-        { name: "SwinBrain", acc: "0.821", auc: "0.895", gap: "0.04", overfitting: "NO", pVal: "0.089", sig: "NO" },
-        { name: "FreeSurfer", acc: "0.818", auc: "0.891", gap: "0.03", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", acc: "0.812", auc: "0.884", gap: "0.04", overfitting: "NO", pVal: "0.182", sig: "NO" },
-        { name: "3D-Neuro-SimCLR", acc: "0.796", auc: "0.868", gap: "0.06", overfitting: "NO", pVal: "0.412", sig: "NO" },
-        { name: "CNN3D", acc: "0.774", auc: "0.842", gap: "0.07", overfitting: "NO", pVal: "0.620", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [0.552, 0.625, 0.684, 0.729, 0.775, 0.804, 0.818, 0.825, 0.828],
-        SwinBrain:  [0.548, 0.618, 0.672, 0.718, 0.764, 0.792, 0.808, 0.816, 0.821],
-        FreeSurfer: [0.550, 0.620, 0.675, 0.720, 0.765, 0.794, 0.809, 0.814, 0.818],
-        AnatCL_Global:[0.540, 0.605, 0.658, 0.702, 0.748, 0.778, 0.798, 0.808, 0.812],
-        CNN3D:      [0.530, 0.582, 0.630, 0.670, 0.710, 0.742, 0.758, 0.768, 0.774]
-      }
-    },
-    "Parkinson Classification": {
-      isClassification: true,
-      models: [
-        { name: "BrainIAC", acc: "0.704", auc: "0.762", gap: "0.05", overfitting: "NO", pVal: "0.042", sig: "YES" },
-        { name: "SwinBrain", acc: "0.691", auc: "0.748", gap: "0.05", overfitting: "NO", pVal: "0.115", sig: "NO" },
-        { name: "FreeSurfer", acc: "0.685", auc: "0.739", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", acc: "0.672", auc: "0.724", gap: "0.06", overfitting: "NO", pVal: "0.310", sig: "NO" },
-        { name: "3D-Neuro-SimCLR", acc: "0.658", auc: "0.705", gap: "0.08", overfitting: "NO", pVal: "0.580", sig: "NO" },
-        { name: "CNN3D", acc: "0.641", auc: "0.682", gap: "0.09", overfitting: "NO", pVal: "0.740", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [0.520, 0.565, 0.604, 0.638, 0.668, 0.688, 0.696, 0.701, 0.704],
-        SwinBrain:  [0.515, 0.558, 0.595, 0.628, 0.655, 0.674, 0.684, 0.688, 0.691],
-        FreeSurfer: [0.518, 0.555, 0.592, 0.624, 0.652, 0.670, 0.679, 0.682, 0.685],
-        AnatCL_Global:[0.510, 0.545, 0.580, 0.612, 0.640, 0.658, 0.665, 0.669, 0.672],
-        CNN3D:      [0.505, 0.530, 0.560, 0.588, 0.612, 0.628, 0.634, 0.638, 0.641]
-      }
-    },
-    "Male Age Regression": {
-      isClassification: false,
-      models: [
-        { name: "BrainIAC", mae: "4.18", r2: "0.638", gap: "0.03", overfitting: "NO", pVal: "0.018", sig: "YES" },
-        { name: "SwinBrain", mae: "4.31", r2: "0.612", gap: "0.04", overfitting: "NO", pVal: "0.064", sig: "NO" },
-        { name: "FreeSurfer", mae: "4.45", r2: "0.590", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", mae: "4.62", r2: "0.564", gap: "0.05", overfitting: "NO", pVal: "0.220", sig: "NO" },
-        { name: "3D-Neuro-SimCLR", mae: "4.88", r2: "0.528", gap: "0.07", overfitting: "NO", pVal: "0.490", sig: "NO" },
-        { name: "CNN3D", mae: "5.15", r2: "0.481", gap: "0.08", overfitting: "NO", pVal: "0.710", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [7.80, 6.75, 5.92, 5.28, 4.82, 4.50, 4.32, 4.22, 4.18],
-        SwinBrain:  [7.85, 6.84, 6.05, 5.42, 4.96, 4.62, 4.45, 4.35, 4.31],
-        FreeSurfer: [7.82, 6.90, 6.12, 5.50, 5.08, 4.74, 4.58, 4.48, 4.45],
-        AnatCL_Global:[7.90, 7.02, 6.28, 5.68, 5.24, 4.90, 4.75, 4.65, 4.62],
-        CNN3D:      [8.05, 7.30, 6.64, 6.10, 5.72, 5.44, 5.28, 5.18, 5.15]
-      }
-    },
-    "Female Age Regression": {
-      isClassification: false,
-      models: [
-        { name: "BrainIAC", mae: "4.29", r2: "0.621", gap: "0.04", overfitting: "NO", pVal: "0.024", sig: "YES" },
-        { name: "SwinBrain", mae: "4.42", r2: "0.598", gap: "0.04", overfitting: "NO", pVal: "0.075", sig: "NO" },
-        { name: "FreeSurfer", mae: "4.58", r2: "0.574", gap: "0.04", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", mae: "4.78", r2: "0.548", gap: "0.06", overfitting: "NO", pVal: "0.260", sig: "NO" },
-        { name: "3D-Neuro-SimCLR", mae: "5.01", r2: "0.512", gap: "0.08", overfitting: "NO", pVal: "0.520", sig: "NO" },
-        { name: "CNN3D", mae: "5.34", r2: "0.465", gap: "0.09", overfitting: "NO", pVal: "0.760", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [7.95, 6.90, 6.08, 5.44, 4.96, 4.62, 4.45, 4.34, 4.29],
-        SwinBrain:  [8.02, 7.01, 6.20, 5.58, 5.10, 4.75, 4.58, 4.48, 4.42],
-        FreeSurfer: [7.98, 7.05, 6.28, 5.66, 5.22, 4.88, 4.72, 4.62, 4.58],
-        AnatCL_Global:[8.08, 7.20, 6.45, 5.84, 5.40, 5.05, 4.90, 4.81, 4.78],
-        CNN3D:      [8.25, 7.48, 6.82, 6.28, 5.90, 5.62, 5.46, 5.38, 5.34]
-      }
-    }
-  },
-  HBN: {
-    "Sex Classification": {
-      isClassification: true,
-      models: [
-        { name: "BrainIAC", acc: "0.811", auc: "0.884", gap: "0.03", overfitting: "NO", pVal: "0.045", sig: "YES" },
-        { name: "SwinBrain", acc: "0.803", auc: "0.872", gap: "0.04", overfitting: "NO", pVal: "0.095", sig: "NO" },
-        { name: "FreeSurfer", acc: "0.798", auc: "0.865", gap: "0.03", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", acc: "0.784", auc: "0.852", gap: "0.05", overfitting: "NO", pVal: "0.280", sig: "NO" },
-        { name: "CNN3D", acc: "0.742", auc: "0.809", gap: "0.08", overfitting: "NO", pVal: "0.690", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [0.545, 0.612, 0.670, 0.714, 0.758, 0.788, 0.801, 0.808, 0.811],
-        SwinBrain:  [0.540, 0.605, 0.662, 0.706, 0.749, 0.779, 0.792, 0.800, 0.803],
-        FreeSurfer: [0.542, 0.602, 0.658, 0.701, 0.744, 0.774, 0.788, 0.795, 0.798],
-        AnatCL_Global:[0.535, 0.590, 0.645, 0.688, 0.730, 0.760, 0.772, 0.780, 0.784],
-        CNN3D:      [0.525, 0.570, 0.618, 0.655, 0.692, 0.720, 0.732, 0.738, 0.742]
-      }
-    }
-  },
-  NKI: {
-    "Sex Classification": {
-      isClassification: true,
-      models: [
-        { name: "BrainIAC", acc: "0.804", auc: "0.875", gap: "0.03", overfitting: "NO", pVal: "0.048", sig: "YES" },
-        { name: "SwinBrain", acc: "0.796", auc: "0.865", gap: "0.04", overfitting: "NO", pVal: "0.102", sig: "NO" },
-        { name: "FreeSurfer", acc: "0.790", auc: "0.858", gap: "0.03", overfitting: "NO", pVal: "--", sig: "--" },
-        { name: "AnatCL_Global", acc: "0.775", auc: "0.840", gap: "0.05", overfitting: "NO", pVal: "0.290", sig: "NO" },
-        { name: "CNN3D", acc: "0.735", auc: "0.801", gap: "0.08", overfitting: "NO", pVal: "0.710", sig: "NO" }
-      ],
-      curves: {
-        fractions: [1, 5, 10, 15, 25, 40, 60, 80, 100],
-        BrainIAC:   [0.540, 0.605, 0.662, 0.706, 0.750, 0.780, 0.794, 0.801, 0.804],
-        SwinBrain:  [0.535, 0.598, 0.655, 0.698, 0.742, 0.772, 0.786, 0.793, 0.796],
-        FreeSurfer: [0.538, 0.595, 0.650, 0.692, 0.736, 0.766, 0.780, 0.787, 0.790],
-        AnatCL_Global:[0.530, 0.582, 0.638, 0.680, 0.722, 0.752, 0.765, 0.772, 0.775],
-        CNN3D:      [0.520, 0.562, 0.610, 0.648, 0.685, 0.712, 0.725, 0.731, 0.735]
-      }
-    }
-  }
+const state = {
+  summary: null,
+  config: null,
+  audit: null,
+  results: [],
+  filteredResults: [],
+  legacy: [],
+  correlation: null,
+  preprocessing: null,
+  qc: null,
+  did: null,
+  pareto: null,
+  equivalence: null,
+  projectionMode: false,
+  projectionData: null,
+  projectionSnapshot: null,
+  projectionFilters: null,
+  currentPage: "overview",
+  scope: "observed",
+  jobId: null,
+  pollTimer: null,
+  toastTimer: null
 };
 
-const CORRELATION_MATRIX = {
-  models: [
-    "AnatCL_Glob", "AnatCL_Loc", "BrainIAC", "SwinBrain",
-    "SimCLR", "CNN3D", "FS_Thick", "FS_Area"
-  ],
-  values: [
-    [1.00, 0.46, 0.25, 0.25, 0.26, 0.26, 0.24, 0.25],
-    [0.46, 1.00, 0.25, 0.25, 0.26, 0.26, 0.24, 0.25],
-    [0.25, 0.25, 1.00, 0.38, 0.32, 0.27, 0.31, 0.29],
-    [0.25, 0.25, 0.38, 1.00, 0.34, 0.28, 0.30, 0.28],
-    [0.26, 0.26, 0.32, 0.34, 1.00, 0.31, 0.28, 0.27],
-    [0.26, 0.26, 0.27, 0.28, 0.31, 1.00, 0.25, 0.25],
-    [0.24, 0.24, 0.31, 0.30, 0.28, 0.25, 1.00, 0.42],
-    [0.25, 0.25, 0.29, 0.28, 0.27, 0.25, 0.42, 1.00]
-  ]
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+const pageLabels = {
+  overview: "Overview & architecture", benchmark: "Benchmark runner", results: "Results & metrics",
+  correlation: "Correlation & clustering", preprocessing: "Preprocessing sensitivity", data: "Data & configuration",
+  audit: "Contamination audit", did: "Natural experiment · DiD", equivalence: "Label equivalence & Pareto", qc: "3D slice QC & montage"
+};
+const modelLabels = {
+  brainiac: "BrainIAC", densenet121_scratch: "DenseNet-121 (scratch)", fomo_unet_b: "FOMO U-Net B",
+  fomo_unet_xl: "FOMO U-Net XL", resnet18_scratch: "ResNet-18 (scratch)", volumetric_gbm: "Volumetric + LightGBM"
+};
+const taskLabels = { t1_aomic_age: "T1 · AOMIC brain age" };
+const metricFields = {
+  mae: ["seen_mae", "unseen_mae", "val_mae_mean", "val_mae_std", "MAE · years"],
+  r2: ["seen_r2", "unseen_r2", "val_r2_mean", "val_r2_std", "R²"],
+  accuracy: ["seen_accuracy", "unseen_accuracy", "val_acc_mean", "val_acc_std", "Accuracy"],
+  auc: ["seen_auc", "unseen_auc", "val_auc_mean", "val_auc_std", "AUC"]
 };
 
-// Global Workstation State
-let currentPlane = "axial";
-let currentSliceIdx = 45;
-let maxSlices = { axial: 91, coronal: 109, sagittal: 91 };
-let cineInterval = null;
-let negativeMode = false;
-let currentDataset = "PPMI";
-let currentTask = "Sex Classification";
-
-// Image Cache to ensure 60fps instant scrub
-const sliceCache = { axial: {}, coronal: {}, sagittal: {} };
-
-// DOM Initialization
-document.addEventListener("DOMContentLoaded", () => {
-  preloadInitialSlices();
-  renderRealBrainSlice();
-  populateBenchTable();
-  renderAllSevenGraphs();
-});
-
-// =====================================================================
-// WINDOW MANAGEMENT & COCKPIT LAYOUTS
-// =====================================================================
-function setLayout(mode) {
-  const grid = document.getElementById("cockpit-grid");
-  const buttons = document.querySelectorAll(".layout-btn");
-  if (!grid) return;
-
-  buttons.forEach(b => b.classList.remove("active"));
-  
-  if (mode === "tiled") {
-    grid.className = "cockpit-grid";
-    buttons[0]?.classList.add("active");
-  } else if (mode === "focus-pacs") {
-    grid.className = "cockpit-grid focus-win1";
-    buttons[1]?.classList.add("active");
-  } else if (mode === "focus-bench") {
-    grid.className = "cockpit-grid focus-win2";
-    buttons[2]?.classList.add("active");
-  } else if (mode === "focus-causal") {
-    grid.className = "cockpit-grid focus-win3";
-    buttons[3]?.classList.add("active");
-  }
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 }
 
-// =====================================================================
-// WINDOW 01: REAL 3D PACS BRAIN SLICE WORKSTATION
-// =====================================================================
-function preloadInitialSlices() {
-  // Preload neighboring slices around current index
-  for (let offset = -5; offset <= 5; offset++) {
-    const idx = Math.min(Math.max(0, currentSliceIdx + offset), maxSlices[currentPlane] - 1);
-    getSliceImage(currentPlane, idx);
-  }
+function numeric(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
-function getSliceImage(plane, idx) {
-  if (sliceCache[plane][idx]) return sliceCache[plane][idx];
-
-  const img = new Image();
-  img.src = `/slices/${plane}/slice_${String(idx).padStart(3, '0')}.png`;
-  sliceCache[plane][idx] = img;
-  return img;
+function fmt(value, digits = 2) {
+  const parsed = numeric(value);
+  return parsed === null ? "—" : parsed.toFixed(digits);
 }
 
-function changeSlicePlane(plane) {
-  currentPlane = plane;
-  document.querySelectorAll(".pacs-plane-btn").forEach(b => b.classList.remove("active"));
-  const activeBtn = document.getElementById(`pacs-btn-${plane}`);
-  if (activeBtn) activeBtn.classList.add("active");
-
-  const slider = document.getElementById("pacs-slider");
-  const max = maxSlices[plane] - 1;
-  currentSliceIdx = Math.floor(max / 2);
-
-  if (slider) {
-    slider.max = max;
-    slider.value = currentSliceIdx;
-  }
-
-  renderRealBrainSlice();
-}
-
-function onScrubberInput(val) {
-  currentSliceIdx = parseInt(val, 10);
-  renderRealBrainSlice();
-}
-
-function toggleCinePlay() {
-  const btn = document.getElementById("btn-auto-cine");
-  if (cineInterval) {
-    clearInterval(cineInterval);
-    cineInterval = null;
-    if (btn) btn.innerText = "AUTO-CINE: OFF";
-  } else {
-    let dir = 1;
-    cineInterval = setInterval(() => {
-      const max = maxSlices[currentPlane] - 1;
-      currentSliceIdx += dir;
-      if (currentSliceIdx >= max) { currentSliceIdx = max; dir = -1; }
-      else if (currentSliceIdx <= 0) { currentSliceIdx = 0; dir = 1; }
-
-      const slider = document.getElementById("pacs-slider");
-      if (slider) slider.value = currentSliceIdx;
-      renderRealBrainSlice();
-    }, 40);
-    if (btn) btn.innerText = "AUTO-CINE: PLAYING";
-  }
-}
-
-function toggleNegativeMode() {
-  negativeMode = !negativeMode;
-  renderRealBrainSlice();
-}
-
-function renderRealBrainSlice() {
-  const canvas = document.getElementById("real-slice-canvas");
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const total = maxSlices[currentPlane];
-  const maxIdx = total - 1;
-  const idx = Math.min(Math.max(0, currentSliceIdx), maxIdx);
-
-  // Update HUD text elements
-  const planeReadout = document.getElementById("pacs-hud-plane");
-  const idxReadout = document.getElementById("pacs-hud-idx");
-  const sliderReadout = document.getElementById("pacs-slice-readout");
-  const coordsReadout = document.getElementById("pacs-hud-coords");
-  const regionReadout = document.getElementById("pacs-hud-region");
-
-  if (planeReadout) planeReadout.innerText = currentPlane.toUpperCase();
-  if (idxReadout) idxReadout.innerText = `${idx} / ${total}`;
-  if (sliderReadout) sliderReadout.innerText = `Slice ${idx} / ${total}`;
-
-  // Anatomical HUD mapping
-  let regionName = "CEREBRAL CORTEX";
-  let mniCoords = "[0.0, 0.0, 0.0]";
-  if (currentPlane === "axial") {
-    const zMm = -40 + (idx / maxIdx) * 110;
-    mniCoords = `[0.0, 10.0, ${zMm.toFixed(1)}] mm`;
-    if (idx < 22) regionName = "CEREBELLUM & BRAINSTEM";
-    else if (idx < 38) regionName = "TEMPORAL LOBES & MIDBRAIN";
-    else if (idx < 58) regionName = "LATERAL VENTRICLES & CAUDATE";
-    else if (idx < 76) regionName = "CENTRUM SEMIOVALE & CORPUS CALLOSUM";
-    else regionName = "SUPERIOR CORTICAL VERTEX";
-  } else if (currentPlane === "coronal") {
-    const yMm = -70 + (idx / maxIdx) * 110;
-    mniCoords = `[0.0, ${yMm.toFixed(1)}, 12.0] mm`;
-    if (idx < 25) regionName = "ANTERIOR FRONTAL POLE";
-    else if (idx < 55) regionName = "BASAL GANGLIA & ANTERIOR HORNS";
-    else if (idx < 80) regionName = "SPLENIUM & THALAMUS";
-    else regionName = "OCCIPITAL VISUAL CORTEX";
-  } else {
-    const xMm = -50 + (idx / maxIdx) * 100;
-    mniCoords = `[${xMm.toFixed(1)}, 8.0, 14.0] mm`;
-    if (idx < 25) regionName = "LEFT LATERAL TEMPORAL CORTEX";
-    else if (idx < 65) regionName = "MIDLINE CORPUS CALLOSUM & PONS";
-    else regionName = "RIGHT LATERAL PARIETAL CORTEX";
-  }
-
-  if (coordsReadout) coordsReadout.innerText = mniCoords;
-  if (regionReadout) regionReadout.innerText = regionName;
-
-  // Load and draw slice image
-  const img = getSliceImage(currentPlane, idx);
-  if (img.complete && img.naturalWidth > 0) {
-    drawSliceOntoCanvas(ctx, canvas, img);
-  } else {
-    img.onload = () => drawSliceOntoCanvas(ctx, canvas, img);
-  }
-
-  // Preload neighboring slices
-  preloadInitialSlices();
-}
-
-function drawSliceOntoCanvas(ctx, canvas, img) {
-  const cw = canvas.width;
-  const ch = canvas.height;
-
-  ctx.fillStyle = negativeMode ? "#FFFFFF" : "#000000";
-  ctx.fillRect(0, 0, cw, ch);
-
-  if (negativeMode) {
-    ctx.filter = "invert(1)";
-  } else {
-    ctx.filter = "none";
-  }
-
-  // Scale and center the image crisp
-  const imgAspect = img.width / img.height;
-  let dw = cw;
-  let dh = cw / imgAspect;
-  if (dh > ch) {
-    dh = ch;
-    dw = ch * imgAspect;
-  }
-  const dx = (cw - dw) / 2;
-  const dy = (ch - dh) / 2;
-
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, dx, dy, dw, dh);
-  ctx.filter = "none";
-}
-
-// =====================================================================
-// WINDOW 02: BENCHMARK SUITE & LIVE RUNNER
-// =====================================================================
-function onBenchDatasetChange(val) {
-  currentDataset = val;
-  updateBenchTaskOptions();
-  populateBenchTable();
-  renderAllSevenGraphs();
-}
-
-function onBenchTaskChange(val) {
-  currentTask = val;
-  populateBenchTable();
-  renderAllSevenGraphs();
-}
-
-function updateBenchTaskOptions() {
-  const taskSelect = document.getElementById("bm-task");
-  if (!taskSelect) return;
-  const tasks = Object.keys(BENCHMARK_DATA[currentDataset] || {});
-  taskSelect.innerHTML = tasks.map(t => `<option value="${t}">${t}</option>`).join("");
-  currentTask = tasks[0] || "Sex Classification";
-}
-
-function populateBenchTable() {
-  const tableBody = document.querySelector("#win-bench-table tbody");
-  if (!tableBody) return;
-  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
-  tableBody.innerHTML = taskObj.models.map(m => `
-    <tr>
-      <td><strong>${m.name}</strong></td>
-      <td>${taskObj.isClassification ? m.acc : m.mae}</td>
-      <td>${taskObj.isClassification ? m.auc : m.r2}</td>
-      <td>${m.gap}</td>
-      <td>${m.pVal}</td>
-      <td><span class="badge ${m.sig === 'YES' ? 'badge-solid' : 'badge-outline'}">${m.sig}</span></td>
-    </tr>
-  `).join("");
-}
-
-function executeProbeSimulation() {
-  const terminal = document.getElementById("terminal-logs");
-  const btn = document.getElementById("btn-run-benchmark");
-  if (!terminal || !btn) return;
-
-  btn.disabled = true;
-  btn.innerText = "PROBING IN PROGRESS...";
-
-  const logs = [
-    `[INIT] Validating MNI152 volumes and FreeSurfer morphometry on ${currentDataset}...`,
-    `[ENCODER] Extracting frozen representations from BrainIAC ViT, SwinBrain, AnatCL, SimCLR...`,
-    `[CROSS-VAL] Executing 5-Fold Stratified Cross-Validation across 5 seeds (25 folds)...`,
-    `[ALPHA SWEEP] Probing sample efficiency: alpha in [1%, 5%, 10%, 15%, 25%, 40%, 60%, 80%, 100%]...`,
-    `[STAT AUDIT] Non-parametric permutation test (9,999 resamples) vs FreeSurfer reference...`,
-    `[SUCCESS] Multi-model probe complete. Synchronizing cockpit metrics.`
+function buildModelProjections({ focusModel = "brainiac", didBaseModel = "resnet18_scratch", eqBaseModel = "resnet18_scratch", targetN = 50 } = {}) {
+  // These coefficients are explicit interface assumptions, not fitted model results.
+  const models = [
+    { id: "brainiac", base: 5.85, slope: .42, gap: 1.24, gapSlope: .065, r2: .66, seconds: 1480, shared: .31 },
+    { id: "fomo_unet_b", base: 6.02, slope: .39, gap: 1.09, gapSlope: .052, r2: .64, seconds: 1120, shared: .28 },
+    { id: "fomo_unet_xl", base: 5.78, slope: .43, gap: 1.02, gapSlope: .048, r2: .68, seconds: 1780, shared: .35 },
+    { id: "resnet18_scratch", base: 6.18, slope: .36, gap: .66, gapSlope: .024, r2: .58, seconds: 645, shared: .22 },
+    { id: "densenet121_scratch", base: 6.31, slope: .34, gap: .73, gapSlope: .027, r2: .56, seconds: 820, shared: .20 },
+    { id: "volumetric_gbm", base: 6.48, slope: .29, gap: .49, gapSlope: .018, r2: .53, seconds: 236, shared: .17 }
   ];
-
-  terminal.innerHTML = "";
-  let step = 0;
-  const timer = setInterval(() => {
-    if (step < logs.length) {
-      terminal.innerHTML += logs[step] + "\n";
-      terminal.scrollTop = terminal.scrollHeight;
-      step++;
-    } else {
-      clearInterval(timer);
-      btn.disabled = false;
-      btn.innerText = "EXECUTE PROBE SUITE";
-      populateBenchTable();
-      renderAllSevenGraphs();
-    }
-  }, 130);
-}
-
-// =====================================================================
-// WINDOW 03: CAUSAL AUDIT (N_eq SLIDER)
-// =====================================================================
-function onNeqSliderInput(val) {
-  const nVal = parseInt(val, 10);
-  const readout = document.getElementById("win-neq-readout");
-  const seenEl = document.getElementById("win-neq-seen");
-  const unseenEl = document.getElementById("win-neq-unseen");
-
-  if (readout) readout.innerText = `N = ${nVal} scans`;
-
-  const lnN = Math.log(nVal);
-  const fm_seen_mae = -1.25 * lnN + 8.30;
-  const fm_unseen_mae = -1.18 * lnN + 9.45;
-
-  const req_seen = Math.round(Math.exp((fm_seen_mae - 9.30) / -1.15));
-  const req_unseen = Math.round(Math.exp((fm_unseen_mae - 9.30) / -1.15));
-
-  const neq_seen = Math.max(0, req_seen - nVal);
-  const neq_unseen = Math.max(0, req_unseen - nVal);
-
-  if (seenEl) seenEl.innerText = `+${neq_seen} Scans`;
-  if (unseenEl) unseenEl.innerText = `+${neq_unseen} Scans`;
-}
-
-// =====================================================================
-// THE 7 SCIENTIFIC INTERACTIVE GRAPH ENGINES
-// =====================================================================
-function renderAllSevenGraphs() {
-  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
-  renderGraph1_LearningCurves(taskObj);
-  renderGraph2_ErrorDistribution(taskObj);
-  renderGraph3_RocCurves();
-  renderGraph4_RadarTopology();
-  renderGraph5_DidSlope();
-  renderGraph6_ParetoFrontier();
-  renderGraph7_CorrelationHeatmap();
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 1: Learning Curve with Shaded 95% Confidence Intervals
-// ---------------------------------------------------------------------
-function renderGraph1_LearningCurves(taskObj) {
-  const container = document.getElementById("chart-learning-curve-container");
-  const tooltip = document.getElementById("tooltip-learning-curve");
-  if (!container) return;
-
-  const curves = taskObj.curves;
-  const isClass = taskObj.isClassification;
-  const fractions = curves.fractions;
-
-  const w = container.clientWidth || 740;
-  const h = 330;
-  const padL = 55, padR = 140, padT = 25, padB = 40;
-  const plotW = w - padL - padR;
-  const plotH = h - padT - padB;
-
-  let minVal = isClass ? 0.48 : 0.0;
-  let maxVal = isClass ? 0.88 : 14.0;
-
-  const getX = (f) => padL + ((f - 1) / 99) * plotW;
-  const getY = (val) => padT + (1 - (val - minVal) / (maxVal - minVal)) * plotH;
-
-  const modelsList = [
-    { name: "BrainIAC", color: "#FFFFFF", dash: "none", width: 2.6 },
-    { name: "SwinBrain", color: "#CCCCCC", dash: "6,3", width: 1.8 },
-    { name: "FreeSurfer", color: "#AAAAAA", dash: "3,3", width: 1.8 },
-    { name: "AnatCL_Global", color: "#777777", dash: "8,4", width: 1.5 },
-    { name: "CNN3D", color: "#444444", dash: "4,4", width: 1.4 }
-  ];
-
-  let svg = `<svg id="svg-learning-curve" width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Grid
-  for (let t = 0; t <= 4; t++) {
-    const yVal = minVal + (t / 4) * (maxVal - minVal);
-    const yPos = getY(yVal);
-    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
-    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${yVal.toFixed(2)}</text>`;
-  }
-
-  fractions.forEach(f => {
-    const xPos = getX(f);
-    svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
-    svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${f}%</text>`;
-  });
-
-  // Dynamic Hover Guideline
-  svg += `<line id="guide-crosshair" x1="0" y1="${padT}" x2="0" y2="${h - padB}" stroke="#FFF" stroke-width="1" stroke-dasharray="2,2" opacity="0" />`;
-
-  // Plot lines & Shaded Confidence Band for BrainIAC
-  const topVals = curves["BrainIAC"];
-  if (topVals) {
-    let ciPath = "";
-    topVals.forEach((v, idx) => {
-      const x = getX(fractions[idx]);
-      const yUpper = getY(v + (isClass ? 0.015 : 0.22));
-      ciPath += (idx === 0 ? `M ${x} ${yUpper}` : ` L ${x} ${yUpper}`);
-    });
-    for (let idx = topVals.length - 1; idx >= 0; idx--) {
-      const x = getX(fractions[idx]);
-      const yLower = getY(topVals[idx] - (isClass ? 0.015 : 0.22));
-      ciPath += ` L ${x} ${yLower}`;
-    }
-    ciPath += " Z";
-    svg += `<path d="${ciPath}" fill="rgba(255, 255, 255, 0.08)" stroke="none" />`;
-  }
-
-  // Model Lines
-  modelsList.forEach(m => {
-    const vals = curves[m.name];
-    if (!vals) return;
-    let pathD = "";
-    vals.forEach((v, idx) => {
-      const x = getX(fractions[idx]);
-      const y = getY(v);
-      pathD += (idx === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-    });
-
-    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
-
-    // Dots
-    vals.forEach((v, idx) => {
-      const x = getX(fractions[idx]);
-      const y = getY(v);
-      svg += `<circle cx="${x}" cy="${y}" r="2.8" fill="${m.color}" />`;
-    });
-  });
-
-  // Legend
-  modelsList.forEach((m, idx) => {
-    const legX = w - padR + 15;
-    const legY = padT + idx * 22;
-    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<line x1="${legX}" y1="${legY}" x2="${legX + 22}" y2="${legY}" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
-    svg += `<circle cx="${legX + 11}" cy="${legY}" r="2.5" fill="${m.color}" />`;
-    svg += `<text x="${legX + 28}" y="${legY + 4}" fill="#CCC" font-size="10" font-family="JetBrains Mono">${m.name}</text>`;
-  });
-
-  // Labels
-  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Training Data Fraction (&alpha;)</text>`;
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">${isClass ? 'Balanced Acc' : 'MAE (Years)'}</text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-
-  // Add Hover Crosshair Tracking
-  const svgEl = document.getElementById("svg-learning-curve");
-  const crosshair = document.getElementById("guide-crosshair");
-  if (svgEl && crosshair && tooltip) {
-    svgEl.addEventListener("mousemove", (e) => {
-      const rect = svgEl.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      if (mouseX >= padL && mouseX <= w - padR) {
-        crosshair.setAttribute("x1", mouseX);
-        crosshair.setAttribute("x2", mouseX);
-        crosshair.setAttribute("opacity", "0.6");
-
-        const ratio = (mouseX - padL) / plotW;
-        const estF = 1 + ratio * 99;
-        let closestF = fractions[0];
-        let minD = 999;
-        fractions.forEach(f => {
-          const diff = Math.abs(f - estF);
-          if (diff < minD) { minD = diff; closestF = f; }
+  const profileFor = (id) => models.find((model) => model.id === id) || models[0];
+  const focus = profileFor(focusModel);
+  const baseline = profileFor(didBaseModel === focus.id ? (focus.id === "resnet18_scratch" ? "densenet121_scratch" : "resnet18_scratch") : didBaseModel);
+  const equivalentBase = profileFor(eqBaseModel === focus.id ? (focus.id === "resnet18_scratch" ? "densenet121_scratch" : "resnet18_scratch") : eqBaseModel);
+  const budgets = [25, 50, 100, 250, 500];
+  const seeds = [42, 1337, 2026];
+  const round = (value, digits = 3) => Number(value.toFixed(digits));
+  const rows = [];
+  for (const model of models) {
+    for (const n of budgets) {
+      const step = Math.log2(n / 25);
+      for (const [seedIndex, seed] of seeds.entries()) {
+        const offset = (seedIndex - 1) * .045;
+        const seen = round(model.base - model.slope * step + offset);
+        const gap = round(model.gap - model.gapSlope * step + offset * .18);
+        const seconds = round(model.seconds * Math.pow(n / 25, .68) * (1 + (seedIndex - 1) * .025), 1);
+        rows.push({
+          data_status: "predicted", record_type: "model_projection", task_id: "t1_aomic_age", model_id: model.id,
+          n_labels: n, seed, trial_budget: 5, trials: 5, seen_mae: seen, unseen_mae: round(seen + gap),
+          seen_r2: round(model.r2 + .043 * step + offset / 12),
+          unseen_r2: round(model.r2 + .043 * step - gap * .026 + offset / 12),
+          total_gpu_seconds: seconds, total_gpu_hours: seconds / 3600
         });
-
-        const fIdx = fractions.indexOf(closestF);
-        const bVal = curves.BrainIAC ? curves.BrainIAC[fIdx] : "--";
-        const fsVal = curves.FreeSurfer ? curves.FreeSurfer[fIdx] : "--";
-
-        tooltip.style.display = "block";
-        tooltip.style.left = (e.clientX - rect.left + 16) + "px";
-        tooltip.style.top = (e.clientY - rect.top - 20) + "px";
-        tooltip.innerHTML = `
-          <strong>&alpha; = ${closestF}% Training Scans</strong><br>
-          BrainIAC: ${bVal} (95% CI &plusmn;0.015)<br>
-          FreeSurfer: ${fsVal}
-        `;
-      } else {
-        crosshair.setAttribute("opacity", "0");
-        tooltip.style.display = "none";
       }
-    });
-
-    svgEl.addEventListener("mouseleave", () => {
-      crosshair.setAttribute("opacity", "0");
-      tooltip.style.display = "none";
-    });
-  }
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 2: Fold Error Residual Distribution
-// ---------------------------------------------------------------------
-function renderGraph2_ErrorDistribution(taskObj) {
-  const container = document.getElementById("chart-error-distribution-container");
-  if (!container) return;
-
-  const w = container.clientWidth || 740;
-  const h = 330;
-  const padL = 60, padR = 40, padT = 30, padB = 40;
-  const plotW = w - padL - padR;
-  const plotH = h - padT - padB;
-
-  const models = [
-    { name: "BrainIAC", median: 0.828, q1: 0.812, q3: 0.844, min: 0.795, max: 0.860 },
-    { name: "SwinBrain", median: 0.821, q1: 0.805, q3: 0.835, min: 0.785, max: 0.852 },
-    { name: "FreeSurfer", median: 0.818, q1: 0.802, q3: 0.831, min: 0.780, max: 0.846 },
-    { name: "AnatCL", median: 0.812, q1: 0.795, q3: 0.825, min: 0.770, max: 0.839 },
-    { name: "SimCLR", median: 0.796, q1: 0.778, q3: 0.812, min: 0.755, max: 0.825 },
-    { name: "CNN3D", median: 0.774, q1: 0.752, q3: 0.792, min: 0.730, max: 0.810 }
-  ];
-
-  const yMin = 0.70, yMax = 0.90;
-  const getY = (val) => padT + (1 - (val - yMin) / (yMax - yMin)) * plotH;
-  const colW = plotW / models.length;
-
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Grid
-  for (let t = 0; t <= 4; t++) {
-    const yVal = yMin + (t / 4) * (yMax - yMin);
-    const yPos = getY(yVal);
-    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
-    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${yVal.toFixed(2)}</text>`;
-  }
-
-  models.forEach((m, i) => {
-    const cx = padL + i * colW + colW / 2;
-    const boxW = Math.min(36, colW * 0.5);
-
-    const yQ1 = getY(m.q1);
-    const yQ3 = getY(m.q3);
-    const yMed = getY(m.median);
-    const yMinPos = getY(m.min);
-    const yMaxPos = getY(m.max);
-
-    // Whiskers
-    svg += `<line x1="${cx}" y1="${yMinPos}" x2="${cx}" y2="${yMaxPos}" stroke="#777" stroke-width="1.5" />`;
-    svg += `<line x1="${cx - boxW/3}" y1="${yMinPos}" x2="${cx + boxW/3}" y2="${yMinPos}" stroke="#777" stroke-width="1.5" />`;
-    svg += `<line x1="${cx - boxW/3}" y1="${yMaxPos}" x2="${cx + boxW/3}" y2="${yMaxPos}" stroke="#777" stroke-width="1.5" />`;
-
-    // Box
-    svg += `<rect x="${cx - boxW/2}" y="${yQ3}" width="${boxW}" height="${yQ1 - yQ3}" fill="#111" stroke="#FFF" stroke-width="1.2" />`;
-    // Median line
-    svg += `<line x1="${cx - boxW/2}" y1="${yMed}" x2="${cx + boxW/2}" y2="${yMed}" stroke="#FFF" stroke-width="2.5" />`;
-
-    // Label
-    svg += `<text x="${cx}" y="${h - padB + 16}" fill="#AAA" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${m.name}</text>`;
-  });
-
-  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Evaluation Model Arm</text>`;
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">Fold Score Variance</text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 3: Multi-Model ROC-AUC Curves
-// ---------------------------------------------------------------------
-function renderGraph3_RocCurves() {
-  const container = document.getElementById("chart-roc-container");
-  if (!container) return;
-
-  const w = container.clientWidth || 740;
-  const h = 330;
-  const padL = 55, padR = 140, padT = 25, padB = 40;
-  const plotW = w - padL - padR;
-  const plotH = h - padT - padB;
-
-  const getX = (fpr) => padL + fpr * plotW;
-  const getY = (tpr) => padT + (1 - tpr) * plotH;
-
-  const models = [
-    { name: "BrainIAC (0.902)", color: "#FFFFFF", dash: "none", width: 2.5, power: 3.5 },
-    { name: "SwinBrain (0.895)", color: "#CCCCCC", dash: "6,3", width: 1.8, power: 3.2 },
-    { name: "FreeSurfer (0.891)", color: "#AAAAAA", dash: "3,3", width: 1.8, power: 3.0 },
-    { name: "AnatCL (0.884)", color: "#777777", dash: "8,4", width: 1.5, power: 2.8 },
-    { name: "CNN3D (0.842)", color: "#444444", dash: "4,4", width: 1.4, power: 2.2 }
-  ];
-
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Grid
-  for (let t = 0; t <= 4; t++) {
-    const val = t / 4;
-    const yPos = getY(val);
-    const xPos = getX(val);
-    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
-    svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
-    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${val.toFixed(2)}</text>`;
-    svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${val.toFixed(2)}</text>`;
-  }
-
-  // Diagonal Chance line
-  svg += `<line x1="${padL}" y1="${getY(0)}" x2="${padL + plotW}" y2="${getY(1)}" stroke="#2E2E2E" stroke-dasharray="4,4" stroke-width="1.2" />`;
-
-  // Plot ROC curves
-  models.forEach(m => {
-    let pathD = "";
-    for (let s = 0; s <= 50; s++) {
-      const fpr = s / 50;
-      // Parametric ROC function: TPR = 1 - (1 - FPR)^power
-      const tpr = 1 - Math.pow(1 - fpr, m.power);
-      const x = getX(fpr);
-      const y = getY(tpr);
-      pathD += (s === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-    }
-    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<path d="${pathD}" fill="none" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
-  });
-
-  // Legend
-  models.forEach((m, idx) => {
-    const legX = w - padR + 15;
-    const legY = padT + idx * 24;
-    const dashAttr = m.dash !== "none" ? `stroke-dasharray="${m.dash}"` : "";
-    svg += `<line x1="${legX}" y1="${legY}" x2="${legX + 22}" y2="${legY}" stroke="${m.color}" stroke-width="${m.width}" ${dashAttr} />`;
-    svg += `<text x="${legX + 28}" y="${legY + 4}" fill="#CCC" font-size="9" font-family="JetBrains Mono">${m.name}</text>`;
-  });
-
-  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">False Positive Rate (1 - Specificity)</text>`;
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">True Positive Rate (Sensitivity)</text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 4: 6-Axis Radar / Spider Model Topology
-// ---------------------------------------------------------------------
-function renderGraph4_RadarTopology() {
-  const container = document.getElementById("chart-radar-container");
-  if (!container) return;
-
-  const size = 330;
-  const cx = size / 2;
-  const cy = size / 2;
-  const radius = size * 0.38;
-
-  const axes = [
-    "Accuracy",
-    "ROC-AUC",
-    "Sample Eff",
-    "Latency",
-    "Calibration",
-    "Template Inv"
-  ];
-
-  const models = [
-    { name: "BrainIAC", vals: [0.95, 0.94, 0.90, 0.55, 0.85, 0.70], color: "#FFFFFF", width: 2 },
-    { name: "FreeSurfer", vals: [0.88, 0.88, 0.84, 0.35, 0.95, 0.92], color: "#888888", width: 1.6 }
-  ];
-
-  let svg = `<svg width="${size}" height="${size}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Concentric spider rings
-  for (let ring = 1; ring <= 4; ring++) {
-    const r = (ring / 4) * radius;
-    let ringPath = "";
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-      const x = cx + r * Math.cos(angle);
-      const y = cy + r * Math.sin(angle);
-      ringPath += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-    }
-    ringPath += " Z";
-    svg += `<path d="${ringPath}" fill="none" stroke="#1A1A1A" stroke-width="1" />`;
-  }
-
-  // Spoke axes
-  for (let i = 0; i < 6; i++) {
-    const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-    const x = cx + radius * Math.cos(angle);
-    const y = cy + radius * Math.sin(angle);
-    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#222" />`;
-
-    // Axis labels
-    const lx = cx + (radius + 20) * Math.cos(angle);
-    const ly = cy + (radius + 20) * Math.sin(angle);
-    svg += `<text x="${lx}" y="${ly + 4}" fill="#AAA" font-size="9" font-family="JetBrains Mono" text-anchor="middle">${axes[i]}</text>`;
-  }
-
-  // Model Polygons
-  models.forEach(m => {
-    let polyPath = "";
-    m.vals.forEach((v, i) => {
-      const r = v * radius;
-      const angle = (i / 6) * Math.PI * 2 - Math.PI / 2;
-      const x = cx + r * Math.cos(angle);
-      const y = cy + r * Math.sin(angle);
-      polyPath += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-    });
-    polyPath += " Z";
-    svg += `<path d="${polyPath}" fill="${m.color === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : 'rgba(120,120,120,0.1)'}" stroke="${m.color}" stroke-width="${m.width}" />`;
-  });
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 5: DiD Causal Degradation Slope Chart
-// ---------------------------------------------------------------------
-function renderGraph5_DidSlope() {
-  const container = document.getElementById("chart-did-slope-container");
-  if (!container) return;
-
-  const w = container.clientWidth || 740;
-  const h = 330;
-  const padL = 70, padR = 60, padT = 30, padB = 40;
-  const plotW = w - padL - padR;
-  const plotH = h - padT - padB;
-
-  const xSeen = padL + plotW * 0.25;
-  const xUnseen = padL + plotW * 0.75;
-
-  const yMin = 3.0, yMax = 5.5;
-  const getY = (val) => padT + (1 - (val - yMin) / (yMax - yMin)) * plotH;
-
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Grid
-  for (let t = 0; t <= 4; t++) {
-    const val = yMin + (t / 4) * (yMax - yMin);
-    const yPos = getY(val);
-    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
-    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">${val.toFixed(2)}y</text>`;
-  }
-
-  // Vertical lines for cohorts
-  svg += `<line x1="${xSeen}" y1="${h - padB}" x2="${xSeen}" y2="${padT}" stroke="#222" stroke-width="1.5" />`;
-  svg += `<line x1="${xUnseen}" y1="${h - padB}" x2="${xUnseen}" y2="${padT}" stroke="#222" stroke-width="1.5" />`;
-
-  svg += `<text x="${xSeen}" y="${h - padB + 18}" fill="#FFF" font-size="11" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">AOMIC ID1000 (SEEN)</text>`;
-  svg += `<text x="${xUnseen}" y="${h - padB + 18}" fill="#FFF" font-size="11" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">AOMIC PIOP1/2 (UNSEEN)</text>`;
-
-  // BrainIAC slope: 3.41 -> 4.82 (+1.41 yrs)
-  const yBSeen = getY(3.41);
-  const yBUnseen = getY(4.82);
-  svg += `<line x1="${xSeen}" y1="${yBSeen}" x2="${xUnseen}" y2="${yBUnseen}" stroke="#FFFFFF" stroke-width="3" />`;
-  svg += `<circle cx="${xSeen}" cy="${yBSeen}" r="5" fill="#FFF" />`;
-  svg += `<circle cx="${xUnseen}" cy="${yBUnseen}" r="5" fill="#FFF" />`;
-  svg += `<text x="${xSeen - 12}" y="${yBSeen + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="end">3.41 yrs</text>`;
-  svg += `<text x="${xUnseen + 12}" y="${yBUnseen + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="start">4.82 yrs (+1.41y)</text>`;
-
-  // ResNet-18 slope: 4.79 -> 4.88 (+0.09 yrs)
-  const yRSeen = getY(4.79);
-  const yRUnseen = getY(4.88);
-  svg += `<line x1="${xSeen}" y1="${yRSeen}" x2="${xUnseen}" y2="${yRUnseen}" stroke="#666666" stroke-width="2" stroke-dasharray="4,4" />`;
-  svg += `<circle cx="${xSeen}" cy="${yRSeen}" r="4" fill="#666" />`;
-  svg += `<circle cx="${xUnseen}" cy="${yRUnseen}" r="4" fill="#666" />`;
-  svg += `<text x="${xSeen - 12}" y="${yRSeen + 4}" fill="#888" font-size="10" font-family="JetBrains Mono" text-anchor="end">4.79 yrs</text>`;
-  svg += `<text x="${xUnseen + 12}" y="${yRUnseen + 4}" fill="#888" font-size="10" font-family="JetBrains Mono" text-anchor="start">4.88 yrs (+0.09y)</text>`;
-
-  // Causal Delta-Delta annotation bracket
-  const bracketX = xUnseen + 100;
-  svg += `<line x1="${bracketX}" y1="${yBSeen}" x2="${bracketX}" y2="${yBUnseen}" stroke="#FFF" stroke-width="1.5" />`;
-  svg += `<text x="${bracketX + 12}" y="${(yBSeen + yBUnseen) / 2 + 4}" fill="#FFF" font-size="10" font-family="JetBrains Mono" font-weight="bold">&Delta;&Delta; = +1.32 yrs</text>`;
-
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">MAE (Lower is Better)</text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 6: Pretraining Compute vs. Label Savings Pareto Frontier
-// ---------------------------------------------------------------------
-function renderGraph6_ParetoFrontier() {
-  const container = document.getElementById("chart-pareto-container");
-  if (!container) return;
-
-  const w = container.clientWidth || 740;
-  const h = 330;
-  const padL = 60, padR = 40, padT = 30, padB = 40;
-  const plotW = w - padL - padR;
-  const plotH = h - padT - padB;
-
-  const getX = (gpuH) => padL + (gpuH / 600) * plotW;
-  const getY = (neq) => padT + (1 - neq / 80) * plotH;
-
-  const models = [
-    { name: "ResNet-18", gpu: 0, neq: 0, pareto: true },
-    { name: "3D-SimCLR", gpu: 120, neq: 24, pareto: true },
-    { name: "AnatCL", gpu: 180, neq: 35, pareto: true },
-    { name: "SwinBrain", gpu: 350, neq: 52, pareto: false },
-    { name: "BrainIAC (Seen)", gpu: 520, neq: 68, pareto: false },
-    { name: "BrainIAC (Unseen)", gpu: 520, neq: 14, pareto: false }
-  ];
-
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  // Grid
-  for (let t = 0; t <= 4; t++) {
-    const yVal = t * 20;
-    const yPos = getY(yVal);
-    svg += `<line x1="${padL}" y1="${yPos}" x2="${w - padR}" y2="${yPos}" stroke="#161616" stroke-dasharray="3,3" />`;
-    svg += `<text x="${padL - 10}" y="${yPos + 4}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="end">+${yVal}</text>`;
-  }
-
-  for (let g = 0; g <= 600; g += 150) {
-    const xPos = getX(g);
-    svg += `<line x1="${xPos}" y1="${h - padB}" x2="${xPos}" y2="${padT}" stroke="#121212" stroke-dasharray="2,2" />`;
-    svg += `<text x="${xPos}" y="${h - padB + 16}" fill="#777" font-size="10" font-family="JetBrains Mono" text-anchor="middle">${g}h</text>`;
-  }
-
-  // Pareto Frontier Line
-  svg += `<path d="M ${getX(0)} ${getY(0)} L ${getX(120)} ${getY(24)} L ${getX(180)} ${getY(35)} L ${getX(350)} ${getY(52)} L ${getX(520)} ${getY(68)}" fill="none" stroke="#FFFFFF" stroke-width="2" />`;
-
-  // Points
-  models.forEach(m => {
-    const x = getX(m.gpu);
-    const y = getY(m.neq);
-    svg += `<circle cx="${x}" cy="${y}" r="4.5" fill="${m.pareto ? '#FFFFFF' : '#888888'}" stroke="#000" stroke-width="1.5" />`;
-    svg += `<text x="${x + 8}" y="${y + 3}" fill="#CCC" font-size="9" font-family="JetBrains Mono">${m.name}</text>`;
-  });
-
-  svg += `<text x="${padL + plotW / 2}" y="${h - 8}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle">Pretraining Compute (GPU Hours)</text>`;
-  svg += `<text x="16" y="${padT + plotH / 2}" fill="#888" font-size="11" font-family="JetBrains Mono" text-anchor="middle" transform="rotate(-90 16 ${padT + plotH / 2})">Scans Saved (N_eq)</text>`;
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// ---------------------------------------------------------------------
-// GRAPH 7: Pairwise Latent Correlation Heatmap
-// ---------------------------------------------------------------------
-function renderGraph7_CorrelationHeatmap() {
-  const container = document.getElementById("chart-heatmap-container");
-  if (!container) return;
-
-  const models = CORRELATION_MATRIX.models;
-  const values = CORRELATION_MATRIX.values;
-
-  const w = 420;
-  const h = 420;
-  const pad = 80;
-  const cellW = (w - pad) / models.length;
-
-  let svg = `<svg width="${w}" height="${h}" style="background-color: #060606; border-radius: 2px;">`;
-
-  for (let i = 0; i < models.length; i++) {
-    for (let j = 0; j < models.length; j++) {
-      const val = values[i][j];
-      const intensity = Math.round(val * 255);
-      const hex = intensity.toString(16).padStart(2, "0");
-      const fill = `#${hex}${hex}${hex}`;
-      const textColor = intensity > 140 ? "#000000" : "#FFFFFF";
-
-      const x = pad + j * cellW;
-      const y = pad + i * cellW;
-
-      svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellW}" fill="${fill}" stroke="#0E0E0E" />`;
-      svg += `<text x="${x + cellW / 2}" y="${y + cellW / 2 + 4}" fill="${textColor}" font-size="9" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle" pointer-events="none">${val.toFixed(2)}</text>`;
     }
   }
-
-  models.forEach((m, idx) => {
-    const pos = pad + idx * cellW + cellW / 2;
-    svg += `<text x="${pos}" y="${pad - 10}" fill="#CCC" font-size="9" font-family="JetBrains Mono" text-anchor="start" transform="rotate(-45 ${pos} ${pad - 10})">${m}</text>`;
-    svg += `<text x="${pad - 8}" y="${pos + 4}" fill="#CCC" font-size="9" font-family="JetBrains Mono" text-anchor="end">${m}</text>`;
+  const mean = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+  const quantile = (values, q) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    const position = (sorted.length - 1) * q;
+    const lower = Math.floor(position), fraction = position - lower;
+    return sorted[lower] * (1 - fraction) + sorted[Math.min(lower + 1, sorted.length - 1)] * fraction;
+  };
+  const pairedGaps = new Map();
+  rows.filter((row) => row.n_labels <= 100 && [focus.id, baseline.id].includes(row.model_id)).forEach((row) => {
+    const key = `${row.task_id}|${row.n_labels}|${row.seed}|${row.trial_budget}`;
+    const pair = pairedGaps.get(key) || {};
+    pair[row.model_id] = row.unseen_mae - row.seen_mae;
+    pairedGaps.set(key, pair);
   });
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-// =====================================================================
-// EXPORTS
-// =====================================================================
-function downloadCSV() {
-  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
-  const isClass = taskObj.isClassification;
-  let csv = `Model,${isClass ? 'Balanced_Acc' : 'MAE'},${isClass ? 'ROC_AUC' : 'R2'},Train_Val_Gap,Overfitting,Permutation_p,Significance\n`;
-  taskObj.models.forEach(m => {
-    csv += `${m.name},${isClass ? m.acc : m.mae},${isClass ? m.auc : m.r2},${m.gap},${m.overfitting},${m.pVal},${m.sig}\n`;
+  const didValues = [...pairedGaps.values()].filter((pair) => pair[focus.id] !== undefined && pair[baseline.id] !== undefined).map((pair) => pair[focus.id] - pair[baseline.id]);
+  const didPoint = mean(didValues) || 0;
+  let randomState = [...`${focus.id}|${baseline.id}|${targetN}`].reduce((hash, character) => (hash * 33 + character.charCodeAt(0)) >>> 0, 5381);
+  const random = () => ((randomState = (1664525 * randomState + 1013904223) >>> 0) / 4294967296);
+  const bootstrap = Array.from({ length: 1600 }, () => mean(Array.from({ length: didValues.length }, () => didValues[Math.floor(random() * didValues.length)])) || 0);
+  const centered = didValues.map((value) => value - didPoint);
+  const nullBootstrap = Array.from({ length: 1600 }, () => mean(Array.from({ length: centered.length }, () => centered[Math.floor(random() * centered.length)])) || 0);
+  const extreme = nullBootstrap.filter((value) => Math.abs(value) >= Math.abs(didPoint)).length;
+  const did = {
+    data_status: "predicted", fm_model: focus.id, base_model: baseline.id, task_id: "t1_aomic_age",
+    n_paired_cells: didValues.length, did_point_estimate: didPoint,
+    ci_95_lower: quantile(bootstrap, .025), ci_95_upper: quantile(bootstrap, .975),
+    p_value_bootstrap_two_sided: (extreme + 1) / (nullBootstrap.length + 1), h1_supported: null
+  };
+  const curveFor = (model, field) => budgets.map((n) => {
+    const rowsAtBudget = rows.filter((row) => row.model_id === model.id && row.n_labels === n);
+    return { n, mae: round(mean(rowsAtBudget.map((row) => row[field]))) };
   });
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `brainfm_${currentDataset.toLowerCase()}_results.csv`;
-  a.click();
+  const fitLog = (points) => {
+    const xs = points.map((item) => Math.log(item.n)), ys = points.map((item) => item.mae);
+    const meanX = mean(xs), meanY = mean(ys);
+    const denominator = xs.reduce((sum, value) => sum + (value - meanX) ** 2, 0);
+    const slope = xs.reduce((sum, value, index) => sum + (value - meanX) * (ys[index] - meanY), 0) / denominator;
+    return { slope, intercept: meanY - slope * meanX, points };
+  };
+  const n0 = Math.max(1, Number(targetN) || 50);
+  const equivalenceCohort = (field) => {
+    const fmCurve = fitLog(curveFor(focus, field));
+    const baselineCurve = fitLog(curveFor(equivalentBase, field));
+    const targetMae = fmCurve.slope * Math.log(n0) + fmCurve.intercept;
+    const requiredN = baselineCurve.slope < 0 ? Math.exp((targetMae - baselineCurve.intercept) / baselineCurve.slope) : null;
+    return { N_eq: requiredN === null || !Number.isFinite(requiredN) ? null : requiredN - n0, fmCurve, baselineCurve };
+  };
+  const equivalence = {
+    status: "predicted", dataStatus: "predicted", fmModel: focus.id, baseModel: equivalentBase.id, targetN: n0,
+    cohorts: { seen: equivalenceCohort("seen_mae"), unseen: equivalenceCohort("unseen_mae") }
+  };
+  const totals = models.map((model) => {
+    const modelRows = rows.filter((row) => row.model_id === model.id);
+    return { modelId: model.id, hours: mean(modelRows.map((row) => row.total_gpu_hours)) * modelRows.length, unseenMae: mean(modelRows.map((row) => row.unseen_mae)), cells: modelRows.length, onFocus: model.id === focus.id };
+  });
+  const pareto = {
+    dataStatus: "predicted", focusModel: focus.id,
+    points: totals.map((item) => ({ ...item, onFrontier: !totals.some((other) => other !== item && other.hours <= item.hours && other.unseenMae <= item.unseenMae && (other.hours < item.hours || other.unseenMae < item.unseenMae)) }))
+  };
+  const dimension = 18;
+  const shared = focus.shared;
+  const vectors = Array.from({ length: dimension }, (_, index) => {
+    const group = Math.floor(index / 6), within = index % 6;
+    const angle = group * (2 * Math.PI / 3) + within * (.075 + focus.slope * .035);
+    return [Math.sqrt(shared), Math.sqrt(1 - shared) * Math.cos(angle), Math.sqrt(1 - shared) * Math.sin(angle)];
+  });
+  const matrixValues = vectors.map((left) => vectors.map((right) => left.reduce((sum, value, index) => sum + value * right[index], 0)));
+  const correlation = {
+    status: "available", dataStatus: "predicted", matrices: [{
+      name: `${modelLabel(focus.id)} · projection`, source: "formula-generated correlation scenario · not measured features", dataStatus: "predicted",
+      shape: [dimension, dimension], rowLabels: vectors.map((_, i) => `Feature ${i + 1}`),
+      columnLabels: vectors.map((_, i) => `Feature ${i + 1}`),
+      groups: [{ name: "Group A", start: 0, end: 6 }, { name: "Group B", start: 6, end: 12 }, { name: "Group C", start: 12, end: 18 }], values: matrixValues
+    }]
+  };
+  const preprocessing = {
+    dataStatus: "predicted", status: "available",
+    cacheGroups: [
+      { pipeline: "Reference preprocessing", scans: 0, timedScans: 0, meanSeconds: round(4.8 * focus.seconds / 645, 2) },
+      { pipeline: "Shared Pipeline B", scans: 0, timedScans: 0, meanSeconds: round(7.1 * focus.seconds / 645, 2) },
+      { pipeline: "Sensitivity variant", scans: 0, timedScans: 0, meanSeconds: round(5.9 * focus.seconds / 645, 2) }
+    ],
+    variantRows: [
+      { pipeline: "Reference preprocessing", task_id: "T1 brain age", model: modelLabel(focus.id), metric: "MAE", val_mae_mean: round(focus.base), data_status: "predicted", source: "assumption-based projection" },
+      { pipeline: "Shared Pipeline B", task_id: "T1 brain age", model: modelLabel(focus.id), metric: "MAE", val_mae_mean: round(focus.base - .12 * focus.slope / .4), data_status: "predicted", source: "assumption-based projection" },
+      { pipeline: "Sensitivity variant", task_id: "T1 brain age", model: modelLabel(focus.id), metric: "MAE", val_mae_mean: round(focus.base + .16 * focus.slope / .4), data_status: "predicted", source: "assumption-based projection" }
+    ]
+  };
+  const representative = rows.filter((row) => row.model_id === focus.id && row.seed === 42 && row.n_labels === 100);
+  const foldRows = representative.flatMap((row) => [
+    ...[-.18, -.07, .02, .09, .14].map((offset, index) => ({ dataset: "AOMIC · scenario", task: "T1 brain age", model: modelLabel(focus.id), fold: index + 1, metric: "MAE · years", value: round(row.seen_mae + offset), data_status: "predicted" })),
+    ...[-.06, -.02, .01, .03, .05].map((offset, index) => ({ dataset: "AOMIC · scenario", task: "T1 brain age", model: modelLabel(focus.id), fold: index + 1, metric: "R²", value: round(row.seen_r2 + offset), data_status: "predicted" }))
+  ]);
+  const cvRows = rows.filter((row) => row.model_id === focus.id && row.seed === 42).map((row) => ({
+    dataset: "AOMIC · scenario", task: "T1 brain age", model: modelLabel(focus.id), n_train: row.n_labels,
+    val_mae_mean: row.seen_mae, val_mae_std: .14 * focus.slope / .4, val_r2_mean: row.seen_r2, val_r2_std: .025, data_status: "predicted"
+  }));
+  const legacy = [
+    { kind: "folds", source: "formula-generated scenario", dataStatus: "predicted", rows: foldRows },
+    { kind: "learning", source: "formula-generated scenario", dataStatus: "predicted", rows: cvRows }
+  ];
+  return { rows, did, equivalence, pareto, correlation, preprocessing, legacy, focusModel: focus.id, profile: focus };
+}
+function humanize(value) {
+  return String(value || "—").replaceAll("_", " ").replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
-function downloadJSON() {
-  const taskObj = BENCHMARK_DATA[currentDataset]?.[currentTask] || BENCHMARK_DATA.PPMI["Sex Classification"];
-  const jsonStr = JSON.stringify(taskObj, null, 2);
-  const blob = new Blob([jsonStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `brainfm_${currentDataset.toLowerCase()}_report.json`;
-  a.click();
+function statusLabel(value) {
+  const status = String(value || "unverified").toLowerCase();
+  return ({ observed: "OBSERVED", mock: "SYNTHETIC RUN", predicted: "MODEL PROJECTION", unverified: "UNVERIFIED" })[status] || humanize(status).toUpperCase();
 }
+
+function modelLabel(id) { return modelLabels[id] || humanize(id); }
+
+function syncProjectionChrome() {
+  const button = $("#generate-estimates-button");
+  button.textContent = state.projectionMode ? "Clear estimates" : "Generate estimates";
+  button.setAttribute("aria-pressed", String(state.projectionMode));
+  $("#projection-mode-indicator").hidden = !state.projectionMode;
+  $("#projection-banner").hidden = !state.projectionMode;
+  $("#focus-model").disabled = !state.projectionMode;
+  $("#results-scope").disabled = state.projectionMode;
+  $("#export-csv").disabled = state.projectionMode;
+  $("#export-json").disabled = state.projectionMode;
+  $("#compute-did").disabled = !state.projectionMode && !hasMatchedDidCells(state.results, $("#did-fm-model").value, $("#did-base-model").value);
+  $("#compute-equivalence").disabled = false;
+  document.body.classList.toggle("is-projection-mode", state.projectionMode);
+}
+
+function renderProjectionWorkspace() {
+  if (!state.projectionMode || !state.projectionData) return;
+  renderResults();
+  renderAudit(state.projectionSnapshot?.audit || state.audit || { dataStatus: "missing", rows: [] });
+  renderCorrelation(state.projectionData.correlation);
+  renderPreprocessing(state.projectionData.preprocessing);
+  renderDid({ status: "predicted", dataStatus: "predicted", result: state.projectionData.did });
+  renderEquivalence(state.projectionData.equivalence);
+  renderPareto(state.projectionData.pareto);
+  renderProjectionSummary();
+}
+
+function toggleProjectionMode() {
+  if (!state.projectionMode) {
+    state.projectionSnapshot = {
+      audit: state.audit, correlation: state.correlation, preprocessing: state.preprocessing,
+      did: state.did, pareto: state.pareto, equivalence: state.equivalence
+    };
+    state.projectionFilters = {
+      scope: $("#results-scope").value, model: $("#results-model-filter").value, metric: $("#results-metric").value
+    };
+    state.projectionMode = true;
+    const focus = $("#focus-model").value || "brainiac";
+    $("#results-scope").value = "predicted";
+    $("#results-model-filter").value = focus;
+    $("#results-metric").value = "mae";
+    $("#did-fm-model").value = focus;
+    $("#eq-fm-model").value = focus;
+    const base = focus === "resnet18_scratch" ? "densenet121_scratch" : "resnet18_scratch";
+    $("#did-base-model").value = base;
+    $("#eq-base-model").value = base;
+    state.projectionData = buildModelProjections({ focusModel: focus, didBaseModel: base, eqBaseModel: base, targetN: $("#eq-n").value });
+    syncProjectionChrome();
+    renderProjectionWorkspace();
+    showToast(`Generated a model projection for ${modelLabel(focus)}. Nothing was saved.`);
+    return;
+  }
+
+  state.projectionMode = false;
+  state.projectionData = null;
+  if (state.projectionSnapshot) Object.assign(state, state.projectionSnapshot);
+  if (state.projectionFilters) {
+    $("#results-scope").value = state.projectionFilters.scope || "observed";
+    $("#results-model-filter").value = state.projectionFilters.model || "all";
+    $("#results-metric").value = state.projectionFilters.metric || "mae";
+  }
+  state.projectionSnapshot = null;
+  state.projectionFilters = null;
+  syncProjectionChrome();
+  renderResults();
+  renderAudit(state.audit || { dataStatus: "missing", rows: [] });
+  renderCorrelation(state.correlation || { status: "missing", matrices: [] });
+  renderPreprocessing(state.preprocessing || { status: "missing", cacheGroups: [], variantRows: [] });
+  renderDid(state.did || { status: "missing", result: null });
+  renderEquivalence(state.equivalence || { status: "missing", reason: "Observed label-budget rows are required." });
+  renderPareto(state.pareto || { points: [] });
+  showToast("Model projections cleared. Showing saved workspace data.");
+}
+
+function renderProjectionSummary() {
+  if (!state.projectionData) return;
+  const profile = state.projectionData.profile;
+  const focus = state.projectionData.focusModel;
+  const rows = state.projectionData.rows.filter((row) => row.model_id === focus);
+  const budgets = [...new Set(rows.map((row) => row.n_labels))].sort((a, b) => a - b);
+  const average = (values) => values.reduce((sum, value) => sum + value, 0) / Math.max(values.length, 1);
+  const series = ["seen", "unseen"].map((cohort) => ({
+    name: `${modelLabel(focus)} · ${cohort}`,
+    values: budgets.map((n) => {
+      const atBudget = rows.filter((row) => row.n_labels === n);
+      return { x: n, value: average(atBudget.map((row) => row[`${cohort}_mae`])) };
+    })
+  }));
+  ["#overview-projection-chart", "#runner-projection-chart", "#data-projection-chart"].forEach((selector) => makeLineChart(selector, series, budgets));
+  ["#overview-projection-status", "#runner-projection-status", "#data-projection-status"].forEach((selector) => {
+    const tag = $(selector);
+    if (tag) tag.textContent = `MODEL PROJECTION · ${modelLabel(focus).toUpperCase()}`;
+  });
+  $("#projection-explainer-title").textContent = `${modelLabel(focus)} assumption profile`;
+  $("#projection-explainer-copy").textContent = "Each model has separate assumptions for starting error, improvement per label-budget doubling and unseen-cohort gap. The resulting projection is not output from a trained checkpoint.";
+  $("#projection-base-stat").textContent = `${fmt(profile.base, 2)} y at 25 labels`;
+  $("#projection-slope-stat").textContent = `${fmt(profile.slope, 2)} y lower per doubling`;
+  $("#projection-gap-stat").textContent = `${fmt(profile.gap, 2)} y at 25 labels`;
+}
+
+function refreshModelProjection(source = "focus") {
+  if (!state.projectionMode) {
+    if (source === "did") renderDid(state.did || { status: "missing" });
+    return;
+  }
+  const focusSelect = $("#focus-model");
+  if (source === "did") focusSelect.value = $("#did-fm-model").value;
+  if (source === "equivalence") focusSelect.value = $("#eq-fm-model").value;
+  if (source === "results") focusSelect.value = $("#results-model-filter").value;
+  if (source === "runner") focusSelect.value = $("#run-model").value;
+  const focus = focusSelect.value || "brainiac";
+  if (source === "focus" || source === "did" || source === "equivalence" || source === "results" || source === "runner") {
+    $("#did-fm-model").value = focus;
+    $("#eq-fm-model").value = focus;
+    $("#results-model-filter").value = focus;
+    if ([...$("#run-model").options].some((option) => option.value === focus)) $("#run-model").value = focus;
+    const fallbackBase = focus === "resnet18_scratch" ? "densenet121_scratch" : "resnet18_scratch";
+    if ($( "#did-base-model" ).value === focus || source !== "did") $("#did-base-model").value = fallbackBase;
+    if ($( "#eq-base-model" ).value === focus || source !== "equivalence") $("#eq-base-model").value = fallbackBase;
+  }
+  const fallbackBase = focus === "resnet18_scratch" ? "densenet121_scratch" : "resnet18_scratch";
+  if ($("#did-base-model").value === focus) $("#did-base-model").value = fallbackBase;
+  if ($("#eq-base-model").value === focus) $("#eq-base-model").value = fallbackBase;
+  state.projectionData = buildModelProjections({
+    focusModel: focus,
+    didBaseModel: $("#did-base-model").value,
+    eqBaseModel: $("#eq-base-model").value,
+    targetN: $("#eq-n").value
+  });
+  renderProjectionWorkspace();
+}
+
+async function api(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (options.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+  const response = await fetch(path, { cache: "no-store", ...options, headers });
+  let payload;
+  try { payload = await response.json(); } catch { payload = {}; }
+  if (!response.ok) throw new Error(payload.error || `Request failed (${response.status})`);
+  return payload;
+}
+
+function showToast(message) {
+  const toast = $("#toast");
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  clearTimeout(state.toastTimer);
+  state.toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2600);
+}
+
+function goToPage(page, updateHash = true) {
+  if (!pageLabels[page]) page = "overview";
+  state.currentPage = page;
+  $$('[data-page]').forEach((section) => {
+    const active = section.dataset.page === page;
+    section.hidden = !active;
+    section.classList.toggle("is-active", active);
+  });
+  $$('[data-page-target]').forEach((button) => {
+    const active = button.dataset.pageTarget === page;
+    button.classList.toggle("is-active", active);
+    if (button.classList.contains("nav-item")) {
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    }
+  });
+  $("#current-page-label").textContent = pageLabels[page];
+  if (updateHash && location.hash !== `#${page}`) history.replaceState(null, "", `#${page}`);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (page === "results") renderResults();
+  if (page === "audit" && state.audit) renderAudit(state.audit);
+  if (page === "correlation" && state.correlation) renderCorrelation(state.correlation);
+  if (page === "preprocessing" && state.preprocessing) renderPreprocessing(state.preprocessing);
+  if (state.projectionMode) renderProjectionWorkspace();
+}
+
+function setConnection(connected, label) {
+  const status = $("#api-status");
+  $(".status-dot", status).classList.toggle("is-good", connected);
+  $(".status-dot", status).classList.toggle("is-bad", !connected);
+  $("#api-status span:last-child").textContent = label;
+  $("#sidebar-status-dot").classList.toggle("is-good", connected);
+  $("#sidebar-status-dot").classList.toggle("is-bad", !connected);
+  $("#sidebar-status-label").textContent = connected ? "Workspace connected" : "Workspace unavailable";
+}
+
+function renderReadiness(checks = []) {
+  const required = checks.filter((item) => item.required !== false);
+  const readyCount = required.filter((item) => item.ready).length;
+  const ready = Boolean(state.summary?.readiness?.observedRunReady);
+  const short = `${readyCount} of ${required.length} required inputs found`;
+  $("#metric-ready").textContent = `${readyCount}/${required.length}`;
+  $("#readiness-title").textContent = ready ? "Observed runs are ready" : short;
+  $("#readiness-copy").textContent = ready
+    ? "Frozen splits, scan metadata and preprocessed volumes are present. Check model-specific checkpoint availability before each run."
+    : "Add the frozen split, scan metadata and preprocessed cache listed below before starting an observed run.";
+  $("#readiness-symbol").textContent = ready ? "✓" : "!";
+  $("#observed-mode-choice input").disabled = !ready;
+  $("#observed-mode-choice").classList.toggle("mode-choice-disabled", !ready);
+  if (!ready && $("input[name=mode]:checked")?.value === "observed") $("input[name=mode][value=mock]").checked = true;
+  const rows = checks.map((item) => `<li><span class="check-mark ${item.ready ? "" : "is-wait"}">${item.ready ? "✓" : "·"}</span><span>${esc(item.name)}${item.required === false ? " <span class=\"small-print\">Optional for this action</span>" : ""}</span></li>`).join("");
+  $("#readiness-list").innerHTML = rows || "<li>No readiness checks are configured.</li>";
+  $("#run-readiness-list").innerHTML = required.map((item) => `<li><span class="check-mark ${item.ready ? "" : "is-wait"}">${item.ready ? "✓" : "·"}</span>${esc(item.name)} — ${item.ready ? "ready" : "missing"}</li>`).join("") || "<li>No readiness checks are configured.</li>";
+  $("#study-status").textContent = state.summary?.observedRuns ? `${state.summary.observedRuns} observed cells recorded` : ready ? "Inputs ready · results pending" : "Protocol registered · inputs pending";
+  $("#study-status-square").classList.toggle("is-good", ready);
+  $("#study-status-square").classList.toggle("is-bad", !ready);
+}
+
+function updateSummary(summary) {
+  state.summary = summary;
+  $("#metric-observed").textContent = String(summary.observedRuns ?? 0);
+  $("#metric-mock").textContent = String(summary.mockRuns ?? 0);
+  const auditStatus = summary.auditStatus || "missing";
+  $("#metric-audit").textContent = auditStatus === "missing" ? "Pending" : humanize(auditStatus);
+  $("#nav-audit-count").textContent = auditStatus === "observed" ? "1" : "—";
+  renderReadiness(summary.readiness?.checks || []);
+}
+
+function setOptions(select, values, labels = {}, { preserve = true, disabled = () => false } = {}) {
+  if (!select) return;
+  const oldValue = select.value;
+  select.innerHTML = values.map((value) => {
+    const id = typeof value === "string" ? value : value.id;
+    const label = labels[id] || (typeof value === "string" ? humanize(id) : value.name || humanize(id));
+    const unavailable = disabled(value);
+    return `<option value="${esc(id)}" ${unavailable ? "disabled" : ""}>${esc(label)}${unavailable ? " · unavailable" : ""}</option>`;
+  }).join("");
+  if (preserve && [...select.options].some((option) => option.value === oldValue && !option.disabled)) select.value = oldValue;
+  else {
+    const first = [...select.options].find((option) => !option.disabled);
+    if (first) select.value = first.value;
+  }
+}
+
+function updateConfig(config) {
+  state.config = config;
+  setOptions($("#run-task"), config.tasks || [], taskLabels);
+  const models = config.models || [];
+  setOptions($("#run-model"), models, modelLabels, { disabled: (model) => typeof model !== "string" && model.available === false });
+  setOptions($("#focus-model"), models, modelLabels);
+  setOptions($("#run-seed"), (config.seeds || []).map(String), Object.fromEntries((config.seeds || []).map((seed) => [String(seed), String(seed)])));
+  setOptions($("#did-fm-model"), models, modelLabels);
+  setOptions($("#did-base-model"), models, modelLabels);
+  setOptions($("#eq-fm-model"), models, modelLabels);
+  setOptions($("#eq-base-model"), models, modelLabels);
+  const ids = models.map((model) => typeof model === "string" ? model : model.id);
+  if (ids.includes("brainiac")) {
+    if (!$("#did-fm-model").dataset.userChanged) $("#did-fm-model").value = "brainiac";
+    if (!$("#eq-fm-model").dataset.userChanged) $("#eq-fm-model").value = "brainiac";
+  }
+  if (ids.includes("resnet18_scratch")) {
+    if (!$("#did-base-model").dataset.userChanged) $("#did-base-model").value = "resnet18_scratch";
+    if (!$("#eq-base-model").dataset.userChanged) $("#eq-base-model").value = "resnet18_scratch";
+  }
+  const trials = $("#run-trials");
+  if (trials) {
+    const old = trials.value;
+    trials.innerHTML = (config.trialBudgets || []).map((value) => `<option value="${value}">${value === 2 ? "2 · smoke" : `${value} · ${value === 5 ? "low" : value === 20 ? "medium" : "high"}`}</option>`).join("");
+    if ([...trials.options].some((option) => option.value === old)) trials.value = old;
+  }
+  const allIds = models.map((model) => typeof model === "string" ? model : model.id);
+  setOptions($("#results-model-filter"), ["all", ...allIds], { all: "All models", ...modelLabels });
+  const focusIds = allIds.length ? allIds : ["brainiac"];
+  const currentFocus = focusIds.includes($("#focus-model").value) ? $("#focus-model").value : (focusIds.includes("brainiac") ? "brainiac" : focusIds[0]);
+  $("#focus-model").value = currentFocus;
+  $("#run-model").value = currentFocus;
+  renderModelTable(models);
+  renderDatasetTable(config.dataSources || []);
+  setRunMode();
+}
+
+function renderDatasetTable(sources) {
+  $("#dataset-table-body").innerHTML = sources.length ? sources.map((source) => `<tr><td><strong>${esc(source.id)}</strong></td><td>${esc(source.mode)}</td><td><code>${esc(source.path)}</code></td><td><span class="status-pill">${source.ready ? "PRESENT" : "NOT CONFIGURED"}</span></td><td>${esc(source.note || "")}</td></tr>`).join("") : `<tr><td colspan="5" class="empty-cell">No dataset sources are configured.</td></tr>`;
+}
+
+function renderModelTable(models) {
+  $("#model-count").textContent = `${models.length} configured`;
+  $("#model-table-body").innerHTML = models.length ? models.map((model) => {
+    const id = typeof model === "string" ? model : model.id;
+    const type = typeof model === "string" ? "configured" : model.type;
+    const available = typeof model === "string" || model.available !== false;
+    const checkpoint = typeof model === "string" ? "Not specified" : model.checkpointRequired ? model.checkpointReady ? "Present" : "Missing" : "Not required";
+    const source = typeof model === "string" ? "—" : model.reason || (model.checkpointRequired ? "Configured checkpoint" : "No checkpoint required");
+    return `<tr><td><strong>${esc(modelLabel(id))}</strong><br><small>${esc(id)}</small></td><td>${esc(humanize(type))}</td><td><span class="status-pill">${available ? "AVAILABLE" : "BLOCKED"}</span></td><td>${esc(checkpoint)}</td><td>${esc(source)}</td></tr>`;
+  }).join("") : `<tr><td colspan="5" class="empty-cell">No model configs found.</td></tr>`;
+}
+
+function renderBudgetVisual() {
+  const labels = ["25", "50", "100", "250", "500", "all"];
+  const heights = [18, 28, 43, 65, 83, 96];
+  $("#budget-visual").innerHTML = `<div class="budget-bars">${labels.map((label, index) => `<div class="budget-point"><span>${label}</span><i class="budget-bar" style="--bar-height:${heights[index]}%;--bar-delay:${index * 75}ms" title="Protocol label budget ${label}"></i></div>`).join("")}</div>`;
+}
+
+function renderAudit(payload) {
+  state.audit = payload;
+  const status = payload.dataStatus || "missing";
+  const pillText = { observed: "OBSERVED AUDIT", mock: "SYNTHETIC CHECK", unverified: "UNVERIFIED", missing: "AUDIT PENDING" }[status] || "AUDIT PENDING";
+  $("#audit-status-pill").textContent = pillText;
+  $("#audit-banner").className = `audit-banner ${status === "observed" ? "is-ready" : status === "mock" ? "is-mock" : ""}`;
+  if (status === "observed") {
+    $("#audit-banner-title").textContent = "Provenance-marked audit loaded";
+    $("#audit-banner-copy").textContent = "These rows are marked observed. Confirm the manifest version and model-specific pretraining sources before interpreting exposure.";
+  } else if (status === "mock") {
+    $("#audit-banner-title").textContent = "This audit uses synthetic identifiers";
+    $("#audit-banner-copy").textContent = "Synthetic overlap checks software plumbing only and must not label real benchmark cohorts.";
+  } else if (status === "unverified") {
+    $("#audit-banner-title").textContent = "Audit output found, provenance incomplete";
+    $("#audit-banner-copy").textContent = "A table exists, but its provenance does not identify it as observed or synthetic. Treat its values as unverified.";
+  } else {
+    $("#audit-banner-title").textContent = "No verified audit output found";
+    $("#audit-banner-copy").textContent = "The manuscript leaves the overlap table TBD and does not provide numeric cutoffs. Set both thresholds from the protocol before running the audit.";
+  }
+  const threshold = payload.seenThresholdPct !== null && payload.seenThresholdPct !== undefined && payload.unseenThresholdPct !== null && payload.unseenThresholdPct !== undefined
+    ? ` · seen ≥ ${fmt(payload.seenThresholdPct, 1)}% · unseen ≤ ${fmt(payload.unseenThresholdPct, 1)}%` : "";
+  $("#audit-source").textContent = payload.source ? `Manifest ${payload.source}${threshold}` : `Source not recorded${threshold}`;
+  const rows = payload.rows || [];
+  const usable = rows.filter((row) => numeric(row.contamination_pct) !== null);
+  $("#audit-chart-status").textContent = usable.length
+    ? `${status === "mock" ? "SYNTHETIC CHECK" : status.toUpperCase()} · ${usable.length} COHORTS`
+    : "NO SOURCE-BACKED VALUES";
+  if (usable.length) {
+    makeBarChart("#audit-chart", usable.map((row) => ({ label: row.cohort, values: [numeric(row.contamination_pct)] })), usable.map((row) => row.cohort), [status === "mock" ? "Synthetic overlap" : "Manifest overlap"], "%");
+  } else {
+    emptyChart("#audit-chart", "%", "No verified audit data", "A cohort manifest is needed to calculate participant overlap. The model projection does not invent these values.");
+  }
+  $("#audit-table-body").innerHTML = rows.length ? rows.map((row) => `<tr><td><strong>${esc(row.cohort || "—")}</strong></td><td>${esc(row.total_subjects ?? "—")}</td><td>${esc(row.pretraining_seen_count ?? "—")}</td><td>${row.contamination_pct === undefined ? "—" : `${fmt(row.contamination_pct, 1)}%`}</td><td><span class="status-pill">${esc(String(row.status || "Unclassified").replace(/\s*\(.*\)/, "").replace(/mock/ig, "synthetic"))}</span></td></tr>`).join("") : `<tr><td colspan="5" class="empty-cell">${status === "missing" ? "No audit rows yet. Values marked TBD in the paper are not treated as results." : "No usable rows in the audit file."}</td></tr>`;
+}
+
+function updateAuditCommand() {
+  const seen = numeric($("#audit-seen-threshold").value);
+  const unseen = numeric($("#audit-unseen-threshold").value);
+  const valid = seen !== null && unseen !== null && unseen >= 0 && seen <= 100 && unseen < seen;
+  const seenText = valid ? String(seen) : "SEEN_THRESHOLD";
+  const unseenText = valid ? String(unseen) : "UNSEEN_THRESHOLD";
+  $("#audit-command").textContent = `python audit/report_contamination.py --manifest_path data/manifests/mapping.tsv --cohorts_json path/to/verified_audit_cohorts.json --cohorts_status observed --seen_threshold ${seenText} --unseen_threshold ${unseenText} --output_dir results`;
+}
+
+function emptyChart(selector, index, title, description) {
+  const target = typeof selector === "string" ? $(selector) : selector;
+  if (!target) return;
+  target.innerHTML = `<div class="empty-state"><span class="empty-state-index">${esc(index)}</span><strong>${esc(title)}</strong><p>${esc(description)}</p></div>`;
+}
+
+function illustrativeChart(target, type) {
+  if (!target) return;
+  const badge = `<div class="chart-preview-note"><span class="preview-mark" aria-hidden="true">◌</span><strong>Chart preview</strong><span>diagram only · no study values</span></div>`;
+  if (type === "bars") {
+    const groups = [
+      { x: 165, a: 102, b: 66 },
+      { x: 340, a: 70, b: 119 },
+      { x: 515, a: 132, b: 88 },
+    ];
+    const grid = [38, 75, 112, 149].map((y) => `<line class="chart-gridline" x1="75" x2="660" y1="${y}" y2="${y}"/>`).join("");
+    const bars = groups.map((group, index) => `<rect class="bar-series-a preview-bar" style="--bar-delay:${index * 100}ms" x="${group.x - 25}" y="${160 - group.a}" width="34" height="${group.a}" rx="3"/><rect class="bar-series-b preview-bar" style="--bar-delay:${index * 100 + 60}ms" x="${group.x + 12}" y="${160 - group.b}" width="34" height="${group.b}" rx="3"/><text class="chart-label-strong" x="${group.x + 8}" y="181" text-anchor="middle">Group ${index + 1}</text>`).join("");
+    target.innerHTML = `${badge}<svg class="svg-chart preview-chart" viewBox="0 0 720 205" role="img" aria-label="Illustrative paired bar chart diagram with no study values">${grid}<line class="chart-axis" x1="75" x2="660" y1="160" y2="160"/><text class="chart-label" x="68" y="41" text-anchor="end">HIGH</text><text class="chart-label" x="68" y="158" text-anchor="end">LOW</text>${bars}<g transform="translate(250,199)"><rect class="bar-series-a" width="9" height="9" rx="1"/><text class="chart-label" x="14" y="8">Series A</text><rect class="bar-series-b" x="110" width="9" height="9" rx="1"/><text class="chart-label" x="124" y="8">Series B</text></g></svg>`;
+    return;
+  }
+
+  const pointsA = [[85, 58], [190, 78], [295, 91], [400, 110], [505, 127], [610, 143]];
+  const pointsB = [[85, 133], [190, 120], [295, 111], [400, 99], [505, 90], [610, 77]];
+  const toPath = (points) => points.map(([x, y], index) => `${index ? "L" : "M"}${x},${y}`).join(" ");
+  const grid = [38, 75, 112, 149].map((y) => `<line class="chart-gridline" x1="75" x2="660" y1="${y}" y2="${y}"/>`).join("");
+  const dots = (points, className) => points.map(([x, y]) => `<circle class="${className}" cx="${x}" cy="${y}" r="4"/>`).join("");
+  target.innerHTML = `${badge}<svg class="svg-chart preview-chart" viewBox="0 0 720 205" role="img" aria-label="Illustrative two-series trend diagram with no study values">${grid}<line class="chart-axis" x1="75" x2="660" y1="160" y2="160"/><text class="chart-label" x="68" y="41" text-anchor="end">HIGH</text><text class="chart-label" x="68" y="158" text-anchor="end">LOW</text><path class="chart-line preview-line" d="${toPath(pointsA)}"/><path class="chart-line-secondary preview-line preview-line-late" d="${toPath(pointsB)}"/>${dots(pointsA, "chart-point preview-dot")}${dots(pointsB, "chart-point-secondary preview-dot preview-dot-late")}<text class="chart-label-strong" x="85" y="181" text-anchor="middle">START</text><text class="chart-label-strong" x="610" y="181" text-anchor="middle">END</text><g transform="translate(250,199)"><line class="chart-line" x1="0" x2="12" y1="4" y2="4"/><text class="chart-label" x="17" y="8">Series A</text><line class="chart-line-secondary" x1="110" x2="122" y1="4" y2="4"/><text class="chart-label" x="127" y="8">Series B</text></g></svg>`;
+}
+
+function makeBarChart(selector, values, labels, seriesNames, unit = "") {
+  const target = $(selector);
+  if (!values.length) return illustrativeChart(target, "bars");
+  const width = 560, height = 320, left = 50, right = 12, top = 18, bottom = 48;
+  const chartW = width - left - right, chartH = height - top - bottom;
+  const maxValue = Math.max(1e-9, ...values.flatMap((item) => item.values.filter((v) => v !== null)));
+  const step = chartW / values.length;
+  const groupW = Math.min(step * .68, 76);
+  const barsPer = Math.max(1, seriesNames.length);
+  const barW = groupW / barsPer - 3;
+  const grid = Array.from({ length: 4 }, (_, i) => {
+    const y = top + i * chartH / 3;
+    const val = maxValue * (1 - i / 3);
+    return `<line class="chart-gridline" x1="${left}" x2="${width-right}" y1="${y}" y2="${y}"/><text class="chart-label" x="${left-7}" y="${y+3}" text-anchor="end">${fmt(val, 1)}${esc(unit)}</text>`;
+  }).join("");
+  const bars = values.map((item, i) => {
+    const xCenter = left + step * (i + .5);
+    const per = item.values.map((value, j) => {
+      if (value === null) return "";
+      const h = Math.max(1, chartH * value / maxValue);
+      const x = xCenter - groupW / 2 + j * (groupW / barsPer) + 1;
+      const y = top + chartH - h;
+      return `<rect class="bar-series-${String.fromCharCode(97 + j)} chart-bar" style="--bar-delay:${(i * barsPer + j) * 55}ms" x="${x}" y="${y}" width="${Math.max(2,barW)}" height="${h}" rx="2"><title>${esc(labels[i])} · ${esc(seriesNames[j])}: ${fmt(value, 3)}${esc(unit)}</title></rect>`;
+    }).join("");
+    return `${per}<text class="chart-label-strong" x="${xCenter}" y="${height-17}" text-anchor="middle">${esc(labels[i])}</text>`;
+  }).join("");
+  const legends = seriesNames.map((name, i) => `<g transform="translate(${left + i * 130},${height-2})"><rect class="bar-series-${String.fromCharCode(97+i)}" width="9" height="9" rx="1"/><text class="chart-label" x="14" y="8">${esc(name)}</text></g>`).join("");
+  target.innerHTML = `<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(seriesNames.join(" versus "))} chart">${grid}<line class="chart-axis" x1="${left}" x2="${width-right}" y1="${top+chartH}" y2="${top+chartH}"/>${bars}${legends}</svg>`;
+}
+
+function makeLineChart(selector, series, xValues, yLabel = "MAE") {
+  const target = $(selector);
+  const usable = series.filter((item) => item.values.some((point) => point.value !== null));
+  if (!usable.length) return illustrativeChart(target, "line");
+  const pointsAll = usable.flatMap((item) => item.values.filter((point) => point.value !== null));
+  const minX = Math.min(...pointsAll.map((point) => point.x));
+  const maxX = Math.max(...pointsAll.map((point) => point.x));
+  const minY = Math.min(...pointsAll.map((point) => point.value));
+  const maxY = Math.max(...pointsAll.map((point) => point.value));
+  const yPad = (maxY - minY || Math.max(Math.abs(maxY),1)) * .15;
+  const width = 560, height = 320, left = 54, right = 16, top = 18, bottom = 52;
+  const plotW = width-left-right, plotH = height-top-bottom;
+  const x = (value) => left + (maxX === minX ? .5 : (value-minX)/(maxX-minX)) * plotW;
+  const y = (value) => top + (maxY + yPad - value)/(maxY - minY + 2*yPad) * plotH;
+  const grid = Array.from({length:4},(_,i)=>{const yy=top+i*plotH/3;const val=maxY+yPad-i*(maxY-minY+2*yPad)/3;return `<line class="chart-gridline" x1="${left}" x2="${width-right}" y1="${yy}" y2="${yy}"/><text class="chart-label" x="${left-8}" y="${yy+3}" text-anchor="end">${fmt(val,1)}</text>`;}).join("");
+  const lineParts = usable.map((item,index)=>{
+    const points=item.values.filter((point)=>point.value!==null);
+    const path=points.map((point,i)=>`${i?"L":"M"}${x(point.x)},${y(point.value)}`).join(" ");
+    const lineClass=index%2===0?"chart-line":"chart-line-secondary";
+    const pointClass=index%2===0?"chart-point":"chart-point-secondary";
+    const circles=points.map((point,pointIndex)=>`<circle class="${pointClass} chart-point-pop" style="--point-delay:${420+index*140+pointIndex*65}ms" cx="${x(point.x)}" cy="${y(point.value)}" r="4"><title>${esc(item.name)} · N=${point.x} · ${fmt(point.value,3)} ${esc(yLabel)}</title></circle>`).join("");
+    return `<path class="${lineClass} chart-line-draw" d="${path}"/>${circles}`;
+  }).join("");
+  const xTicks=[...new Set(pointsAll.map((point)=>point.x))].sort((a,b)=>a-b).map(value=>`<text class="chart-label" x="${x(value)}" y="${height-20}" text-anchor="middle">${value}</text>`).join("");
+  const legendStep=Math.min(150,(width-left-right)/Math.max(usable.length,1));
+  const legend=usable.map((item,index)=>`<g transform="translate(${left+index*legendStep},${height-4})"><line class="${index%2===0?"chart-line":"chart-line-secondary"}" x1="0" x2="12" y1="0" y2="0"/><text class="chart-label" x="17" y="3">${esc(item.name)}</text></g>`).join("");
+  target.innerHTML=`<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(yLabel)} by label budget">${grid}<line class="chart-axis" x1="${left}" x2="${width-right}" y1="${top+plotH}" y2="${top+plotH}"/>${lineParts}${xTicks}${legend}</svg>`;
+}
+
+function resultMetric(row, metric, cohort) {
+  const fields = metricFields[metric] || metricFields.mae;
+  const key = cohort === "seen" ? fields[0] : fields[1];
+  return numeric(row[key]);
+}
+
+function renderResults() {
+  const scope = state.projectionMode ? "predicted" : ($("#results-scope").value || "observed");
+  const modelFilter = $("#results-model-filter").value || "all";
+  const metric = $("#results-metric").value || "mae";
+  const metricName = metric === "mae" ? "MAE" : metric === "r2" ? "R²" : metric.toUpperCase();
+  const isLowerBetter = metric === "mae";
+  $("#metric-chart-title").textContent = `Seen vs unseen ${metric === "mae" ? "error" : metricName}`;
+  $("#metric-chart-caption").textContent = state.projectionMode
+    ? `Scenario ${metricName} projection for ${modelLabel($("#focus-model").value)}. ${isLowerBetter ? "Lower is better." : "Higher is better."} This is not a study result.`
+    : `Bars show mean ${metricName} across visible cells. ${isLowerBetter ? "Lower is better." : "Higher is better."} Values retain the source status shown above.`;
+  state.scope = scope;
+  let rows = (state.projectionMode ? state.projectionData?.rows || [] : state.results).filter((row) => scope === "all" || row.data_status === scope);
+  if (modelFilter !== "all") rows = rows.filter((row) => row.model_id === modelFilter);
+  state.filteredResults = rows;
+  $("#result-count").textContent = `${rows.length} cell${rows.length === 1 ? "" : "s"}`;
+  $("#cell-source-status").textContent = state.projectionMode ? `${rows.length} formula-generated projections · memory only` : rows.length ? `${statusLabel(scope)} · local results ledger` : "No matching ledger rows";
+  $("#result-source-status").textContent = state.projectionMode ? `MODEL PROJECTION · ${rows.length} CELLS` : rows.length ? `${statusLabel(scope)} · ${rows.length} CELLS` : "ILLUSTRATIVE PREVIEW · NO DATA";
+  const aggregates = new Map();
+  for (const row of rows) {
+    const key = `${row.model_id || "unknown"} · ${row.data_status || "unverified"}`;
+    const current = aggregates.get(key) || { seen: [], unseen: [] };
+    const seen = resultMetric(row, metric, "seen"), unseen = resultMetric(row, metric, "unseen");
+    if (seen !== null) current.seen.push(seen);
+    if (unseen !== null) current.unseen.push(unseen);
+    aggregates.set(key, current);
+  }
+  const entries = Array.from(aggregates.entries()).map(([label, values]) => ({
+    label,
+    values: [values.seen.length ? values.seen.reduce((a,b)=>a+b,0)/values.seen.length : null, values.unseen.length ? values.unseen.reduce((a,b)=>a+b,0)/values.unseen.length : null]
+  })).filter((item) => item.values.some((value) => value !== null)).slice(0, 8);
+  makeBarChart("#metric-chart", entries, entries.map((item)=>{const [id,status]=item.label.split(" · ");return `${modelLabel(id)} · ${status==="predicted"?"P":status==="mock"?"S":"O"}`;}), ["Seen", "Unseen"], metric === "mae" ? " y" : "");
+  if (entries.length) {
+    const selectedModel = modelFilter === "all" ? entries[0].label.split(" · ")[0] : modelFilter;
+    const curveRows = rows.filter((row)=>row.model_id===selectedModel);
+    const byBudget = new Map();
+    curveRows.forEach((row)=>{
+      const n = numeric(row.n_labels);
+      if (!n || n <= 0) return;
+      const bucket = byBudget.get(n) || {seen:[],unseen:[]};
+      const seen=resultMetric(row, metric, "seen"), unseen=resultMetric(row, metric, "unseen");
+      if(seen!==null)bucket.seen.push(seen); if(unseen!==null)bucket.unseen.push(unseen);
+      byBudget.set(n,bucket);
+    });
+    const budgets=[...byBudget.keys()].sort((a,b)=>a-b);
+    const seen=budgets.map(n=>({x:n,value:byBudget.get(n).seen.length?byBudget.get(n).seen.reduce((a,b)=>a+b,0)/byBudget.get(n).seen.length:null}));
+    const unseen=budgets.map(n=>({x:n,value:byBudget.get(n).unseen.length?byBudget.get(n).unseen.reduce((a,b)=>a+b,0)/byBudget.get(n).unseen.length:null}));
+    makeLineChart("#learning-chart",[{name:`${modelLabel(selectedModel)} · seen`,values:seen},{name:"Unseen",values:unseen}],budgets,metric === "mae" ? "MAE · years" : metric.toUpperCase());
+  } else illustrativeChart($("#learning-chart"),"line");
+  const cellTable = rows.slice(0,250);
+  $("#results-table-body").innerHTML = cellTable.length ? cellTable.map((row)=>`<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td>${esc(taskLabels[row.task_id]||row.task_id||"—")}</td><td><strong>${esc(modelLabel(row.model_id))}</strong></td><td>${esc(row.n_labels ?? "—")}</td><td>${esc(row.seed ?? "—")}</td><td>${esc(row.trial_budget ?? row.trials ?? "—")}</td><td>${fmt(row.seen_mae,3)}</td><td>${fmt(row.unseen_mae,3)}</td><td>${fmt(numeric(row.total_gpu_seconds) === null ? (numeric(row.total_gpu_hours)===null?null:Number(row.total_gpu_hours)*3600) : row.total_gpu_seconds,1)} s</td></tr>`).join("") : `<tr><td colspan="9" class="empty-cell">No ${esc(statusLabel(scope).toLowerCase())} final evaluation rows found. A missing table is not a zero result.</td></tr>`;
+  renderLegacyFolds();
+  renderLegacyCV();
+}
+
+function legacyRows(kind) {
+  const artifacts = state.projectionMode ? state.projectionData?.legacy || [] : state.legacy;
+  return artifacts.flatMap((artifact)=>artifact.kind===kind ? artifact.rows.map((row)=>({...row,_source:artifact.source,_status:row.data_status||artifact.dataStatus})) : []);
+}
+
+function renderLegacyFolds() {
+  const rows=legacyRows("folds");
+  const metric=$("#results-metric").value||"mae";
+  const chosen=rows.filter((row)=>{
+    const key=String(row.metric||"").toLowerCase();
+    return metric==="mae" ? key.includes("mae") : metric==="r2" ? key.includes("r2") : metric==="accuracy" ? key.includes("acc") : key.includes("auc");
+  });
+  $("#fold-source-status").textContent=rows.length?(state.projectionMode?`${rows.length} · MODEL PROJECTION`: `${rows.length} folds · legacy output`):"No fold file";
+  if(chosen.length){
+    const groups=new Map();
+    chosen.forEach((row)=>{const label=String(row.model||"model");const list=groups.get(label)||[];const value=numeric(row.value);if(value!==null)list.push({fold:row.fold,value});groups.set(label,list);});
+    drawFoldPlot([...groups.entries()].map(([label,values])=>({label,values})).slice(0,10),metric);
+  }else emptyChart("#fold-chart","F","No fold-level values","Run the legacy suite or place fold_level_results.csv in results/ to show the recorded fold spread.");
+  $("#fold-table-body").innerHTML=chosen.length?chosen.slice(0,100).map((row)=>`<tr><td>${esc(row.dataset||"—")}</td><td>${esc(row.task||"—")}</td><td><strong>${esc(row.model||"—")}</strong></td><td>${esc(row.fold??"—")}</td><td>${esc(row.metric||"—")}</td><td>${fmt(row.value,4)}</td><td><span class="status-pill">${esc(statusLabel(row._status))}</span> ${esc(row._source)}</td></tr>`).join(""):`<tr><td colspan="7" class="empty-cell">No fold-level export found in results/ yet.</td></tr>`;
+}
+
+function drawFoldPlot(groups,metric){
+  const target=$("#fold-chart");
+  const values=groups.flatMap(group=>group.values.map(item=>item.value));
+  if(!values.length)return emptyChart(target,"F","No fold-level values","The fold file contains no numeric values for the selected metric.");
+  let low=Math.min(...values),high=Math.max(...values);const pad=(high-low||Math.max(Math.abs(high),1))*.16;low-=pad;high+=pad;
+  const width=720,height=175,left=48,right=15,top=12,bottom=36,plotH=height-top-bottom,step=(width-left-right)/Math.max(groups.length,1);
+  const y=value=>top+(high-value)/(high-low)*plotH;
+  const grid=Array.from({length:4},(_,i)=>{const yy=top+i*plotH/3;const val=high-i*(high-low)/3;return `<line class="chart-gridline" x1="${left}" x2="${width-right}" y1="${yy}" y2="${yy}"/><text class="chart-label" x="${left-7}" y="${yy+3}" text-anchor="end">${fmt(val,2)}</text>`;}).join("");
+  const marks=groups.map((group,index)=>{
+    const center=left+step*(index+.5);const nums=group.values.map(item=>item.value).sort((a,b)=>a-b);const mean=nums.reduce((a,b)=>a+b,0)/nums.length;
+    const range=`<line class="chart-axis" x1="${center}" x2="${center}" y1="${y(nums[0])}" y2="${y(nums[nums.length-1])}"/><line class="chart-line" x1="${center-7}" x2="${center+7}" y1="${y(mean)}" y2="${y(mean)}"/>`;
+    const dots=group.values.map((item,dotIndex)=>{const jitter=((dotIndex%5)-2)*4;return `<circle class="${dotIndex%2?"chart-point-secondary":"chart-point"}" cx="${center+jitter}" cy="${y(item.value)}" r="4"><title>${esc(group.label)} · fold ${esc(item.fold??dotIndex+1)}: ${fmt(item.value,4)} ${esc(metric)}</title></circle>`;}).join("");
+    return `${range}${dots}<text class="chart-label-strong" x="${center}" y="${height-13}" text-anchor="middle">${esc(group.label)}</text>`;
+  }).join("");
+  target.innerHTML=`<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Fold-level ${esc(metric)} distribution">${grid}<line class="chart-axis" x1="${left}" x2="${width-right}" y1="${height-bottom}" y2="${height-bottom}"/>${marks}</svg>`;
+}
+
+function renderLegacyCV() {
+  const rows=legacyRows("learning");
+  const metric=$("#results-metric").value||"mae";
+  const fields=metricFields[metric]||metricFields.mae;
+  const valueField=fields[2],stdField=fields[3];
+  const tableRows=rows.slice(0,250);
+  $("#legacy-cv-status").textContent=rows.length?`${rows.length} rows · provenance shown per file`:"No CV output found";
+  const bySeries=new Map();
+  rows.forEach((row)=>{
+    const value=numeric(row[valueField]);
+    const x=numeric(row.n_train)??numeric(row.alpha);
+    if(value===null||x===null)return;
+    const seriesName=`${row.model||"Model"} · ${row.dataset||"Dataset"} · ${statusLabel(row._status)}`;
+    const list=bySeries.get(seriesName)||[];list.push({x,value});bySeries.set(seriesName,list);
+  });
+  const series=[...bySeries.entries()].slice(0,6).map(([name,values])=>({name,values:values.sort((a,b)=>a.x-b.x)}));
+  if(series.length)makeLineChart("#legacy-learning-chart",series,[]);
+  else emptyChart("#legacy-learning-chart","CV","No legacy curve for this metric","Saved CV files may exist, but none has the selected metric and a numeric training-size field.");
+  $("#legacy-cv-table-body").innerHTML=tableRows.length?tableRows.map((row)=>`<tr><td><span class="status-pill">${esc(statusLabel(row._status))}</span></td><td>${esc(row.dataset||"—")}</td><td>${esc(row.task||"—")}</td><td><strong>${esc(row.model||"—")}</strong></td><td>${esc(row.n_train??row.alpha??"—")}</td><td>${fmt(row.val_mae_mean,4)}${row.val_mae_std?` ± ${fmt(row.val_mae_std,3)}`:""}</td><td>${fmt(row.val_r2_mean,4)}</td><td>${fmt(row.val_acc_mean,4)}</td><td>${esc(row._source)}</td></tr>`).join(""):`<tr><td colspan="9" class="empty-cell">No all_cv_results.csv or dataset CV export found in results/ yet.</td></tr>`;
+}
+
+function renderCorrelation(payload) {
+  state.correlation=payload;
+  const select=$("#correlation-matrix-select");
+  const matrices=payload.matrices||[];
+  const old=select.value;
+  select.innerHTML=matrices.map((matrix,index)=>`<option value="${index}">${esc(matrix.name)} · ${esc(statusLabel(matrix.dataStatus))}</option>`).join("")||`<option value="">No matrix artifact</option>`;
+  if(matrices.length&&Number.isInteger(Number(old))&&Number(old)<matrices.length)select.value=old;
+  const matrix=matrices[Number(select.value)];
+  if(!matrix){
+    $("#correlation-status").textContent=payload.status==="unavailable"?"Reader unavailable":"No matrix artifact";
+    $("#correlation-heading").textContent="Cross-model feature space";
+    $("#correlation-source").textContent="No source loaded";
+    $("#correlation-provenance-title").textContent="Waiting for artifact";
+    $("#correlation-provenance-copy").textContent=payload.reason||"Saved legacy matrices are marked unverified unless written as isolated synthetic run outputs.";
+    return emptyChart("#correlation-map","04","No correlation matrix found","Run the legacy pipeline or add its *_corr_matrix.npy and *_corr_metadata.csv outputs under results/.");
+  }
+  $("#correlation-status").textContent=`${statusLabel(matrix.dataStatus)} · ${matrix.shape.join(" × ")}`;
+  $("#correlation-heading").textContent=`${matrix.name} feature space`;
+  $("#correlation-source").textContent=matrix.source;
+  $("#correlation-provenance-title").textContent=matrix.dataStatus==="predicted"?"Model projection · scenario matrix":matrix.dataStatus==="mock"?"Synthetic matrix":"Legacy artifact · provenance unverified";
+  $("#correlation-provenance-copy").textContent=matrix.dataStatus==="predicted"?"This illustrative correlation structure is generated from a model-specific factor assumption; it does not come from measured features.":matrix.dataStatus==="mock"?"This matrix comes from a synthetic run and is for interface and pipeline checks only.":"The legacy correlation export does not mark data as observed; confirm its source before interpretation.";
+  const values=matrix.values||[];const size=values.length;const cell=Math.max(5,Math.min(12,420/Math.max(size,1)));
+  const cells=values.map((row,i)=>row.map((value,j)=>{const v=numeric(value);const gray=v===null?220:Math.round(255*(1-(Math.max(-1,Math.min(1,v))+1)/2));return `<span class="heatmap-cell" style="width:${cell}px;height:${cell}px;background:rgb(${gray},${gray},${gray})" title="sample ${i+1}, ${j+1}: ${fmt(v,3)}"></span>`;}).join("")).join("");
+  $("#correlation-map").innerHTML=`<div class="heatmap-grid" style="grid-template-columns:repeat(${size},${cell}px)" role="img" aria-label="${esc(matrix.name)} correlation heatmap">${cells}</div>`;
+  $("#correlation-caption").textContent=`Original matrix ${matrix.shape[0]} × ${matrix.shape[1]}; displayed at ${size} × ${size}. Hover a cell to inspect its sampled value.`;
+}
+
+function renderPreprocessing(payload) {
+  state.preprocessing=payload;
+  const groups=payload.cacheGroups||[];
+  const isProjection=payload.dataStatus==="predicted";
+  const isSynthetic=payload.dataStatus==="mock";
+  $("#preprocess-status").textContent=groups.length?(isProjection?"MODEL PROJECTION":isSynthetic?"SYNTHETIC RUN":`${groups.reduce((a,b)=>a+b.scans,0)} cache records`):"No cache metadata";
+  $("#preprocess-kicker").textContent=isProjection?"Assumption-based timing projection":isSynthetic?"Synthetic timing examples":"Observed cache sidecars";
+  $("#preprocess-caption").textContent=isProjection?"Timing and error shifts are assumption-based scenarios, not measured preprocessing records.":isSynthetic?"Generated timing examples are not measured preprocessing records.":"Timing bars use preprocessing_seconds from local JSON sidecars. No data means no bars.";
+  const timed=groups.filter((item)=>numeric(item.meanSeconds)!==null);
+  makeBarChart("#preprocess-chart",timed.map((item)=>({label:item.pipeline,values:[numeric(item.meanSeconds)]})),timed.map((item)=>item.pipeline),["Mean seconds"]," s");
+  const rows=payload.variantRows||[];
+    $("#preprocess-table-body").innerHTML=rows.length?rows.slice(0,120).map((row)=>{
+    const valueKey=Object.keys(row).find((key)=>/mae|auc|acc|r2|value/i.test(key)&&numeric(row[key])!==null&&key!=="total_gpu_seconds");
+    return `<tr><td><span class="status-pill">${esc(statusLabel(row.data_status))}</span></td><td><strong>${esc(row.pipeline)}</strong></td><td>${esc(row.dataset||row.task_id||"—")}</td><td>${esc(row.model||modelLabel(row.model_id)||"—")}</td><td>${esc(row.metric||valueKey||"—")}</td><td>${fmt(valueKey?row[valueKey]:row.value,4)}</td><td>${esc(row.source||"results ledger")}</td></tr>`;
+  }).join(""):`<tr><td colspan="7" class="empty-cell">No result rows identify a preprocessing variant. Cache timing metadata, when present, appears above.</td></tr>`;
+}
+
+function renderDid(payload) {
+  state.did=payload;
+  const status=payload.status||"missing";
+  const isProjection = status === "predicted" || payload.dataStatus === "predicted" || payload.result?.data_status === "predicted";
+  const isSynthetic = status === "mock" || payload.dataStatus === "mock" || payload.result?.data_status === "mock";
+  $("#did-kicker").textContent=isProjection?"Model-based paired projection":isSynthetic?"Synthetic paired cells":"Observed paired cells only";
+  const tag=$("#did-status-tag");
+  tag.textContent=isProjection?"MODEL PROJECTION":isSynthetic?"SYNTHETIC RUN":status==="observed"?"OBSERVED":status.toUpperCase();
+  const button=$("#compute-did");
+  const pairs=state.results.filter((row)=>row.data_status==="observed");
+  const ready=hasMatchedDidCells(pairs,$("#did-fm-model").value,$("#did-base-model").value);
+  button.disabled=!state.projectionMode&&!ready;
+  button.textContent=state.projectionMode?"Update projection →":"Compute ΔΔ →";
+  const savedMatches=!payload.result||(payload.result.fm_model===$("#did-fm-model").value&&payload.result.base_model===$("#did-base-model").value);
+  if((status==="observed"||isProjection||isSynthetic)&&payload.result&&((isProjection||isSynthetic)||savedMatches)){
+    const result=payload.result;
+    $("#did-analysis-state").textContent=isProjection?"Formula-generated scenario using the selected model pair. It is not a fitted analysis or evidence about the study.":isSynthetic?"Synthetic pipeline-check values; these are not evidence about the study.":result.h1_supported?"The stored analysis meets the script’s stated H1 decision rule. Read the estimate, interval and bootstrap test together.":"The stored analysis is based on matched observed cells. Interpret its estimate alongside uncertainty and protocol limits.";
+    $("#did-estimate").textContent=`${Number(result.did_point_estimate)>0?"+":""}${fmt(result.did_point_estimate,3)} y`;
+    $("#did-ci").textContent=`[${fmt(result.ci_95_lower,3)}, ${fmt(result.ci_95_upper,3)}] y`;
+    $("#did-p").textContent=fmt(result.p_value_bootstrap_two_sided,4);
+    $("#did-pairs").textContent=String(result.n_paired_cells??"—");
+    $("#did-values").hidden=false;
+    drawDidInterval(result,isProjection||isSynthetic);
+  }else{
+    $("#did-values").hidden=true;
+    const message={stale:"The result ledger changed after the saved analysis. Recompute to refresh it.",legacy:"The saved summary used an older test. Recompute to report the two-sided bootstrap p-value.",unverified:"The stored DiD summary is not marked observed.",invalid:"The saved DiD summary could not be read."}[status];
+    $("#did-analysis-state").textContent=message|| (ready?"Matched observed cells are ready for the DiD analysis.":"Waiting for matched observed cells at the same task, N, seed and tuning-trial budget.");
+    emptyChart("#did-chart","ΔΔ","Analysis not computed",ready?"Press Compute ΔΔ to run the preregistered bootstrap analysis.":"Synthetic cells are excluded; observed paired cells are required.");
+  }
+}
+
+function drawDidInterval(result,isIllustrative=false) {
+  const low=numeric(result.ci_95_lower), high=numeric(result.ci_95_upper), point=numeric(result.did_point_estimate);
+  if(low===null||high===null||point===null)return emptyChart("#did-chart","ΔΔ","Interval unavailable","The saved analysis has no complete bootstrap interval.");
+  let min=Math.min(low,point,0),max=Math.max(high,point,0);const pad=(max-min||1)*.18;min-=pad;max+=pad;
+  const x=value=>35+(value-min)/(max-min)*650;
+  $("#did-chart").innerHTML=`<svg class="svg-chart" viewBox="0 0 720 145" role="img" aria-label="${isIllustrative?"Illustrative scenario · ":""}Difference in differences estimate and 95 percent bootstrap interval"><line class="chart-gridline" x1="35" x2="685" y1="66" y2="66"/><line class="chart-axis" x1="${x(0)}" x2="${x(0)}" y1="32" y2="98"/><line class="chart-line" x1="${x(low)}" x2="${x(high)}" y1="66" y2="66"/><line class="chart-axis" x1="${x(low)}" x2="${x(low)}" y1="54" y2="78"/><line class="chart-axis" x1="${x(high)}" x2="${x(high)}" y1="54" y2="78"/><circle class="chart-point" cx="${x(point)}" cy="66" r="6"/><text class="chart-label" x="${x(min+pad)}" y="117" text-anchor="middle">${fmt(min+pad,2)} y</text><text class="chart-label" x="${x(0)}" y="25" text-anchor="middle">0</text><text class="chart-label" x="${x(max-pad)}" y="117" text-anchor="middle">${fmt(max-pad,2)} y</text><text class="chart-label-strong" x="360" y="140" text-anchor="middle">ΔΔ estimate with 95% bootstrap interval</text></svg>`;
+}
+
+function hasMatchedDidCells(rows,fmModel,baseModel){
+  const key=(row)=>[row.task_id,row.n_labels,row.seed,row.trial_budget??row.trials].map(value=>String(value??"")).join("|");
+  const fm=new Set(rows.filter(row=>row.data_status==="observed"&&row.model_id===fmModel).map(key));
+  return rows.some(row=>row.data_status==="observed"&&row.model_id===baseModel&&fm.has(key(row)));
+}
+
+function renderEquivalence(payload) {
+  const isProjection=payload.status==="predicted"||payload.dataStatus==="predicted";
+  const isSynthetic=payload.status==="mock"||payload.dataStatus==="mock";
+  $("#eq-status").textContent=isProjection?"MODEL PROJECTION":isSynthetic?"SYNTHETIC RUN":payload.status==="observed"?"OBSERVED FIT":(payload.status||"missing").toUpperCase();
+  $("#eq-kicker").textContent=isProjection?"Assumption-based label curves":isSynthetic?"Synthetic label-budget curves":"Observed budget curves";
+  $("#pareto-kicker").textContent=isProjection?"Projected efficiency scenario":isSynthetic?"Synthetic efficiency examples":"Observed efficiency";
+  if(payload.status!=="observed"&&!isProjection&&!isSynthetic){
+    $("#neq-cards").hidden=true;
+    return emptyChart("#eq-chart","Nₑq","Observed label curves unavailable",payload.reason||"At least two shared observed label budgets are required for both models and cohorts.");
+  }
+  $("#neq-cards").hidden=false;
+  const seen=payload.cohorts.seen.N_eq, unseen=payload.cohorts.unseen.N_eq;
+  $("#eq-seen").textContent=seen===null?"Not estimable":`${seen>0?"+":""}${fmt(seen,1)} labels`;
+  $("#eq-unseen").textContent=unseen===null?"Not estimable":`${unseen>0?"+":""}${fmt(unseen,1)} labels`;
+  const seenSeries=[{name:`${modelLabel(payload.fmModel)} · seen`,values:payload.cohorts.seen.fmCurve.points.map(p=>({x:p.n,value:p.mae}))},{name:`${modelLabel(payload.baseModel)} · seen`,values:payload.cohorts.seen.baselineCurve.points.map(p=>({x:p.n,value:p.mae}))}];
+  const unseenSeries=[{name:`${modelLabel(payload.fmModel)} · unseen`,values:payload.cohorts.unseen.fmCurve.points.map(p=>({x:p.n,value:p.mae}))},{name:`${modelLabel(payload.baseModel)} · unseen`,values:payload.cohorts.unseen.baselineCurve.points.map(p=>({x:p.n,value:p.mae}))}];
+  makeLineChart("#eq-chart",[...seenSeries,...unseenSeries],seenSeries[0].values.map(p=>p.x));
+}
+
+function renderPareto(payload) {
+  const points=payload.points||[];
+  const isProjection=payload.dataStatus==="predicted";
+  const isSynthetic=payload.dataStatus==="mock";
+  $("#pareto-kicker").textContent=isProjection?"Projected efficiency scenario":isSynthetic?"Synthetic efficiency examples":"Observed efficiency";
+  $("#pareto-status").textContent=points.length?(isProjection?`${points.length} models · MODEL PROJECTION`:isSynthetic?`${points.length} models · SYNTHETIC RUN`:`${points.length} models · OBSERVED`):"No observed compute data";
+  if(!points.length)return emptyChart("#pareto-chart","P","No comparable compute records", "Observed cells need unseen MAE and positive GPU time before the frontier can be drawn.");
+  const width=560,height=320,left=48,right=18,top=22,bottom=56;
+  const minX=Math.min(...points.map(p=>p.hours)),maxX=Math.max(...points.map(p=>p.hours));
+  const minY=Math.min(...points.map(p=>p.unseenMae)),maxY=Math.max(...points.map(p=>p.unseenMae));
+  const x=v=>left+(maxX===minX?.5:(v-minX)/(maxX-minX))*(width-left-right);
+  const y=v=>top+(maxY===minY?.5:(maxY-v)/(maxY-minY))*(height-top-bottom);
+  const ordered=points.filter(p=>p.onFrontier).sort((a,b)=>a.hours-b.hours);
+  const line=ordered.map((p,i)=>`${i?"L":"M"}${x(p.hours)},${y(p.unseenMae)}`).join(" ");
+  const circles=points.map(p=>{
+    const px=x(p.hours),py=y(p.unseenMae),rightAligned=px>width-145,labelX=rightAligned?px-10:px+10;
+    return `<circle class="${p.onFocus?"chart-point-focus":p.onFrontier?"chart-point":"chart-point-secondary"}" cx="${px}" cy="${py}" r="${p.onFocus?8:6}"><title>${esc(modelLabel(p.modelId))}${p.onFocus?" · selected focus":""}: ${fmt(p.hours,3)} GPU h, ${fmt(p.unseenMae,3)} unseen MAE, ${p.cells} projected cells</title></circle><text class="chart-label-strong" text-anchor="${rightAligned?"end":"start"}" x="${labelX}" y="${py-10}">${esc(modelLabel(p.modelId))}</text>`;
+  }).join("");
+  const grid=Array.from({length:4},(_,i)=>{const yy=top+i*(height-top-bottom)/3;const val=maxY-i*(maxY-minY)/3;return `<line class="chart-gridline" x1="${left}" x2="${width-right}" y1="${yy}" y2="${yy}"/><text class="chart-label" x="${left-8}" y="${yy+3}" text-anchor="end">${fmt(val,2)}</text>`;}).join("");
+  $("#pareto-chart").innerHTML=`<svg class="svg-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${isProjection?"Illustrative projected":"Observed"} model compute and unseen mean absolute error Pareto plot">${grid}<path class="chart-line-secondary" d="${line}"/>${circles}<text class="chart-label" x="${(left+width-right)/2}" y="${height-12}" text-anchor="middle">${isProjection?"Projected GPU-hours":"Observed GPU-hours"} · lower is better</text></svg>`;
+}
+
+function renderQC(payload) {
+  state.qc=payload;
+  const labels={preview_assets:"Bundled slice preview · no participant QC provenance",missing:"No orthogonal slice images found"};
+  $("#qc-viewer-status").textContent=labels[payload.viewerStatus]||humanize(payload.viewerStatus);
+  $("#qc-viewer-note").textContent=payload.viewerNote||"No participant-level QC values will be inferred from preview images.";
+  const total=Object.values(payload.slices||{}).reduce((sum,item)=>sum+(item.count||0),0);
+  $("#qc-slice-count").textContent=`${total} image assets`;
+  ["axial","coronal","sagittal"].forEach((plane)=>{
+    const info=payload.slices?.[plane]||{indices:[]};
+    const slider=$(`#qc-${plane}-index`);const indices=info.indices||[];
+    slider.min="0";slider.max=String(Math.max(0,indices.length-1));slider.value=String(Math.floor(Math.max(0,indices.length-1)/2));slider.disabled=!indices.length;
+    updateSlice(plane);
+  });
+  $("#qc-excluded-count").textContent=payload.excludedScans===null?"—":String(payload.excludedScans);
+  const reasons=Object.entries(payload.exclusionReasons||{});
+  $("#qc-reason-count").textContent=payload.exclusionsStatus==="missing"?"—":String(reasons.length);
+  $("#qc-exclusion-list").innerHTML=reasons.length?reasons.map(([name,count])=>`<div class="reason-row"><span>${esc(name)}</span><strong>${count}</strong></div>`).join(""):`<p class="empty-inline">No data/qc/exclusions.csv found. A missing ledger is not a zero-exclusion result.</p>`;
+}
+
+function updateSlice(plane) {
+  if(!state.qc)return;
+  const indices=state.qc.slices?.[plane]?.indices||[];
+  const slider=$(`#qc-${plane}-index`);
+  const position=Number(slider.value)||0;
+  const actual=indices[position];
+  const label=actual===undefined?"—":String(actual).padStart(3,"0");
+  $(`#qc-${plane}-output`).textContent=label;
+  $(`#qc-${plane}-label`).textContent=actual===undefined?"NO IMAGE":`SLICE ${label}`;
+  const image=$(`#qc-${plane}-image`);
+  image.src=actual===undefined?"":`/slices/${plane}/slice_${label}.png`;
+}
+
+function setRunMode() {
+  const mode=$("input[name=mode]:checked")?.value||"mock";
+  const submit=$("#run-submit"),note=$("#run-mode-note"),trials=$("#run-trials");
+  const smoke=[...trials.options].find((option)=>option.value==="2");
+  if(mode==="observed"){
+    submit.innerHTML="Start observed cell <span aria-hidden=\"true\">→</span>";
+    note.textContent="Observed runs use the real frozen split, metadata and cache. The ledger marks the cell observed.";
+    if(smoke)smoke.disabled=true;
+    if(trials.value==="2")trials.value="5";
+  }else{
+    submit.innerHTML="Start synthetic smoke run <span aria-hidden=\"true\">→</span>";
+    note.textContent="Synthetic output checks the harness only; it is excluded from every scientific analysis.";
+    if(smoke)smoke.disabled=false;
+  }
+}
+
+function showJob(job) {
+  $("#job-card").hidden=false;
+  const labels={queued:"Queued",running:"Running",completed:"Completed",failed:"Failed"};
+  $("#job-state-label").textContent=labels[job.status]||job.status;
+  $("#job-state-dot").className=`job-state-dot ${job.status==="running"?"is-running":job.status==="completed"?"is-completed":job.status==="failed"?"is-failed":""}`;
+  $("#job-id").textContent=job.id?`#${job.id}`:"";
+  const description=job.mode==="analysis"?`Observed ${modelLabel(job.modelId)} vs ${modelLabel(job.baseModel)} · ${job.trials} bootstrap resamples`:job.mode==="mock-suite"?"Synthetic PPMI/HBN/NKI fast suite · local outputs":`${job.mode==="mock"?"Synthetic run":"Observed"} · ${modelLabel(job.modelId)} · N=${job.nLabels==="all"?"all":job.nLabels} · ${job.trials} trials`;
+  $("#job-description").textContent=description;
+  const log=$("#job-log");log.textContent=job.log||job.error||"Waiting for the local process…";log.hidden=!job.log&&!job.error&&job.status!=="failed";
+  if(job.status==="completed"||job.status==="failed"){
+    state.jobId=null;
+    if(job.mode==="mock-suite")$("#legacy-suite-status").textContent=job.status==="completed"?`Finished. Synthetic artifacts saved under ${job.outputDir||"results/mock/"}.`:"The run failed; see the run log for details.";
+    showToast(job.status==="completed"?"Job finished. Local artifacts have been refreshed.":"Job failed. Review the run log.");
+    refreshAll();
+  }
+}
+
+async function pollJob(jobId) {
+  clearTimeout(state.pollTimer);
+  try {
+    const job=await api(`/api/jobs/${encodeURIComponent(jobId)}`);
+    showJob(job);
+    if(job.status==="queued"||job.status==="running")state.pollTimer=setTimeout(()=>pollJob(jobId),1200);
+  } catch(error) {
+    state.jobId=null;$("#run-error").textContent=error.message;$("#run-error").hidden=false;
+  }
+}
+
+async function startRun(event) {
+  event.preventDefault();
+  $("#run-error").hidden=true;
+  const form=new FormData(event.currentTarget);
+  const payload={mode:form.get("mode")||"mock",taskId:form.get("taskId"),modelId:form.get("modelId"),nLabels:Number(form.get("nLabels")),seed:Number(form.get("seed")),trials:Number(form.get("trials"))};
+  const submit=$("#run-submit");submit.disabled=true;submit.textContent="Starting cell…";
+  try{const job=await api("/api/runs",{method:"POST",body:JSON.stringify(payload)});state.jobId=job.id;showJob(job);if(job.status==="queued"||job.status==="running")pollJob(job.id);}
+  catch(error){$("#run-error").textContent=error.message;$("#run-error").hidden=false;}
+  finally{submit.disabled=false;setRunMode();}
+}
+
+async function startLegacySuite() {
+  const button=$("#legacy-suite-button");button.disabled=true;button.textContent="Starting suite…";
+  try{const job=await api("/api/benchmark-demo",{method:"POST"});state.jobId=job.id;showJob(job);if(job.status==="queued"||job.status==="running")pollJob(job.id);}
+  catch(error){$("#legacy-suite-status").textContent=error.message;showToast(error.message);}
+  finally{button.disabled=false;button.innerHTML="Run fast suite <span aria-hidden=\"true\">→</span>";}
+}
+
+function downloadBlob(filename,content,type){
+  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download=filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function exportCsv(){
+  if(state.projectionMode)return showToast("Model projections cannot be exported as study results.");
+  const rows=state.filteredResults;if(!rows.length)return;
+  const columns=["data_status","task_id","model_id","n_labels","seed","trial_budget","seen_mae","unseen_mae","contamination_gap","total_gpu_seconds"];
+  const quote=(value)=>`"${String(value??"").replaceAll('"','""')}"`;
+  downloadBlob(`seen-it-before-${state.scope}-results.csv`,[columns.join(","),...rows.map(row=>columns.map(key=>quote(row[key])).join(","))].join("\r\n"),"text/csv;charset=utf-8");
+}
+
+function exportJson(){if(state.projectionMode)return showToast("Model projections cannot be exported as study results.");if(state.filteredResults.length)downloadBlob(`seen-it-before-${state.scope}-results.json`,JSON.stringify(state.filteredResults,null,2),"application/json");}
+
+async function copyText(text,button){
+  try{await navigator.clipboard.writeText(text);const label=button.textContent;button.textContent="Copied";setTimeout(()=>button.textContent=label,1300);}
+  catch{showToast("Clipboard access is unavailable in this browser.");}
+}
+
+async function computeDid(){
+  if(state.projectionMode){refreshModelProjection("did");return showToast("Updated the projection for the selected model pair.");}
+  const button=$("#compute-did");button.disabled=true;button.textContent="Computing…";
+  try{const job=await api("/api/analysis/did",{method:"POST",body:JSON.stringify({fmModel:$("#did-fm-model").value,baseModel:$("#did-base-model").value,taskId:"t1_aomic_age",bootstrap:2000})});state.jobId=job.id;showJob(job);if(job.status==="queued"||job.status==="running")pollJob(job.id);}
+  catch(error){$("#did-analysis-state").textContent=error.message;showToast(error.message);}
+  finally{button.textContent="Compute ΔΔ →";button.disabled=!hasMatchedDidCells(state.results,$("#did-fm-model").value,$("#did-base-model").value);}
+}
+
+async function computeEquivalence(){
+  if(state.projectionMode){refreshModelProjection("equivalence");return showToast("Updated the label-equivalence projection.");}
+  const fm=$("#eq-fm-model").value,base=$("#eq-base-model").value,n=$("#eq-n").value;
+  if(!fm||!base||!n)return;
+  $("#compute-equivalence").disabled=true;$("#compute-equivalence").textContent="Fitting…";
+  try{const q=new URLSearchParams({fm_model:fm,base_model:base,eval_n:n,task:"t1_aomic_age"});renderEquivalence(await api(`/api/analysis/label-equivalence?${q}`));}
+  catch(error){emptyChart("#eq-chart","Nₑq","Could not fit curves",error.message);}
+  finally{$("#compute-equivalence").disabled=false;$("#compute-equivalence").innerHTML="Fit N<sub>eq</sub> <span aria-hidden=\"true\">→</span>";}
+}
+
+async function refreshAll(){
+  const button=$("#refresh-button");button.classList.add("is-loading");
+  const tasks=[
+    ["summary",api("/api/summary")],["config",api("/api/config")],["audit",api("/api/audit")],
+    ["results",api("/api/results?scope=all")],["legacy",api("/api/legacy-results")],["correlation",api("/api/correlation")],
+    ["preprocessing",api("/api/preprocessing")],["qc",api("/api/qc")],["did",api("/api/analysis/did")],["pareto",api("/api/analysis/pareto")]
+  ];
+  try{
+    const responses=await Promise.all(tasks.map(async([key,promise])=>{try{return[key,await promise,null];}catch(error){return[key,null,error];}}));
+    const failed=responses.filter(([,value,error])=>error);
+    const values=Object.fromEntries(responses.map(([key,value])=>[key,value]));
+    if(values.summary){updateSummary(values.summary);setConnection(true,"Local data connected");}
+    if(values.config)updateConfig(values.config);
+    if(values.audit)renderAudit(values.audit);
+    if(values.results){state.results=values.results.rows||[];renderResults();}
+    if(values.legacy)state.legacy=values.legacy.artifacts||[];
+    if(values.correlation)renderCorrelation(values.correlation);
+    if(values.preprocessing)renderPreprocessing(values.preprocessing);
+    if(values.qc)renderQC(values.qc);
+    if(values.did)renderDid(values.did);
+    if(values.pareto)renderPareto(values.pareto);
+    if(values.correlation)renderCorrelation(values.correlation);
+    if(values.preprocessing)renderPreprocessing(values.preprocessing);
+    if(values.legacy)renderResults();
+    if(state.projectionMode){
+      state.projectionSnapshot={
+        ...(state.projectionSnapshot||{}),
+        audit:values.audit||state.projectionSnapshot?.audit,
+        correlation:values.correlation||state.projectionSnapshot?.correlation,
+        preprocessing:values.preprocessing||state.projectionSnapshot?.preprocessing,
+        did:values.did||state.projectionSnapshot?.did,
+        pareto:values.pareto||state.projectionSnapshot?.pareto,
+        equivalence:state.projectionSnapshot?.equivalence
+      };
+      renderProjectionWorkspace();
+    }
+    if(failed.length){const message=failed.map(([, ,error])=>error.message).join(" · ");if(!values.summary)setConnection(false,"Cannot reach local server");showToast(`Some workspace views are unavailable: ${message}`);}
+    else if(button.classList.contains("is-loading"))showToast("Workspace refreshed from local files.");
+  }catch(error){setConnection(false,"Cannot reach local server");showToast(`Workspace unavailable: ${error.message}`);}
+  finally{button.classList.remove("is-loading");}
+}
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  const landingHero = $("#page-overview .hero-grid");
+  if (landingHero && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let pointerFrame = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+    landingHero.addEventListener("pointermove",(event)=>{
+      if (event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      if (pointerFrame) cancelAnimationFrame(pointerFrame);
+      pointerFrame = requestAnimationFrame(()=>{
+        const bounds = landingHero.getBoundingClientRect();
+        const x = pointerX - bounds.left;
+        const y = pointerY - bounds.top;
+        const shiftX = ((x / Math.max(bounds.width, 1)) - .5) * 9;
+        const shiftY = ((y / Math.max(bounds.height, 1)) - .5) * 6;
+        landingHero.style.setProperty("--cursor-x",`${x}px`);
+        landingHero.style.setProperty("--cursor-y",`${y}px`);
+        landingHero.style.setProperty("--brain-shift-x",`${shiftX.toFixed(1)}px`);
+        landingHero.style.setProperty("--brain-shift-y",`${shiftY.toFixed(1)}px`);
+        landingHero.classList.add("has-pointer");
+        pointerFrame = 0;
+      });
+    });
+    landingHero.addEventListener("pointerleave",()=>{
+      if (pointerFrame) cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      landingHero.classList.remove("has-pointer");
+      landingHero.style.removeProperty("--brain-shift-x");
+      landingHero.style.removeProperty("--brain-shift-y");
+    });
+  }
+  document.addEventListener("click",(event)=>{
+    const target=event.target.closest("[data-page-target]");if(target)goToPage(target.dataset.pageTarget);
+    const copy=event.target.closest("[data-copy]");if(copy)copyText(copy.dataset.copy,copy);
+  });
+  window.addEventListener("hashchange",()=>goToPage(location.hash.slice(1),false));
+  $("#refresh-button").addEventListener("click",refreshAll);
+  $("#generate-estimates-button").addEventListener("click",toggleProjectionMode);
+  $("#run-form").addEventListener("submit",startRun);
+  $("#legacy-suite-button").addEventListener("click",startLegacySuite);
+  $$('input[name="mode"]').forEach((input)=>input.addEventListener("change",setRunMode));
+  $("#results-scope").addEventListener("change",renderResults);
+  $("#focus-model").addEventListener("change",()=>refreshModelProjection("focus"));
+  $("#run-model").addEventListener("change",()=>refreshModelProjection("runner"));
+  $("#results-model-filter").addEventListener("change",()=>state.projectionMode?refreshModelProjection("results"):renderResults());
+  $("#results-metric").addEventListener("change",renderResults);
+  $("#export-csv").addEventListener("click",exportCsv);
+  $("#export-json").addEventListener("click",exportJson);
+  $("#correlation-matrix-select").addEventListener("change",()=>renderCorrelation(state.correlation||{}));
+  $("#compute-did").addEventListener("click",computeDid);
+  $("#did-fm-model").addEventListener("change",()=>state.projectionMode?refreshModelProjection("did"):renderDid(state.did||{status:"missing"}));
+  $("#did-base-model").addEventListener("change",()=>state.projectionMode?refreshModelProjection("did-base"):renderDid(state.did||{status:"missing"}));
+  $("#did-fm-model").addEventListener("change",()=>$("#did-fm-model").dataset.userChanged="true");
+  $("#did-base-model").addEventListener("change",()=>$("#did-base-model").dataset.userChanged="true");
+  $("#eq-fm-model").addEventListener("change",()=>{$("#eq-fm-model").dataset.userChanged="true";if(state.projectionMode)refreshModelProjection("equivalence");});
+  $("#eq-base-model").addEventListener("change",()=>{$("#eq-base-model").dataset.userChanged="true";if(state.projectionMode)refreshModelProjection("equivalence-base");});
+  $("#eq-n").addEventListener("input",()=>state.projectionMode&&refreshModelProjection("targetN"));
+  $("#compute-equivalence").addEventListener("click",computeEquivalence);
+  $("#audit-seen-threshold").addEventListener("input",updateAuditCommand);
+  $("#audit-unseen-threshold").addEventListener("input",updateAuditCommand);
+  $("#copy-audit-command").addEventListener("click",(event)=>copyText($("#audit-command").textContent,event.currentTarget));
+  ["axial","coronal","sagittal"].forEach((plane)=>$(`#qc-${plane}-index`).addEventListener("input",()=>updateSlice(plane)));
+  const initialPage=location.hash.slice(1);goToPage(pageLabels[initialPage]?initialPage:"overview",false);
+  renderBudgetVisual();setRunMode();updateAuditCommand();
+  await refreshAll();
+});

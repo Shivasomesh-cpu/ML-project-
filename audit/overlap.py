@@ -36,7 +36,17 @@ def load_fomo_manifest(manifest_path: Path) -> Tuple[pd.DataFrame, Dict[str, Set
     return df, grouped
 
 
-def audit_cohort(cohort_name: str, cohort_subjects: Iterable[object], fomo_subjects_by_dataset: Dict[str, Set[str]], expected_fomo_dataset_key: str | None = None) -> Dict[str, object]:
+def audit_cohort(
+    cohort_name: str,
+    cohort_subjects: Iterable[object],
+    fomo_subjects_by_dataset: Dict[str, Set[str]],
+    expected_fomo_dataset_key: str | None = None,
+    *,
+    seen_threshold_pct: float,
+    unseen_threshold_pct: float,
+) -> Dict[str, object]:
+    if not (0 <= unseen_threshold_pct < seen_threshold_pct <= 100):
+        raise ValueError("Thresholds must satisfy 0 <= unseen threshold < seen threshold <= 100.")
     subjects = {normalize_id(subject) for subject in cohort_subjects}
     if not subjects:
         raise ValueError(f"Cohort {cohort_name!r} has no subject IDs")
@@ -53,7 +63,9 @@ def audit_cohort(cohort_name: str, cohort_subjects: Iterable[object], fomo_subje
         "total_subjects": len(subjects),
         "pretraining_seen_count": len(all_overlap),
         "contamination_pct": round(percentage, 2),
-        "status": "SEEN (Contaminated)" if percentage > 50 else "UNSEEN (Clean)" if percentage == 0 else "PARTIAL",
+        "status": "SEEN (Contaminated)" if percentage >= seen_threshold_pct else "UNSEEN (Clean)" if percentage <= unseen_threshold_pct else "PARTIAL",
+        "seen_threshold_pct": seen_threshold_pct,
+        "unseen_threshold_pct": unseen_threshold_pct,
         "dataset_key_match_count": len(source_overlap),
     }
 
@@ -76,11 +88,16 @@ def load_cohorts(cohorts_json: Path) -> Dict[str, Dict[str, object]]:
     return result
 
 
-def run_full_audit(manifest_path: Path, cohorts_json: Path) -> pd.DataFrame:
+def run_full_audit(manifest_path: Path, cohorts_json: Path, *, seen_threshold_pct: float, unseen_threshold_pct: float) -> pd.DataFrame:
+    if not (0 <= unseen_threshold_pct < seen_threshold_pct <= 100):
+        raise ValueError("Thresholds must satisfy 0 <= unseen threshold < seen threshold <= 100.")
     _, fomo_sets = load_fomo_manifest(manifest_path)
     cohorts = load_cohorts(cohorts_json)
     return pd.DataFrame([
-        audit_cohort(name, spec["subjects"], fomo_sets, str(spec.get("dataset_key", "")) or None)
+        audit_cohort(
+            name, spec["subjects"], fomo_sets, str(spec.get("dataset_key", "")) or None,
+            seen_threshold_pct=seen_threshold_pct, unseen_threshold_pct=unseen_threshold_pct,
+        )
         for name, spec in cohorts.items()
     ])
 
@@ -89,8 +106,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run an overlap audit on explicitly supplied cohort subject IDs.")
     parser.add_argument("--manifest_path", default="data/manifests/mapping.tsv")
     parser.add_argument("--cohorts_json", required=True, help="JSON mapping cohort names to actual subject IDs")
+    parser.add_argument("--seen_threshold", required=True, type=float, help="Pre-registered minimum overlap percentage for a seen label")
+    parser.add_argument("--unseen_threshold", required=True, type=float, help="Pre-registered maximum overlap percentage for an unseen label")
     args = parser.parse_args()
-    print(run_full_audit(Path(args.manifest_path), Path(args.cohorts_json)).to_string(index=False))
+    print(run_full_audit(
+        Path(args.manifest_path), Path(args.cohorts_json),
+        seen_threshold_pct=args.seen_threshold, unseen_threshold_pct=args.unseen_threshold,
+    ).to_string(index=False))
 
 
 if __name__ == "__main__":

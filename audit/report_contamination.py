@@ -31,6 +31,10 @@ def generate_table1_markdown(df: pd.DataFrame, manifest_version: str = "FOMO50K 
     md = []
     md.append("# Table 1: Benchmark Pretraining Contamination Audit")
     md.append(f"**Manifest Version:** {manifest_version} | **Audit Date:** {query_date}\n")
+    if not df.empty and {"seen_threshold_pct", "unseen_threshold_pct"}.issubset(df.columns):
+        seen_cutoff = float(df["seen_threshold_pct"].iloc[0])
+        unseen_cutoff = float(df["unseen_threshold_pct"].iloc[0])
+        md.append(f"**Pre-registered status cutoffs:** seen >= {seen_cutoff:g}% | unseen <= {unseen_cutoff:g}% | partial between\n")
     md.append("| Evaluation Cohort | Total Subjects ($N$) | Found in Pretraining ($N_{\\text{seen}}$) | Contamination Rate (%) | Pretraining Status |")
     md.append("| :--- | :---: | :---: | :---: | :--- |")
 
@@ -40,7 +44,7 @@ def generate_table1_markdown(df: pd.DataFrame, manifest_version: str = "FOMO50K 
             f"| {row['cohort']} | {row['total_subjects']:,} | {row['pretraining_seen_count']:,} | {row['contamination_pct']:.1f}% | {status_badge} |"
         )
 
-    md.append("\n*Note: AOMIC PIOP1 and PIOP2 are collected on the identical Philips Achieva 3T scanner at the same LAB neuroimaging center as AOMIC ID1000, establishing the controlled natural experiment.*")
+    md.append("\n*Note: The manuscript describes AOMIC PIOP1 and PIOP2 as sharing scanner and protocol with ID1000; verify this against the AOMIC acquisition records before interpreting the cohort contrast.*")
     return "\n".join(md)
 
 
@@ -48,7 +52,7 @@ def plot_contamination_bar(df: pd.DataFrame, output_path: Path):
     plt.figure(figsize=(9, 5))
     sns.set_theme(style="whitegrid")
     
-    colors = ["#e74c3c" if "SEEN" in s else ("#2ecc71" if "UNSEEN" in s else "#f39c12") for s in df["status"]]
+    colors = ["#2ecc71" if str(status).startswith("UNSEEN") else ("#e74c3c" if str(status).startswith("SEEN") else "#f39c12") for status in df["status"]]
     
     ax = sns.barplot(
         x="contamination_pct",
@@ -83,17 +87,41 @@ def main():
     parser.add_argument("--manifest_path", type=str, default="data/manifests/mapping.tsv")
     parser.add_argument("--output_dir", type=str, default="results")
     parser.add_argument("--cohorts_json", type=str, required=True, help="JSON mapping cohort names to actual subject IDs")
-    parser.add_argument("--manifest_version", type=str, default="FOMO50K (v1.0)")
+    parser.add_argument("--manifest_version", type=str, default=None, help="Optional manifest release/version label; defaults to the recorded source repository")
+    parser.add_argument("--seen_threshold", type=float, required=True, help="Pre-registered minimum overlap percentage for a seen label")
+    parser.add_argument("--unseen_threshold", type=float, required=True, help="Pre-registered maximum overlap percentage for an unseen label")
+    parser.add_argument(
+        "--cohorts_status", choices=["observed", "mock", "unverified"], default="unverified",
+        help="Provenance for the supplied cohort IDs. Defaults to unverified so real manifest data alone cannot certify mock cohort IDs.",
+    )
     args = parser.parse_args()
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest_file = Path(args.manifest_path)
-    df_audit = run_full_audit(manifest_file, Path(args.cohorts_json))
+    df_audit = run_full_audit(
+        manifest_file, Path(args.cohorts_json),
+        seen_threshold_pct=args.seen_threshold, unseen_threshold_pct=args.unseen_threshold,
+    )
 
     provenance_path = manifest_file.parent / "manifest_provenance.json"
     provenance = json.loads(provenance_path.read_text(encoding="utf-8")) if provenance_path.exists() else {"data_status": "unverified", "source_repo": "unknown"}
+    manifest_status = str(provenance.get("data_status", "unverified")).lower()
+    cohort_status = args.cohorts_status
+    if manifest_status == "mock" or cohort_status == "mock":
+        combined_status = "mock"
+    elif manifest_status == "observed" and cohort_status == "observed":
+        combined_status = "observed"
+    else:
+        combined_status = "unverified"
+    provenance["manifest_data_status"] = manifest_status
+    provenance["cohort_data_status"] = cohort_status
+    provenance["data_status"] = combined_status
+    manifest_version = args.manifest_version or provenance.get("source_repo") or "unverified manifest source"
+    provenance["manifest_version"] = manifest_version
+    provenance["seen_threshold_pct"] = args.seen_threshold
+    provenance["unseen_threshold_pct"] = args.unseen_threshold
     provenance["cohorts_json"] = str(Path(args.cohorts_json).resolve())
     (out_dir / "table1_contamination_provenance.json").write_text(json.dumps(provenance, indent=2), encoding="utf-8")
 
@@ -102,7 +130,7 @@ def main():
     df_audit.to_csv(csv_path, index=False)
 
     # Save Markdown
-    md_content = generate_table1_markdown(df_audit, manifest_version=args.manifest_version)
+    md_content = generate_table1_markdown(df_audit, manifest_version=manifest_version)
     md_content = f"**Data status:** `{provenance['data_status']}` | **Manifest source:** `{provenance['source_repo']}`\n\n" + md_content
     md_path = out_dir / "table1_contamination.md"
     with open(md_path, "w", encoding="utf-8") as f:

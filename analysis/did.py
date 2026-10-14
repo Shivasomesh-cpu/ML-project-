@@ -46,7 +46,10 @@ def _paired_gaps(df: pd.DataFrame, fm_model: str, base_model: str, task_id: str 
 
 
 def compute_did_bootstrap(df_results: pd.DataFrame, fm_model: str = "brainiac", base_model: str = "resnet18_scratch", n_bootstrap: int = 2000, seed: int = 42, task_id: str | None = "t1_aomic_age") -> Dict[str, Any]:
-    """Compute a paired DiD estimate, bootstrap confidence interval, and sign-flip p-value."""
+    """Compute paired DiD, a bootstrap interval and two-sided bootstrap test.
+
+    The exact sign-flip test is retained as a separately reported sensitivity check.
+    """
     if n_bootstrap < 1:
         raise ValueError("n_bootstrap must be positive")
     pairs = _paired_gaps(df_results, fm_model, base_model, task_id)
@@ -55,10 +58,17 @@ def compute_did_bootstrap(df_results: pd.DataFrame, fm_model: str = "brainiac", 
     boot = np.array([rng.choice(dids, size=len(dids), replace=True).mean() for _ in range(n_bootstrap)])
     point = float(dids.mean())
 
-    # Exact sign-flip randomization test is appropriate for the small seed counts used here.
+    # Center the paired cell effects under H0, then use a two-tailed bootstrap test.
+    centered = dids - point
+    null_boot = np.array([rng.choice(centered, size=len(centered), replace=True).mean() for _ in range(n_bootstrap)])
+    extreme = int(np.count_nonzero(np.abs(null_boot) >= abs(point)))
+    bootstrap_p = float((extreme + 1) / (n_bootstrap + 1))
+
+    # Secondary exact sign-flip sensitivity check for the small seed counts used here.
     signs = np.array(list(itertools.product((-1.0, 1.0), repeat=len(dids))))
-    null = (signs * dids).mean(axis=1)
-    p_value = float(np.mean(np.abs(null) >= abs(point)))
+    sign_flip_null = (signs * dids).mean(axis=1)
+    sign_flip_p = float(np.mean(np.abs(sign_flip_null) >= abs(point)))
+    ci_lower, ci_upper = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return {
         "data_status": "observed",
         "fm_model": fm_model,
@@ -68,10 +78,11 @@ def compute_did_bootstrap(df_results: pd.DataFrame, fm_model: str = "brainiac", 
         "fm_mean_gap": float(pairs[fm_model].mean()),
         "base_mean_gap": float(pairs[base_model].mean()),
         "did_point_estimate": point,
-        "ci_95_lower": float(np.percentile(boot, 2.5)),
-        "ci_95_upper": float(np.percentile(boot, 97.5)),
-        "p_value_sign_flip": p_value,
-        "h1_supported": bool(np.percentile(boot, 2.5) > 0 and p_value < 0.05),
+        "ci_95_lower": ci_lower,
+        "ci_95_upper": ci_upper,
+        "p_value_bootstrap_two_sided": bootstrap_p,
+        "p_value_sign_flip_secondary": sign_flip_p,
+        "h1_supported": bool(ci_lower > 0 and bootstrap_p < 0.05),
         "paired_cells": pairs.to_dict(orient="records"),
     }
 
@@ -85,7 +96,7 @@ def plot_amsterdam_natural_experiment(did_res: Dict[str, Any], output_path: Path
     plt.axhline(0, color="black", linewidth=0.8)
     plt.ylabel("Unseen − seen MAE (years; positive favours seen)")
     plt.title("Observed cohort performance gaps")
-    plt.text(0.02, 0.98, f"DiD = {did_res['did_point_estimate']:+.3f}\n95% CI [{did_res['ci_95_lower']:+.3f}, {did_res['ci_95_upper']:+.3f}]\nSign-flip p = {did_res['p_value_sign_flip']:.4f}", transform=plt.gca().transAxes, va="top", bbox={"boxstyle": "round", "facecolor": "white"})
+    plt.text(0.02, 0.98, f"DiD = {did_res['did_point_estimate']:+.3f}\n95% CI [{did_res['ci_95_lower']:+.3f}, {did_res['ci_95_upper']:+.3f}]\nBootstrap p = {did_res['p_value_bootstrap_two_sided']:.4f}", transform=plt.gca().transAxes, va="top", bbox={"boxstyle": "round", "facecolor": "white"})
     plt.tight_layout()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=300)
