@@ -211,7 +211,7 @@
         <section class="page" id="page-results" data-page="results" aria-labelledby="results-title" hidden>
           <div class="page-heading page-heading-with-action"><div><div class="eyebrow"><span class="eyebrow-line"></span>03 / evidence</div><h1 id="results-title">Results &amp; metrics</h1><p>Explore every saved evaluation, tuning trial, run log, table, and graph. Observed findings, synthetic outputs, and verification files are labeled separately.</p></div><div class="header-actions"><button class="button button-secondary button-compact" id="export-csv" type="button">Export full ledger CSV</button><button class="button button-secondary button-compact" id="export-json" type="button">Export archive JSON</button></div></div>
           <div class="filter-bar panel">
-            <label>Cell scope<select id="results-scope"><option value="observed">Observed</option><option value="mock">Synthetic runs</option><option value="predicted">Model projections</option><option value="all">All cell records</option></select></label>
+            <label>Cell scope<select id="results-scope"><option value="all">All cell records</option><option value="observed">Observed</option><option value="mock">Synthetic runs</option><option value="predicted">Model projections</option></select></label>
             <label>Model<select id="results-model-filter"><option value="all">All models</option></select></label>
             <label>Metric<select id="results-metric"><option value="mae">MAE · years</option><option value="r2">R²</option><option value="accuracy">Accuracy</option><option value="auc">AUC</option></select></label>
             <div class="result-count-block"><span class="panel-kicker">VISIBLE RECORDS</span><strong id="result-count">—</strong></div>

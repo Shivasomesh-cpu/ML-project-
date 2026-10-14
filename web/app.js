@@ -863,7 +863,7 @@ function renderResults() {
   $("#metric-chart-title").textContent = `Seen vs unseen ${metric === "mae" ? "error" : metricName}`;
   $("#metric-chart-caption").textContent = state.projectionMode
     ? `Scenario ${metricName} projection for ${modelLabel($("#focus-model").value)}. Bars use a shared scale across model profiles; this is not a study result.`
-    : `Bars show mean ${metricName} across visible cells. ${isLowerBetter ? "Lower is better." : "Higher is better."} Values retain the source status shown above.`;
+    : `Bars show mean ${metricName} across visible cells. ${isLowerBetter ? "Lower is better." : "Higher is better."} O = observed, S = synthetic, P = model projection; each record keeps its full status in the ledger.`;
   state.scope = scope;
   let rows = (state.projectionMode ? state.projectionData?.rows || [] : state.results).filter((row) => scope === "all" || row.data_status === scope);
   if (modelFilter !== "all") rows = rows.filter((row) => row.model_id === modelFilter);
