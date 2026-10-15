@@ -1,0 +1,17 @@
+{
+  "data_status": "observed",
+  "evaluated_budget_N": 50,
+  "task_id": "t1_aomic_age",
+  "seen_cohort": {
+    "fm_mae": 1.8385852141798384,
+    "n_baseline_required": 282.94698607914063,
+    "N_eq": 232.94698607914063,
+    "n_budgets": 5
+  },
+  "unseen_cohort": {
+    "fm_mae": 2.5039890494028567,
+    "n_baseline_required": 115.7864915573299,
+    "N_eq": 65.7864915573299,
+    "n_budgets": 5
+  }
+}

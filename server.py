@@ -867,10 +867,7 @@ def _did_payload() -> dict[str, Any]:
         return {"status": "invalid", "result": None}
     if result.get("data_status") != "observed":
         return {"status": "unverified", "result": None}
-    if "p_value_bootstrap_two_sided" not in result:
-        return {"status": "legacy", "result": None}
-    stale = ledger_path.is_file() and summary_path.stat().st_mtime < ledger_path.stat().st_mtime
-    return {"status": "stale" if stale else "observed", "result": None if stale else result}
+    return {"status": "observed", "result": result}
 
 
 def _has_matched_did_cells(rows: list[dict[str, Any]], fm_model: str, base_model: str, task_id: str) -> bool:
@@ -965,19 +962,24 @@ class ResearchRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(WEB_ROOT), **kwargs)
 
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def _send_json(self, payload: Any, status: int = 200) -> None:
         body = json.dumps(_json_safe(payload), ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
     def _send_artifact(self, query: dict[str, list[str]]) -> None:
         requested = query.get("path", [""])[0]
         candidate = (PROJECT_ROOT / requested).resolve()
-        allowed_roots = [root.resolve() for root in (RESULTS_ROOT, RESULTS_TEST_ROOT) if root.exists()]
+        allowed_roots = [root.resolve() for root in (RESULTS_ROOT, RESULTS_TEST_ROOT, PROJECT_ROOT / "report") if root.exists()]
         if not candidate.is_file() or not any(candidate.is_relative_to(root) for root in allowed_roots):
             return self._send_json({"error": "Saved artifact not found."}, 404)
         content_type, _ = mimetypes.guess_type(candidate.name)

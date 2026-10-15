@@ -82,6 +82,7 @@ def compute_did_bootstrap(df_results: pd.DataFrame, fm_model: str = "brainiac", 
         "ci_95_upper": ci_upper,
         "p_value_bootstrap_two_sided": bootstrap_p,
         "p_value_sign_flip_secondary": sign_flip_p,
+        "p_value_sign_flip": sign_flip_p,
         "h1_supported": bool(ci_lower > 0 and bootstrap_p < 0.05),
         "paired_cells": pairs.to_dict(orient="records"),
     }

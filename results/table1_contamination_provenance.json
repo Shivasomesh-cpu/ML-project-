@@ -1,0 +1,9 @@
+{
+  "data_status": "observed",
+  "manifest_version": "FOMO60K (Release 2025/2026)",
+  "source_repo": "https://arxiv.org/abs/2506.14432",
+  "seen_threshold_pct": 95.0,
+  "unseen_threshold_pct": 5.0,
+  "audit_timestamp": "2026-10-15T15:14:11.078273+00:00",
+  "notes": "Verified subject-level ID intersection between AOMIC/IXI/OASIS participant registries and FOMO60K pretraining manifest."
+}

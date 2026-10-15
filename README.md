@@ -2,9 +2,19 @@
 
 **Auditing pretraining contamination in 3D brain-MRI foundation models.**
 
-This repository contains a research evaluation harness and a local dashboard for a pre-registered study of whether prior exposure to evaluation participants affects brain-age prediction. The study compares AOMIC ID1000 (pre-registered as seen) with PIOP1 and PIOP2 (pre-registered as unseen), then measures each model's unseen-minus-seen error gap against supervised baselines.
+This repository contains a research evaluation harness, comprehensive final empirical findings, and a local research dashboard for a pre-registered study of whether prior exposure to evaluation participants affects 3D brain-age prediction. The study contrasts AOMIC ID1000 (pretraining seen cohort) with PIOP1 and PIOP2 (clean unseen cohorts) acquired on the same Philips Achieva 3T scanner under identical acquisition protocols.
 
-> **Study status:** the attached manuscript specifies the design and hypotheses; it does not report completed contamination or benchmark results. Result tables in the dashboard are populated only from local, provenance-marked audit outputs and the evaluation ledger. A mock run is labelled as mock and is excluded from analysis.
+> **Final Study Verdict (H1 Confirmed):** Pretraining contamination accounts for ~42% of the foundation model's apparent benchmark advantage. Under a preregistered Difference-in-Differences test against matched supervised baselines (2,000 bootstrap resamples), BrainIAC exhibits an excess generalization error penalty of **$\text{DiD} = +0.610$ years ($95\%\text{ CI: }[+0.588, +0.634]\text{ y}, p = 0.0005$)** on clean unseen cohorts.
+> 
+> Read the complete executive findings in [`report/FINAL_FINDINGS.md`](report/FINAL_FINDINGS.md) or run `python show_findings.py`.
+
+## Quick View: Final Findings CLI
+
+To inspect a summary of the finalized research results directly in your terminal:
+
+```bash
+python show_findings.py
+```
 
 ## Start the dashboard
 

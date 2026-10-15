@@ -1,0 +1,6 @@
+model_id,gpu_hours,unseen_mae,n_cells,is_pareto
+brainiac,0.922095,2.316668,25,True
+densenet121_scratch,0.512484,2.4400239999999997,25,False
+fomo_unet_b,1.085544,2.298148,25,True
+resnet18_scratch,0.273548,2.543276,25,False
+volumetric_gbm,0.031195999999999998,2.3495079999999997,25,True

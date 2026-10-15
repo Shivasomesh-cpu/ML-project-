@@ -1,0 +1,243 @@
+{
+  "data_status": "observed",
+  "fm_model": "brainiac",
+  "base_model": "resnet18_scratch",
+  "task_id": "t1_aomic_age",
+  "n_paired_cells": 25,
+  "fm_mean_gap": 0.6723480000000001,
+  "base_mean_gap": 0.06269200000000003,
+  "did_point_estimate": 0.609656,
+  "ci_95_lower": 0.5882664,
+  "ci_95_upper": 0.6337286999999999,
+  "p_value_bootstrap_two_sided": 0.0004997501249375312,
+  "p_value_sign_flip_secondary": 5.960464477539063e-08,
+  "p_value_sign_flip": 5.960464477539063e-08,
+  "h1_supported": true,
+  "paired_cells": [
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 25,
+      "seed": 7,
+      "trial_budget": 20,
+      "brainiac": 0.633,
+      "resnet18_scratch": 0.07679999999999998,
+      "did": 0.5562
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 25,
+      "seed": 42,
+      "trial_budget": 20,
+      "brainiac": 0.6324999999999998,
+      "resnet18_scratch": 0.07200000000000006,
+      "did": 0.5604999999999998
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 25,
+      "seed": 99,
+      "trial_budget": 20,
+      "brainiac": 0.6830999999999998,
+      "resnet18_scratch": 0.0950000000000002,
+      "did": 0.5880999999999996
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 25,
+      "seed": 1337,
+      "trial_budget": 20,
+      "brainiac": 0.6884000000000001,
+      "resnet18_scratch": 0.07189999999999985,
+      "did": 0.6165000000000003
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 25,
+      "seed": 2026,
+      "trial_budget": 20,
+      "brainiac": 0.6355,
+      "resnet18_scratch": 0.012399999999999967,
+      "did": 0.6231
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 50,
+      "seed": 7,
+      "trial_budget": 20,
+      "brainiac": 0.6580999999999999,
+      "resnet18_scratch": 0.1557000000000004,
+      "did": 0.5023999999999995
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 50,
+      "seed": 42,
+      "trial_budget": 20,
+      "brainiac": 0.6571000000000002,
+      "resnet18_scratch": 0.04829999999999979,
+      "did": 0.6088000000000005
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 50,
+      "seed": 99,
+      "trial_budget": 20,
+      "brainiac": 0.6877000000000002,
+      "resnet18_scratch": 0.039699999999999847,
+      "did": 0.6480000000000004
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 50,
+      "seed": 1337,
+      "trial_budget": 20,
+      "brainiac": 0.6674,
+      "resnet18_scratch": 0.07189999999999985,
+      "did": 0.5955000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 50,
+      "seed": 2026,
+      "trial_budget": 20,
+      "brainiac": 0.7010000000000003,
+      "resnet18_scratch": 0.09120000000000017,
+      "did": 0.6098000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 100,
+      "seed": 7,
+      "trial_budget": 20,
+      "brainiac": 0.6971,
+      "resnet18_scratch": 0.04870000000000019,
+      "did": 0.6483999999999999
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 100,
+      "seed": 42,
+      "trial_budget": 20,
+      "brainiac": 0.6847999999999999,
+      "resnet18_scratch": 0.058800000000000185,
+      "did": 0.6259999999999997
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 100,
+      "seed": 99,
+      "trial_budget": 20,
+      "brainiac": 0.6335000000000002,
+      "resnet18_scratch": 0.0737000000000001,
+      "did": 0.5598000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 100,
+      "seed": 1337,
+      "trial_budget": 20,
+      "brainiac": 0.6884000000000001,
+      "resnet18_scratch": 0.0968,
+      "did": 0.5916000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 100,
+      "seed": 2026,
+      "trial_budget": 20,
+      "brainiac": 0.6732,
+      "resnet18_scratch": 0.0974999999999997,
+      "did": 0.5757000000000003
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 250,
+      "seed": 7,
+      "trial_budget": 20,
+      "brainiac": 0.7515999999999998,
+      "resnet18_scratch": 0.0017000000000000348,
+      "did": 0.7498999999999998
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 250,
+      "seed": 42,
+      "trial_budget": 20,
+      "brainiac": 0.6480000000000001,
+      "resnet18_scratch": 0.0867,
+      "did": 0.5613000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 250,
+      "seed": 99,
+      "trial_budget": 20,
+      "brainiac": 0.6391,
+      "resnet18_scratch": 0.027300000000000102,
+      "did": 0.6117999999999999
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 250,
+      "seed": 1337,
+      "trial_budget": 20,
+      "brainiac": 0.6209,
+      "resnet18_scratch": 0.04939999999999989,
+      "did": 0.5715000000000001
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 250,
+      "seed": 2026,
+      "trial_budget": 20,
+      "brainiac": 0.6497999999999997,
+      "resnet18_scratch": 0.05699999999999994,
+      "did": 0.5927999999999998
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 500,
+      "seed": 7,
+      "trial_budget": 20,
+      "brainiac": 0.6661999999999999,
+      "resnet18_scratch": 0.0686,
+      "did": 0.5975999999999999
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 500,
+      "seed": 42,
+      "trial_budget": 20,
+      "brainiac": 0.6040999999999999,
+      "resnet18_scratch": 0.052200000000000024,
+      "did": 0.5518999999999998
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 500,
+      "seed": 99,
+      "trial_budget": 20,
+      "brainiac": 0.7265999999999999,
+      "resnet18_scratch": 0.09810000000000008,
+      "did": 0.6284999999999998
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 500,
+      "seed": 1337,
+      "trial_budget": 20,
+      "brainiac": 0.746,
+      "resnet18_scratch": -0.004999999999999893,
+      "did": 0.7509999999999999
+    },
+    {
+      "task_id": "t1_aomic_age",
+      "n_labels": 500,
+      "seed": 2026,
+      "trial_budget": 20,
+      "brainiac": 0.7356000000000003,
+      "resnet18_scratch": 0.02090000000000014,
+      "did": 0.7147000000000001
+    }
+  ]
+}

@@ -20,9 +20,15 @@ data/splits/*.json
 data/qc/montages/
 src/checkpoints/
 
-# Generated research outputs: regenerate only from verified observed inputs
-results/*
+# Generated research outputs: keep mock and temp ignored while committing final findings
+results/mock/
+results/*.tmp
 !results/.gitkeep
+!results/*.csv
+!results/*.json
+!results/*.png
+!results/*.md
+!results/results.parquet
 results_test/
 work/
 data_mock/

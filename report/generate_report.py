@@ -18,12 +18,17 @@ def _analysis_section(title: str, result: dict | None, figure: str, details: str
         return f"## {title}\n\nNot yet available from observed data. {details}\n"
     lines = [f"## {title}\n", "Results below were computed from observed ledger records."]
     if "did_point_estimate" in result:
+        boot_p = result.get("p_value_bootstrap_two_sided")
+        sign_p = result.get("p_value_sign_flip_secondary", result.get("p_value_sign_flip"))
         lines.extend([
-            f"- DiD: `{result['did_point_estimate']:+.3f}`",
-            f"- 95% bootstrap CI: `[{result['ci_95_lower']:+.3f}, {result['ci_95_upper']:+.3f}]`",
-            f"- Sign-flip p-value: `{result['p_value_sign_flip']:.4f}`",
+            f"- DiD point estimate: `{result['did_point_estimate']:+.3f}` years",
+            f"- 95% bootstrap CI: `[{result['ci_95_lower']:+.3f}, {result['ci_95_upper']:+.3f}]` years",
+            f"- Two-sided bootstrap p-value: `{boot_p:.4f}`" if boot_p is not None else "",
+            f"- Sign-flip p-value (secondary): `{sign_p:.4e}`" if sign_p is not None else "",
             f"- Paired cells: `{result['n_paired_cells']}`",
+            f"- Preregistered H1 supported: `{'Yes' if result.get('h1_supported') else 'No'}`",
         ])
+        lines = [line for line in lines if line]
     else:
         for cohort in ("seen_cohort", "unseen_cohort"):
             value = result.get(cohort, {}).get("N_eq")

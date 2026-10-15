@@ -1,0 +1,7 @@
+cohort,total_subjects,pretraining_seen_count,contamination_pct,status
+AOMIC ID1000,928,928,100.0,SEEN (Contaminated)
+AOMIC PIOP1,216,0,0.0,UNSEEN (Clean)
+AOMIC PIOP2,226,0,0.0,UNSEEN (Clean)
+IXI,568,568,100.0,SEEN (Contaminated)
+OASIS-1,416,416,100.0,SEEN (Contaminated)
+OASIS-2,150,150,100.0,SEEN (Contaminated)
