@@ -424,6 +424,7 @@ function goToPage(page, updateHash = true) {
   if (page === "audit" && state.audit) renderAudit(state.audit);
   if (page === "correlation" && state.correlation) renderCorrelation(state.correlation);
   if (page === "preprocessing" && state.preprocessing) renderPreprocessing(state.preprocessing);
+  if (page === "equivalence") computeEquivalence();
   if (state.projectionMode) renderProjectionWorkspace();
 }
 
@@ -1813,6 +1814,7 @@ async function refreshAll(){
     if(values.correlation)renderCorrelation(values.correlation);
     if(values.preprocessing)renderPreprocessing(values.preprocessing);
     if(values.legacy)renderResults();
+    computeEquivalence();
     if(state.projectionMode){
       state.projectionSnapshot={
         ...(state.projectionSnapshot||{}),
